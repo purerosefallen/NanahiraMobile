@@ -1254,6 +1254,11 @@ void Game::MainLoop() {
 			sprintf(log_custom_shader, "ogles2TrasparentAlpha = %d", ogles2TrasparentAlpha);
 			Printer::log(log_custom_shader);
 		}
+		//modded
+		if (DuelClient::try_needed) {
+			DuelClient::try_needed = false;
+			DuelClient::StartClient(DuelClient::temp_ip, DuelClient::temp_port, false);
+		}
 	}
 	matManager.mCard.MaterialType = (video::E_MATERIAL_TYPE)ogles2BlendTexture;
 	matManager.mTexture.MaterialType = (video::E_MATERIAL_TYPE)ogles2TrasparentAlpha;

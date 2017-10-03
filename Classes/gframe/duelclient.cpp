@@ -34,6 +34,11 @@ int DuelClient::match_kill = 0;
 std::vector<HostPacket> DuelClient::hosts;
 std::set<unsigned int> DuelClient::remotes;
 event* DuelClient::resp_event = 0;
+//modded
+unsigned int DuelClient::temp_ip = 0;
+unsigned short DuelClient::temp_port = 0;
+unsigned short DuelClient::temp_ver = 0;
+bool DuelClient::try_needed = false;
 
 bool DuelClient::StartClient(unsigned int ip, unsigned short port, bool create_game) {
 	if(connect_state)
@@ -48,6 +53,10 @@ bool DuelClient::StartClient(unsigned int ip, unsigned short port, bool create_g
 	sin.sin_port = htons(port);
 	client_bev = bufferevent_socket_new(client_base, -1, BEV_OPT_CLOSE_ON_FREE);
 	bufferevent_setcb(client_bev, ClientRead, NULL, ClientEvent, (void*)create_game);
+	//modded
+	temp_ip = ip;
+	temp_port = port;
+	
 	if (bufferevent_socket_connect(client_bev, (sockaddr*)&sin, sizeof(sin)) < 0) {
 		bufferevent_free(client_bev);
 		event_base_free(client_base);
@@ -69,6 +78,8 @@ void DuelClient::ConnectTimeout(evutil_socket_t fd, short events, void* arg) {
 	if(connect_state == 0x7)
 		return;
 	if(!is_closing) {
+		//modded
+		temp_ver = 0;
 		mainGame->btnCreateHost->setEnabled(true);
 		mainGame->btnJoinHost->setEnabled(true);
 		mainGame->btnJoinCancel->setEnabled(true);
@@ -148,7 +159,10 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 			SendPacketToServer(CTOS_CREATE_GAME, cscg);
 		} else {
 			CTOS_JoinGame csjg;
-			csjg.version = PRO_VERSION;
+			if (temp_ver)
+				csjg.version = temp_ver;
+			else
+				csjg.version = PRO_VERSION;
 			csjg.gameid = 0;
 			BufferIO::CopyWStr(mainGame->ebJoinPass->getText(), csjg.pass, 20);
 			SendPacketToServer(CTOS_JOIN_GAME, csjg);
@@ -159,6 +173,8 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 		bufferevent_disable(bev, EV_READ);
 		if(!is_closing) {
 			if(connect_state == 0x1) {
+				//modded
+				temp_ver = 0;
 				mainGame->btnCreateHost->setEnabled(true);
 				mainGame->btnJoinHost->setEnabled(true);
 				mainGame->btnJoinCancel->setEnabled(true);
@@ -239,6 +255,8 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		STOC_ErrorMsg* pkt = (STOC_ErrorMsg*)pdata;
 		switch(pkt->msg) {
 		case ERRMSG_JOINERROR: {
+			//modded
+			temp_ver = 0;
 			mainGame->btnCreateHost->setEnabled(true);
 			mainGame->btnJoinHost->setEnabled(true);
 			mainGame->btnJoinCancel->setEnabled(true);
@@ -313,18 +331,26 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			mainGame->gMutex.Unlock();
 			break;
 		}
+		//modded
 		case ERRMSG_VERERROR: {
-			mainGame->btnCreateHost->setEnabled(true);
-			mainGame->btnJoinHost->setEnabled(true);
-			mainGame->btnJoinCancel->setEnabled(true);
-			mainGame->btnStartBot->setEnabled(true);
-			mainGame->btnBotCancel->setEnabled(true);
-			mainGame->gMutex.Lock();
-			wchar_t msgbuf[256];
-			myswprintf(msgbuf, dataManager.GetSysString(1411), pkt->code >> 12, (pkt->code >> 4) & 0xff, pkt->code & 0xf);
-			mainGame->env->addMessageBox(L"", msgbuf);
-			mainGame->gMutex.Unlock();
-			event_base_loopbreak(client_base);
+			if (temp_ver) {
+				temp_ver = 0;
+				mainGame->btnCreateHost->setEnabled(true);
+				mainGame->btnJoinHost->setEnabled(true);
+				mainGame->btnJoinCancel->setEnabled(true);
+				mainGame->btnStartBot->setEnabled(true);
+				mainGame->btnBotCancel->setEnabled(true);
+				mainGame->gMutex.Lock();
+				wchar_t msgbuf[256];
+				myswprintf(msgbuf, dataManager.GetSysString(1411), pkt->code >> 12, (pkt->code >> 4) & 0xff, pkt->code & 0xf);
+				mainGame->env->addMessageBox(L"", msgbuf);
+				mainGame->gMutex.Unlock();
+				event_base_loopbreak(client_base);
+			} else {
+				event_base_loopbreak(client_base);
+				temp_ver = pkt->code;
+				try_needed = true;
+			}	
 			break;
 		}
 		}
@@ -399,6 +425,8 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		break;
 	}
 	case STOC_JOIN_GAME: {
+		//modded
+		temp_ver = 0;
 		mainGame->soundEffectPlayer->doPlayerEnterEffect();
 		STOC_JoinGame* pkt = (STOC_JoinGame*)pdata;
 		std::wstring str;
@@ -3941,7 +3969,8 @@ void DuelClient::BroadcastReply(evutil_socket_t fd, short events, void * arg) {
 		/*int ret = */recvfrom(fd, buf, 256, 0, (sockaddr*)&bc_addr, &sz);
 		unsigned int ipaddr = bc_addr.sin_addr.s_addr;
 		HostPacket* pHP = (HostPacket*)buf;
-		if(!is_closing && pHP->identifier == NETWORK_SERVER_ID && pHP->version == PRO_VERSION && remotes.find(ipaddr) == remotes.end() ) {
+		//modded
+		if(!is_closing && pHP->identifier == NETWORK_SERVER_ID && remotes.find(ipaddr) == remotes.end() ) {
 			mainGame->gMutex.Lock();
 			remotes.insert(ipaddr);
 			pHP->ipaddr = ipaddr;
