@@ -1108,6 +1108,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->dInfo.isReplaySwapped = false;
 			mainGame->dField.ReplaySwap();
 		}
+		mainGame->dInfo.is_swapped = false;		
 		mainGame->gMutex.Unlock();
 		return true;
 	}
@@ -2278,9 +2279,14 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		return true;
 	}
 	case MSG_NEW_TURN: {
+		int r_player = BufferIO::ReadInt8(pbuf);
+		int player = mainGame->LocalPlayer(r_player & 0x1);
+  		mainGame->dInfo.turn++;
+		if(r_player & 0x2) {
+			mainGame->dInfo.is_swapped = !mainGame->dInfo.is_swapped;
+			return true;
+ 		}
 		mainGame->soundEffectPlayer->doNewTurnEffect();
-		int player = mainGame->LocalPlayer(BufferIO::ReadInt8(pbuf));
-		mainGame->dInfo.turn++;
 		if(!mainGame->dInfo.isTag && !mainGame->dInfo.isReplay && mainGame->dInfo.player_type < 7) {
 			mainGame->btnLeaveGame->setText(dataManager.GetSysString(1351));
 			mainGame->btnLeaveGame->setVisible(true);
