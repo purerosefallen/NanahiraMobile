@@ -8,7 +8,7 @@ android {
         applicationId "cn.garymb.ygomobile.KO"
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 33030722
+        versionCode 33030724
         versionName "KO3.3.3"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
