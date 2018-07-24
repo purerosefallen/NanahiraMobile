@@ -197,7 +197,7 @@
             android:exported="false"/>
         <meta-data
             android:name="PGYER_APPID"
-            android:value="dd147e8542b85a64111d98290892d8bd" >
+            android:value="8e985218b1f02bda5fa456557c886f54" >
         </meta-data>
     </application>
 
