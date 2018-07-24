@@ -2370,6 +2370,7 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 			returns.ivalue[0] = 0;
 			return TRUE;
 		}
+		core.set_group_pre_set.clear();
 		core.set_group_set.clear();
 		core.set_group_used_zones = 0;
 		core.phase_action = TRUE;
@@ -2407,8 +2408,8 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 		card_set* set_cards = (card_set*)ptarget;
 		card* target = *set_cards->begin();
 		uint32 seq = returns.bvalue[2];
-		core.set_group_seq[core.set_group_set.size()] = seq;
-		core.set_group_set.insert(target);
+		core.set_group_seq[core.set_group_pre_set.size()] = seq;
+		core.set_group_pre_set.insert(target);
 		core.set_group_used_zones |= (1 << seq);
 		set_cards->erase(target);
 		if(!set_cards->empty())
@@ -2418,7 +2419,7 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 		return FALSE;
 	}
 	case 3: {
-		card_set* set_cards = &core.set_group_set;
+		card_set* set_cards = &core.set_group_pre_set;
 		card* target = *set_cards->begin();
 		target->enable_field_effect(false);
 		uint32 zone;
@@ -2437,7 +2438,7 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 		return FALSE;
 	}
 	case 4: {
-		card_set* set_cards = &core.set_group_set;
+		card_set* set_cards = &core.set_group_pre_set;
 		card* target = *set_cards->begin();
 		target->set_status(STATUS_SET_TURN, TRUE);
 		if(target->data.type & TYPE_MONSTER) {
@@ -2454,7 +2455,7 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 		pduel->write_buffer8(MSG_SET);
 		pduel->write_buffer32(target->data.code);
 		pduel->write_buffer32(target->get_info_location());
-		core.operated_set.insert(target);
+		core.set_group_set.insert(target);
 		set_cards->erase(target);
 		if(!set_cards->empty())
 			core.units.begin()->step = 2;
@@ -2464,8 +2465,8 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 		if(confirm) {
 			pduel->write_buffer8(MSG_CONFIRM_CARDS);
 			pduel->write_buffer8(toplayer);
-			pduel->write_buffer8(core.operated_set.size());
-			for(auto cit = core.operated_set.begin(); cit != core.operated_set.end(); ++cit) {
+			pduel->write_buffer8(core.set_group_set.size());
+			for(auto cit = core.set_group_set.begin(); cit != core.set_group_set.end(); ++cit) {
 				pduel->write_buffer32((*cit)->data.code);
 				pduel->write_buffer8((*cit)->current.controler);
 				pduel->write_buffer8((*cit)->current.location);
@@ -2475,9 +2476,15 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 		return FALSE;
 	}
 	case 6: {
+		core.operated_set.clear();
+		for(auto cit = core.set_group_set.begin(); cit != core.set_group_set.end(); ++cit) {
+			core.operated_set.insert(*cit);
+		}
 		uint8 ct = core.operated_set.size();
 		if(core.set_group_used_zones & (1 << 5))
 			ct--;
+		if(ct <= 1)
+			return FALSE;
 		pduel->write_buffer8(MSG_SHUFFLE_SET_CARD);
 		pduel->write_buffer8(LOCATION_SZONE);
 		pduel->write_buffer8(ct);
@@ -3933,6 +3940,7 @@ int32 field::send_to(uint16 step, group * targets, effect * reason_effect, uint3
 			pcard->previous.location = 0;
 		} else if(oloc & LOCATION_ONFIELD) {
 			pcard->reset(RESET_LEAVE + RESET_MSCHANGE, RESET_EVENT);
+			pcard->clear_card_target();
 			param->leave.insert(pcard);
 		}
 		if(param->predirect->operation) {
@@ -3974,6 +3982,22 @@ int32 field::send_to(uint16 step, group * targets, effect * reason_effect, uint3
 					pduel->write_buffer32(ptop->data.code | 0x80000000);
 			}
 		}
+		for(auto cit = param->targets->container.begin(); cit != param->targets->container.end(); ++cit) {
+			card* pcard = *cit;
+			uint8 nloc = pcard->current.location;
+			if(nloc == LOCATION_HAND)
+				pcard->reset(RESET_TOHAND, RESET_EVENT);
+			else if(nloc == LOCATION_DECK || nloc == LOCATION_EXTRA)
+				pcard->reset(RESET_TODECK, RESET_EVENT);
+			else if(nloc == LOCATION_GRAVE)
+				pcard->reset(RESET_TOGRAVE, RESET_EVENT);
+			if(nloc == LOCATION_REMOVED || ((pcard->data.type & TYPE_TOKEN) && pcard->sendto_param.location == LOCATION_REMOVED)) {
+				if(pcard->current.reason & REASON_TEMPORARY)
+					pcard->reset(RESET_TEMP_REMOVE, RESET_EVENT);
+				else
+					pcard->reset(RESET_REMOVE, RESET_EVENT);
+			}
+		}
 		for(auto iter = param->leave.begin(); iter != param->leave.end(); ++iter)
 			raise_single_event(*iter, 0, EVENT_LEAVE_FIELD, (*iter)->current.reason_effect, (*iter)->current.reason, (*iter)->current.reason_player, 0, 0);
 		if((core.global_flag & GLOBALFLAG_DETACH_EVENT) && param->detach.size()) {
@@ -4011,18 +4035,16 @@ int32 field::send_to(uint16 step, group * targets, effect * reason_effect, uint3
 						equipings.insert(equipc);
 				}
 			}
+			pcard->clear_card_target();
 			if(!(pcard->data.type & TYPE_TOKEN)) {
 				pcard->enable_field_effect(true);
 				if(nloc == LOCATION_HAND) {
 					tohand.insert(pcard);
-					pcard->reset(RESET_TOHAND, RESET_EVENT);
 					raise_single_event(pcard, 0, EVENT_TO_HAND, pcard->current.reason_effect, pcard->current.reason, pcard->current.reason_player, 0, 0);
 				} else if(nloc == LOCATION_DECK || nloc == LOCATION_EXTRA) {
 					todeck.insert(pcard);
-					pcard->reset(RESET_TODECK, RESET_EVENT);
 					raise_single_event(pcard, 0, EVENT_TO_DECK, pcard->current.reason_effect, pcard->current.reason, pcard->current.reason_player, 0, 0);
 				} else if(nloc == LOCATION_GRAVE) {
-					pcard->reset(RESET_TOGRAVE, RESET_EVENT);
 					if(pcard->current.reason & REASON_RETURN) {
 						retgrave.insert(pcard);
 						raise_single_event(pcard, 0, EVENT_RETURN_TO_GRAVE, pcard->current.reason_effect, pcard->current.reason, pcard->current.reason_player, 0, 0);
@@ -4034,10 +4056,6 @@ int32 field::send_to(uint16 step, group * targets, effect * reason_effect, uint3
 			}
 			if(nloc == LOCATION_REMOVED || ((pcard->data.type & TYPE_TOKEN) && pcard->sendto_param.location == LOCATION_REMOVED)) {
 				remove.insert(pcard);
-				if(pcard->current.reason & REASON_TEMPORARY)
-					pcard->reset(RESET_TEMP_REMOVE, RESET_EVENT);
-				else
-					pcard->reset(RESET_REMOVE, RESET_EVENT);
 				raise_single_event(pcard, 0, EVENT_REMOVE, pcard->current.reason_effect, pcard->current.reason, pcard->current.reason_player, 0, 0);
 			}
 			if(pcard->current.reason & REASON_DISCARD) {
@@ -4386,6 +4404,7 @@ int32 field::move_to_field(uint16 step, card* target, uint32 enable, uint32 ret,
 		}
 		if((target->previous.location == LOCATION_SZONE) && target->equiping_target)
 			target->unequip();
+		target->clear_card_target();
 		if(target->current.location == LOCATION_MZONE) {
 			effect_set eset;
 			filter_player_effect(0, EFFECT_MUST_USE_MZONE, &eset, FALSE);
@@ -4499,6 +4518,7 @@ int32 field::change_position(uint16 step, group * targets, effect * reason_effec
 					if(pcard->status & (STATUS_SUMMON_DISABLED | STATUS_ACTIVATE_DISABLED))
 						pcard->set_status(STATUS_SUMMON_DISABLED | STATUS_ACTIVATE_DISABLED, FALSE);
 					pcard->reset(RESET_TURN_SET, RESET_EVENT);
+					pcard->clear_card_target();
 					pcard->set_status(STATUS_SET_TURN, TRUE);
 					pcard->enable_field_effect(false);
 					pcard->summon_info &= 0xdf00ffff;
