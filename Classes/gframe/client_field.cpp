@@ -619,7 +619,7 @@ void ClientField::ShowSelectOption(int select_hint) {
 		for(int i = 0; i < 5; i++)
 			mainGame->btnOption[i]->setVisible(i < count);
 		recti loc = mainGame->wOptions->getRelativePosition();
-		loc.LowerRightCorner.Y = loc.UpperLeftCorner.Y + 30 + 40 * count;
+		loc.LowerRightCorner.Y = ((loc.UpperLeftCorner.Y / mainGame->yScale) + 30 + 40 * count) * mainGame->yScale;
 		mainGame->wOptions->setRelativePosition(loc);
 	} else {
 		mainGame->SetStaticText(mainGame->stOptions, 310, mainGame->guiFont,
@@ -633,7 +633,7 @@ void ClientField::ShowSelectOption(int select_hint) {
 		for(int i = 0; i < 5; i++)
 			mainGame->btnOption[i]->setVisible(false);
 		recti loc = mainGame->wOptions->getRelativePosition();
-		loc.LowerRightCorner.Y = loc.UpperLeftCorner.Y + 140;
+		loc.LowerRightCorner.Y = ((loc.UpperLeftCorner.Y / mainGame->yScale) + 140) * mainGame->yScale;
 		mainGame->wOptions->setRelativePosition(loc);
 	}
 	if(select_hint)
