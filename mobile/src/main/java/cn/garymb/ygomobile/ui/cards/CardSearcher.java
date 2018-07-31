@@ -69,25 +69,7 @@ public class CardSearcher implements View.OnClickListener {
     protected LimitManager mLimitManager;
     protected AppsSettings mSettings;
 
-    private Button button_1;
-    private Button button_2;
-    private Button button_3;
-    private Button button_4;
-    private Button button_5;
-    private Button button_6;
-    private Button button_7;
-    private Button button_8;
-    private Button button_9;
-
-    String Btn_1;
-    String Btn_2;
-    String Btn_3;
-    String Btn_4;
-    String Btn_5;
-    String Btn_6;
-    String Btn_7;
-    String Btn_8;
-    String Btn_9;
+    final String[] BtnVals = new String[9];
     int lineKey;
 
     public CardSearcher(View view, ICardLoader dataLoader) {
@@ -139,139 +121,69 @@ public class CardSearcher implements View.OnClickListener {
         suffixWord.setOnEditorActionListener(searchListener);
 
         LinkMarkerButton.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                Btn_1 = "0";
-                Btn_2 = "0";
-                Btn_3 = "0";
-                Btn_4 = "0";
-                Btn_5 = "0";
-                Btn_6 = "0";
-                Btn_7 = "0";
-                Btn_8 = "0";
-                Btn_9 = "0";
+                for (int i = 0; i < BtnVals.length; i++) {
+                    BtnVals[i] = "0";
+                }
                 Dialog builder = new Dialog(v.getContext());
                 builder.show();
                 LayoutInflater inflater = LayoutInflater.from(v.getContext());
                 View viewDialog = inflater.inflate(R.layout.item_linkmarker, null);
-                button_1 = (Button) viewDialog.findViewById(R.id.button_1);
-                button_2 = (Button) viewDialog.findViewById(R.id.button_2);
-                button_3 = (Button) viewDialog.findViewById(R.id.button_3);
-                button_4 = (Button) viewDialog.findViewById(R.id.button_4);
-                button_5 = (Button) viewDialog.findViewById(R.id.button_5);
-                button_6 = (Button) viewDialog.findViewById(R.id.button_6);
-                button_7 = (Button) viewDialog.findViewById(R.id.button_7);
-                button_8 = (Button) viewDialog.findViewById(R.id.button_8);
-                button_9 = (Button) viewDialog.findViewById(R.id.button_9);
-
-                button_1.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_1.equals("0")) {
-                            button_1.setBackgroundResource(R.drawable.left_bottom_1);
-                            Btn_1 = "1";
-                        } else {
-                            button_1.setBackgroundResource(R.drawable.left_bottom_0);
-                            Btn_1 = "0";
-                        }
-                    }
-                });
-                button_2.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_2.equals("0")) {
-                            button_2.setBackgroundResource(R.drawable.bottom_1);
-                            Btn_2 = "1";
-                        } else {
-                            button_2.setBackgroundResource(R.drawable.bottom_0);
-                            Btn_2 = "0";
-                        }
-                    }
-                });
-                button_3.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_3.equals("0")) {
-                            button_3.setBackgroundResource(R.drawable.right_bottom_1);
-                            Btn_3 = "1";
-                        } else {
-                            button_3.setBackgroundResource(R.drawable.right_bottom_0);
-                            Btn_3 = "0";
-                        }
-                    }
-                });
-                button_4.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_4.equals("0")) {
-                            button_4.setBackgroundResource(R.drawable.left_1);
-                            Btn_4 = "1";
-                        } else {
-                            button_4.setBackgroundResource(R.drawable.left_0);
-                            Btn_4 = "0";
-                        }
-                    }
-                });
-                button_6.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_6.equals("0")) {
-                            button_6.setBackgroundResource(R.drawable.right_1);
-                            Btn_6 = "1";
-                        } else {
-                            button_6.setBackgroundResource(R.drawable.right_0);
-                            Btn_6 = "0";
-                        }
-                    }
-                });
-                button_7.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_7.equals("0")) {
-                            button_7.setBackgroundResource(R.drawable.left_top_1);
-                            Btn_7 = "1";
-                        } else {
-                            button_7.setBackgroundResource(R.drawable.left_top_0);
-                            Btn_7 = "0";
-                        }
-                    }
-                });
-                button_8.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_8.equals("0")) {
-                            button_8.setBackgroundResource(R.drawable.top_1);
-                            Btn_8 = "1";
-                        } else {
-                            button_8.setBackgroundResource(R.drawable.top_0);
-                            Btn_8 = "0";
-                        }
-                    }
-                });
-                button_9.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_9.equals("0")) {
-                            button_9.setBackgroundResource(R.drawable.right_top_1);
-                            Btn_9 = "1";
-                        } else {
-                            button_9.setBackgroundResource(R.drawable.right_top_0);
-                            Btn_9 = "0";
-                        }
-                    }
-                });
-
-                button_5.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Btn_5.equals("0")) {
-                            String mLinkStr = Btn_9 + Btn_8 + Btn_7 + Btn_6 + "0" + Btn_4 + Btn_3 + Btn_2 + Btn_1;
+                int[] ids = new int[]{
+                        R.id.button_1,
+                        R.id.button_2,
+                        R.id.button_3,
+                        R.id.button_4,
+                        R.id.button_5,
+                        R.id.button_6,
+                        R.id.button_7,
+                        R.id.button_8,
+                        R.id.button_9,
+                };
+                int[] enImgs=new int[]{
+                        R.drawable.left_bottom_1,
+                        R.drawable.bottom_1,
+                        R.drawable.right_bottom_1,
+                        R.drawable.left_1,
+                        0,
+                        R.drawable.right_1,
+                        R.drawable.left_top_1,
+                        R.drawable.top_1,
+                        R.drawable.right_top_1,
+                };
+                int[] disImgs=new int[]{
+                        R.drawable.left_bottom_0,
+                        R.drawable.bottom_0,
+                        R.drawable.right_bottom_0,
+                        R.drawable.left_0,
+                        0,
+                        R.drawable.right_0,
+                        R.drawable.left_top_0,
+                        R.drawable.top_0,
+                        R.drawable.right_top_0,
+                };
+                for (int i = 0; i < ids.length; i++) {
+                    final int index = i;
+                    viewDialog.findViewById(ids[index]).setOnClickListener((btn) -> {
+                        if (index == 4) {
+                            String mLinkStr = BtnVals[8] + BtnVals[7] + BtnVals[6] + BtnVals[5] + "0"
+                                    + BtnVals[3] + BtnVals[2] + BtnVals[1] + BtnVals[0];
                             lineKey = Integer.parseInt(mLinkStr, 2);
-                            builder.dismiss();
+                            if(builder.isShowing()) {
+                                builder.dismiss();
+                            }
+                        }else {
+                            if ("0".equals(BtnVals[index])) {
+                                btn.setBackgroundResource(enImgs[index]);
+                                BtnVals[index] = "1";
+                            } else {
+                                btn.setBackgroundResource(disImgs[index]);
+                                BtnVals[index] = "0";
+                            }
                         }
-                    }
-                });
+                    });
+                }
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(600, 600);
                 builder.setContentView(viewDialog, layoutParams);
             }
@@ -343,9 +255,9 @@ public class CardSearcher implements View.OnClickListener {
         initTypeSpinners(typeSpinner, new CardType[]{CardType.None, CardType.Monster, CardType.Spell, CardType.Trap});
         initTypeSpinners(typeMonsterSpinner, new CardType[]{CardType.None, CardType.Normal, CardType.Effect, CardType.Fusion, CardType.Ritual,
                 CardType.Synchro, CardType.Pendulum, CardType.Xyz, CardType.Link, CardType.Spirit, CardType.Union,
-                CardType.Dual, CardType.Tuner, CardType.Flip, CardType.Toon, CardType.Token
+                CardType.Dual, CardType.Tuner, CardType.Flip, CardType.Toon, CardType.Sp_Summon,CardType.Token
         });
-        initTypeSpinners(typeMonsterSpinner2, new CardType[]{CardType.None, CardType.Pendulum, CardType.Tuner, CardType.Effect, CardType.Normal
+        initTypeSpinners(typeMonsterSpinner2, new CardType[]{CardType.None, CardType.Pendulum, CardType.Tuner
         });
         initTypeSpinners(typeSTSpinner, new CardType[]{CardType.None, CardType.Normal, CardType.QuickPlay, CardType.Ritual,
                 CardType.Continuous, CardType.Equip, CardType.Field, CardType.Counter
