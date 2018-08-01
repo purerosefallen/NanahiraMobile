@@ -29,7 +29,7 @@ int32 field::negate_chain(uint8 chaincount) {
 		}
 		pduel->write_buffer8(MSG_CHAIN_NEGATED);
 		pduel->write_buffer8(chaincount);
-		if(pchain.triggering_effect->is_flag(EFFECT_FLAG2_NAGA))
+		if(pchain.flag & CHAIN_DECK_EFFECT)
 			return FALSE;
 		return TRUE;
 	}
@@ -48,7 +48,7 @@ int32 field::disable_chain(uint8 chaincount) {
 		core.current_chain[chaincount - 1].disable_player = core.reason_player;
 		pduel->write_buffer8(MSG_CHAIN_DISABLED);
 		pduel->write_buffer8(chaincount);
-		if(pchain.triggering_effect->is_flag(EFFECT_FLAG2_NAGA))
+		if(pchain.flag & CHAIN_DECK_EFFECT)
 			return FALSE;
 		return TRUE;
 	}
@@ -1516,8 +1516,6 @@ int32 field::summon(uint16 step, uint8 sumplayer, card* target, effect* proc, ui
 		}
 		effect* peffect = core.select_effects[returns.ivalue[0]];
 		core.units.begin()->peffect = peffect;
-		int32 unlimited = -1;
-		bool force_select = false;
 		core.select_effects.clear();
 		core.select_options.clear();
 		if(ignore_count || core.summon_count[sumplayer] < get_summon_count_limit(sumplayer)) {
@@ -1532,12 +1530,9 @@ int32 field::summon(uint16 step, uint8 sumplayer, card* target, effect* proc, ui
 				int32 new_zone = retval.size() > 1 ? retval[1] : 0x1f;
 				int32 releasable = retval.size() > 2 ? (retval[2] < 0 ? 0xff00ff + retval[2] : retval[2]) : 0xff00ff;
 				new_zone &= zone;
-				bool unchanged = (new_zone == zone);
 				if(peffect) {
-					if(new_min_tribute < (int32)min_tribute) {
+					if(new_min_tribute < (int32)min_tribute)
 						new_min_tribute = min_tribute;
-						unchanged = false;
-					}
 					if(!target->is_summonable(peffect, new_min_tribute, new_zone, releasable))
 						continue;
 				} else {
@@ -1550,25 +1545,17 @@ int32 field::summon(uint16 step, uint8 sumplayer, card* target, effect* proc, ui
 						min = min_tribute;
 					if(max < min)
 						continue;
-					if(min < new_min_tribute) {
+					if(min < new_min_tribute)
 						min = new_min_tribute;
-						unchanged = false;
-					}
 					if(!check_tribute(target, min, max, 0, target->current.controler, new_zone, releasable))
 						continue;
 				}
-				if(unlimited < 0 && unchanged)
-					unlimited = (int32)core.select_effects.size();
-				if(eset[i]->operation)
-					force_select = true;
 				core.select_effects.push_back(eset[i]);
 				core.select_options.push_back(eset[i]->description);
 			}
 		}
 		if(core.select_options.size() == 1)
 			returns.ivalue[0] = 0;
-		else if(!force_select && unlimited >= 0)
-			returns.ivalue[0] = unlimited;
 		else
 			add_process(PROCESSOR_SELECT_OPTION, 0, 0, 0, sumplayer, 0);
 		return FALSE;
@@ -2062,8 +2049,6 @@ int32 field::mset(uint16 step, uint8 setplayer, card* target, effect* proc, uint
 		}
 		effect* peffect = core.select_effects[returns.ivalue[0]];
 		core.units.begin()->peffect = peffect;
-		int32 unlimited = -1;
-		bool force_select = false;
 		core.select_effects.clear();
 		core.select_options.clear();
 		if(ignore_count || core.summon_count[setplayer] < get_summon_count_limit(setplayer)) {
@@ -2078,12 +2063,9 @@ int32 field::mset(uint16 step, uint8 setplayer, card* target, effect* proc, uint
 				int32 new_zone = retval.size() > 1 ? retval[1] : 0x1f;
 				int32 releasable = retval.size() > 2 ? (retval[2] < 0 ? 0xff00ff + retval[2] : retval[2]) : 0xff00ff;
 				new_zone &= zone;
-				bool unchanged = (new_zone == zone);
 				if(peffect) {
-					if(new_min_tribute < (int32)min_tribute) {
+					if(new_min_tribute < (int32)min_tribute)
 						new_min_tribute = min_tribute;
-						unchanged = false;
-					}
 					if(!target->is_summonable(peffect, new_min_tribute, new_zone, releasable))
 						continue;
 				} else {
@@ -2096,25 +2078,17 @@ int32 field::mset(uint16 step, uint8 setplayer, card* target, effect* proc, uint
 						min = min_tribute;
 					if(max < min)
 						continue;
-					if(min < new_min_tribute) {
+					if(min < new_min_tribute)
 						min = new_min_tribute;
-						unchanged = false;
-					}
 					if(!check_tribute(target, min, max, 0, target->current.controler, new_zone, releasable, POS_FACEDOWN_DEFENSE))
 						continue;
 				}
-				if(unlimited < 0 && unchanged)
-					unlimited = (int32)core.select_effects.size();
-				if(eset[i]->operation)
-					force_select = true;
 				core.select_effects.push_back(eset[i]);
 				core.select_options.push_back(eset[i]->description);
 			}
 		}
 		if(core.select_options.size() == 1)
 			returns.ivalue[0] = 0;
-		else if(!force_select && unlimited >= 0)
-			returns.ivalue[0] = unlimited;
 		else
 			add_process(PROCESSOR_SELECT_OPTION, 0, 0, 0, setplayer, 0);
 		return FALSE;
@@ -3984,12 +3958,23 @@ int32 field::send_to(uint16 step, group * targets, effect * reason_effect, uint3
 		}
 		for(auto cit = param->targets->container.begin(); cit != param->targets->container.end(); ++cit) {
 			card* pcard = *cit;
+
 			uint8 nloc = pcard->current.location;
 			if(nloc == LOCATION_HAND)
 				pcard->reset(RESET_TOHAND, RESET_EVENT);
 			else if(nloc == LOCATION_DECK || nloc == LOCATION_EXTRA)
 				pcard->reset(RESET_TODECK, RESET_EVENT);
 			else if(nloc == LOCATION_GRAVE)
+
+			if(!(pcard->data.type & TYPE_TOKEN))
+				pcard->enable_field_effect(true);
+			uint8 nloc = pcard->current.location;
+			if(nloc == LOCATION_HAND)
+				pcard->reset(RESET_TOHAND, RESET_EVENT);
+			if(nloc == LOCATION_DECK || nloc == LOCATION_EXTRA)
+				pcard->reset(RESET_TODECK, RESET_EVENT);
+			if(nloc == LOCATION_GRAVE)
+
 				pcard->reset(RESET_TOGRAVE, RESET_EVENT);
 			if(nloc == LOCATION_REMOVED || ((pcard->data.type & TYPE_TOKEN) && pcard->sendto_param.location == LOCATION_REMOVED)) {
 				if(pcard->current.reason & REASON_TEMPORARY)
@@ -4036,6 +4021,7 @@ int32 field::send_to(uint16 step, group * targets, effect * reason_effect, uint3
 				}
 			}
 			pcard->clear_card_target();
+
 			if(!(pcard->data.type & TYPE_TOKEN)) {
 				pcard->enable_field_effect(true);
 				if(nloc == LOCATION_HAND) {
@@ -4328,6 +4314,7 @@ int32 field::move_to_field(uint16 step, card* target, uint32 enable, uint32 ret,
 						&& !(peffect && (peffect->value & TYPE_TRAP)) && ret != 2)
 					resetflag |= RESET_MSCHANGE;
 				target->reset(resetflag, RESET_EVENT);
+				target->clear_card_target();
 			}
 			if(!(target->current.location & LOCATION_ONFIELD))
 				target->clear_relate_effect();
