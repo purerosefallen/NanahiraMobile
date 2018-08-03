@@ -1,6 +1,6 @@
 # License
 GPL
-# YGOMobile
+# NanahiraMobile
 Android编译环境
 ---------------------
     下载Android Studio和Android sdk
@@ -65,3 +65,6 @@ ndk编译环境(请用迅雷，旋风，或者翻墙vpn下载)
     key alias           签名key
     key password        key密码
     点Next，第一行就是apk的保存文件夹，下面的V1和V2，如果不懂，请不要勾V2，然后点Finish。
+7.Use Travis
+-------------------------
+In fact the build steps above are useless. Just take a look at the `.travis.yml` and soon you will understand how to build.
