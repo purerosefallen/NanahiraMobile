@@ -182,12 +182,14 @@ public class SettingFragment extends PreferenceFragmentPlus {
                     .show();
         }
         if (PREF_CHECK_UPDATE.equals(preference.getKey())) {
+/*
              new PgyUpdateManager
                     .Builder()
                     .setForced(true)                //设置是否强制更新,非自定义回调更新接口此方法有用
                     .setUserCanRetry(true)         //失败后是否提示重新下载，非自定义下载 apk 回调此方法有用
                     .setDeleteHistroyApk(true)     // 检查更新前是否删除本地历史 Apk， 默认为true
                     .register();
+*/
 
         }
         if (PREF_PENDULUM_SCALE.equals(key)) {
