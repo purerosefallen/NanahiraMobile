@@ -128,24 +128,24 @@ public class ResCheckTask extends AsyncTask<Void, Integer, Integer> {
             //设置字体
             new ConfigManager(mSettings.getSystemConfig()).setFontSize(mSettings.getFontSize());
 //            copyCoreConfig(new File(mSettings.getResourcePath(), GameSettings.CORE_CONFIG_PATH).getAbsolutePath());
-            if (needsUpdate) {
+            //if (needsUpdate) {
                 setMessage(mContext.getString(R.string.check_things, mContext.getString(R.string.tip_new_deck)));
                 IOUtils.copyFilesFromAssets(mContext, getDatapath(Constants.CORE_DECK_PATH),
                         new File(resPath, Constants.CORE_DECK_PATH).getAbsolutePath(), needsUpdate);
-            }
-            if (needsUpdate) {
+            //}
+            //if (needsUpdate) {
                 setMessage(mContext.getString(R.string.check_things, mContext.getString(R.string.game_skins)));
                 IOUtils.copyFilesFromAssets(mContext, getDatapath(Constants.CORE_SKIN_PATH),
                         mSettings.getCoreSkinPath(), false, mSettings.isPendulumScale());
-            }
+            //}
             setMessage(mContext.getString(R.string.check_things, mContext.getString(R.string.font_files)));
             IOUtils.copyFilesFromAssets(mContext, getDatapath(Constants.FONT_DIRECTORY),
                     mSettings.getFontDirPath(), false);
-            if (needsUpdate) {
+            //if (needsUpdate) {
                 setMessage(mContext.getString(R.string.check_things, mContext.getString(R.string.single_lua)));
                 IOUtils.copyFilesFromAssets(mContext, getDatapath(Constants.CORE_SINGLE_PATH),
                         new File(resPath, Constants.CORE_SINGLE_PATH).getAbsolutePath(), needsUpdate);
-            }
+            //}
             if (IOUtils.hasAssets(mContext, getDatapath(Constants.CORE_SCRIPTS_ZIP))) {
                 setMessage(mContext.getString(R.string.check_things, mContext.getString(R.string.scripts)));
                 IOUtils.copyFilesFromAssets(mContext, getDatapath(Constants.CORE_SCRIPTS_ZIP),
@@ -165,11 +165,11 @@ public class ResCheckTask extends AsyncTask<Void, Integer, Integer> {
                     filesDir.getPath(), needsUpdate);
             //   }
 
-            if (needsUpdate) {
+            //if (needsUpdate) {
                 setMessage(mContext.getString(R.string.check_things, mContext.getString(R.string.ex_pack)));
                 IOUtils.copyFilesFromAssets(mContext, getDatapath(Constants.CORE_EXPANSIONS),
                         mSettings.getExpansionsPath().getAbsolutePath(), true, needsUpdate);
-            }
+            //}
 
             //checkWindbot();
             han.sendEmptyMessage(0);
@@ -185,6 +185,7 @@ public class ResCheckTask extends AsyncTask<Void, Integer, Integer> {
 
     void copyCdbFile(boolean needsUpdate) throws IOException {
         File dbFile = new File(mSettings.getDataBasePath(), DATABASE_NAME);
+/*
         boolean copyDb = true;
         if (dbFile.exists()) {
             copyDb = false;
@@ -194,9 +195,10 @@ public class ResCheckTask extends AsyncTask<Void, Integer, Integer> {
             }
         }
         if (copyDb) {
+*/
             IOUtils.copyFilesFromAssets(mContext, getDatapath(DATABASE_NAME), mSettings.getDataBasePath(), needsUpdate);
 //            doSomeTrickOnDatabase(dbFile.getAbsolutePath());
-        }
+//        }
     }
 
     public static boolean checkDataBase(String path) {

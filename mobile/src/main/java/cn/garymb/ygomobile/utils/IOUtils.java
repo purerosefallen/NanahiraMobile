@@ -118,7 +118,7 @@ public class IOUtils {
             //is file
             String file = getName(assets);
             File tofile = new File(toPath, file);
-            if (update || !tofile.exists()) {
+            //if (update || !tofile.exists()) {
                 if (Constants.DEBUG)
                     Log.i(TAG, "copy1:" + assets + "-->" + tofile);
                 createFolderByFile(tofile);
@@ -133,7 +133,7 @@ public class IOUtils {
                 }else{
                     return 0;
                 }
-            }
+            //}
             return 1;
         } else {
             int count = 0;
