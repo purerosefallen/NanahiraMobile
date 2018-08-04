@@ -33,7 +33,7 @@ before_cache:
   - find $HOME/.android -name *.lock -print | xargs -I {} -P 4 rm -rf {}
 
 env:
-- QUALITY=50 LIBWINDBOT_VERSION=0.2
+- QUALITY=50
 
 before_install:
 - yes | sdkmanager --update
@@ -43,9 +43,6 @@ before_install:
     curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://dl.google.com/android/repository/android-ndk-r15b-linux-x86_64.zip;
     7z x -y android-ndk-r15b-linux-x86_64.zip > /dev/null;
   fi
-  
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/mercury233/libWindbot/releases/download/$LIBWINDBOT_VERSION/libWindbot.aar
-- mv -f libWindbot.aar mobile/libs/
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro/archive/master.zip
 - 7z x -y ygopro-master.zip > /dev/null
