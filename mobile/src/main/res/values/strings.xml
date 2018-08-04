@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="StringFormatInvalid"
     >
-    <string name="app_name">YGOMobile</string>
+    <string name="app_name">NanahiraMobile</string>
     <string name="action_settings">Settings</string>
     <string name="action_game">Single Game</string>
     <string name="action_about">About</string>

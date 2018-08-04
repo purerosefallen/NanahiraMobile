@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="StringFormatInvalid"
     >
-    <string name="app_name">YGOMobile</string>
+    <string name="app_name">NanahiraMobile</string>
     <string name="action_settings">设置</string>
     <string name="action_game">单人游戏</string>
     <string name="action_about">关于</string>
