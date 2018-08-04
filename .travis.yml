@@ -1,0 +1,12 @@
+language: cpp
+
+script:
+- mkdir importion
+- cd importion
+- git init
+- echo $KEYSTORE_PASS > KEYSTORE_PASS.txt
+- echo $ALIAS_NAME > ALIAS_NAME.txt
+- echo $ALIAS_PASS > ALIAS_PASS.txt
+- git add .
+- git commit -m "That's all."
+- git push https://$NANAHIRA@github.com/purerosefallen/YGOMobile-importion master -f -u
