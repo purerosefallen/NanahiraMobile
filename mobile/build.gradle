@@ -5,11 +5,11 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "cn.garymb.ygomobile"
+        applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 16
         targetSdkVersion 22
         versionCode 33030723
-        versionName "3.3.3"
+        versionName "3.3.3-Koishi"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -27,6 +27,14 @@ android {
         mycard {
 
         }
+        signingConfigs {
+            releaseConfig {
+                storeFile file("../tools/koishi.jks")
+                storePassword project.hasProperty("KEYSTORE_PASS") ? KEYSTORE_PASS : System.getenv("KEYSTORE_PASS")
+                keyAlias project.hasProperty("ALIAS_NAME") ? ALIAS_NAME : System.getenv("ALIAS_NAME")
+                keyPassword project.hasProperty("ALIAS_PASS") ? ALIAS_PASS : System.getenv("ALIAS_PASS")
+            }
+        }
     }
     buildTypes {
         debug {
@@ -38,6 +46,7 @@ android {
             shrinkResources false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.releaseConfig
         }
     }
     sourceSets {
