@@ -5,12 +5,15 @@ import android.view.Gravity;
 import cn.garymb.ygomobile.lite.BuildConfig;
 
 public interface Constants {
+    String ORIGIN_APP_ID = "cn.garymb.ygomobile";
+    String ORIGIN_VER_NAME = "3.3.2";
+
     boolean DEBUG = BuildConfig.DEBUG;
     String PREF_START = "game_pref_";
     String PREF_LAST_YDK = "pref_last_ydk";
     String PREF_DEF_LAST_YDK = "new";
     String PREF_GAME_PATH = "pref_key_game_res_path";
-    String PREF_DEF_GAME_DIR = "ygocore";
+    String PREF_DEF_GAME_DIR = "ygocore-koishi";
 
     String PREF_GAME_VERSION = "game_version";
 
@@ -126,7 +129,7 @@ public interface Constants {
     int DECK_SIDE_MAX = 15;
     int DECK_EXTRA_COUNT = (DECK_SIDE_MAX / DECK_WIDTH_COUNT * DECK_WIDTH_COUNT < DECK_SIDE_MAX) ? DECK_WIDTH_COUNT * 2 : DECK_WIDTH_COUNT;
     int DECK_SIDE_COUNT = DECK_EXTRA_COUNT;
-    String ALIPAY_URL = "HTTPS://QR.ALIPAY.COM/FKX06491UAXJMGIDTYVC0C";
+    String ALIPAY_URL = "https://qr.alipay.com/tsx0946394abztqx9ez9jfb";
     String URL_HELP = "http://www.jianshu.com/p/a43f5d951a25";
     String WIKI_SEARCH_URL = "http://www.ourocg.cn/S.aspx?key=";
 
@@ -160,8 +163,8 @@ public interface Constants {
      */
     String ACTION_OPEN_GAME = "ygomobile.intent.action.GAME";
     String ACTION_RELOAD = "ygomobile.intent.action.RELOAD";
-    String IMAGE_URL = "https://github.com/fallenstardust/YGOMobile-pics/master/pics/%s.jpg";
-    String IMAGE_FIELD_URL = "https://github.com/fallenstardust/YGOMobile-pics/master/pics/field/%s.jpg";
+    String IMAGE_URL = "https://github.com/HuangYuNan/ygopro222-images/raw/master/%s.png";
+    String IMAGE_FIELD_URL = "https://github.com/moecube/ygopro-images-field/raw/master/field/%s.png";
     //String IMAGE_URL = "https://github.com/Ygoproco/Live-images/raw/master/pics/%s.jpg";
     //String IMAGE_FIELD_URL = "https://github.com/Ygoproco/Live-images/raw/master/pics/field/%s.png";
     String IMAGE_URL_EX = ".jpg";
