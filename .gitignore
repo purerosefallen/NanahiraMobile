@@ -55,3 +55,6 @@ libYGOMobile.so
 /mobile/assets/data/textures/Thumbs.db
 /mobile/src/main/res/drawable-xhdpi/Thumbs.db
 Thumbs.db
+
+/android-ndk*
+/install.sh
