@@ -3386,6 +3386,12 @@ int32 field::process_battle_command(uint16 step) {
 				pduel->write_buffer8(HINT_CARD);
 				pduel->write_buffer8(0);
 				pduel->write_buffer32(indestructable_effect->owner->data.code);
+				if(indestructable_effect->description) {
+					pduel->write_buffer8(MSG_HINT);
+					pduel->write_buffer8(HINT_SOUND);
+					pduel->write_buffer8(0);
+					pduel->write_buffer32(indestructable_effect->description);
+				}
 				bd[0] = FALSE;
 			} else
 				core.attacker->set_status(STATUS_BATTLE_RESULT, TRUE);
@@ -3397,6 +3403,12 @@ int32 field::process_battle_command(uint16 step) {
 				pduel->write_buffer8(HINT_CARD);
 				pduel->write_buffer8(0);
 				pduel->write_buffer32(indestructable_effect->owner->data.code);
+				if(indestructable_effect->description) {
+					pduel->write_buffer8(MSG_HINT);
+					pduel->write_buffer8(HINT_SOUND);
+					pduel->write_buffer8(0);
+					pduel->write_buffer32(indestructable_effect->description);
+				}
 				bd[1] = FALSE;
 			} else
 				core.attack_target->set_status(STATUS_BATTLE_RESULT, TRUE);
@@ -3949,6 +3961,7 @@ int32 field::process_turn(uint16 step, uint8 turn_player) {
 				pcard->indestructable_effects.clear();
 				pcard->announce_count = 0;
 				pcard->attacked_count = 0;
+				pcard->removed_overlay_count = 0;
 				pcard->announced_cards.clear();
 				pcard->attacked_cards.clear();
 				pcard->battled_cards.clear();
@@ -4161,6 +4174,7 @@ int32 field::process_turn(uint16 step, uint8 turn_player) {
 						continue;
 					pcard->announce_count = 0;
 					pcard->attacked_count = 0;
+					pcard->removed_overlay_count = 0;
 					pcard->announced_cards.clear();
 					pcard->attacked_cards.clear();
 					pcard->battled_cards.clear();
@@ -4274,6 +4288,9 @@ int32 field::add_chain(uint16 step) {
 				else if((phandler->data.type & TYPE_SPELL) && (phandler->data.type & TYPE_QUICKPLAY)
 				        && infos.turn_player != phandler->current.controler)
 					ecode = EFFECT_QP_ACT_IN_NTPHAND;
+				else if((phandler->data.type & TYPE_PENDULUM) && peffect->is_flag(EFFECT_FLAG2_SPOSITCH)
+				        && infos.turn_player != phandler->current.controler)
+					ecode = EFFECT_QP_ACT_IN_NTPHAND;
 			} else if(phandler->current.location == LOCATION_SZONE) {
 				if((phandler->data.type & TYPE_TRAP) && phandler->get_status(STATUS_SET_TURN))
 					ecode = EFFECT_TRAP_ACT_IN_SET_TURN;
@@ -4333,6 +4350,8 @@ int32 field::add_chain(uint16 step) {
 		if((peffect->card_type & 0x5) == 0x5)
 			peffect->card_type -= TYPE_TRAP;
 		peffect->active_type = peffect->card_type;
+		if(peffect->is_flag(EFFECT_FLAG2_SPOSITCH))
+			peffect->active_type |= TYPE_QUICKPLAY;
 		peffect->active_handler = peffect->handler->overlay_target;
 		clit.chain_count = core.current_chain.size() + 1;
 		clit.target_cards = 0;
@@ -5094,7 +5113,9 @@ int32 field::adjust_step(uint16 step) {
 	case 1: {
 		//win check(deck=0 or lp=0)
 		uint32 winp = 5, rea = 1;
-		if(player[0].lp <= 0 && player[1].lp > 0) {
+		bool lp_zero_0 = (player[0].lp <= 0 && !is_player_affected_by_effect(0, EFFECT_CANNOT_LOSE_KOISHI));
+		bool lp_zero_1 = (player[1].lp <= 0 && !is_player_affected_by_effect(1, EFFECT_CANNOT_LOSE_KOISHI));
+		if(lp_zero_0 && !lp_zero_1) {
 			winp = 1;
 			rea = 1;
 		}
@@ -5102,7 +5123,7 @@ int32 field::adjust_step(uint16 step) {
 			winp = 1;
 			rea = 2;
 		}
-		if(player[1].lp <= 0 && player[0].lp > 0) {
+		if(lp_zero_1 && !lp_zero_0) {
 			winp = 0;
 			rea = 1;
 		}
@@ -5110,7 +5131,7 @@ int32 field::adjust_step(uint16 step) {
 			winp = 0;
 			rea = 2;
 		}
-		if(player[1].lp <= 0 && player[0].lp <= 0) {
+		if(lp_zero_0 && lp_zero_1) {
 			winp = PLAYER_NONE;
 			rea = 1;
 		}

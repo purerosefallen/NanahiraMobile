@@ -13,6 +13,129 @@
 #include "group.h"
 #include <iostream>
 
+int32 scriptlib::card_is_ritual_type(lua_State *L) {
+	check_param_count(L, 2);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	uint32 ttype = lua_tointeger(L, 2);
+	if(pcard->get_ritual_type() & ttype)
+		lua_pushboolean(L, 1);
+	else
+		lua_pushboolean(L, 0);
+	return 1;
+}
+int32 scriptlib::card_set_entity_code(lua_State *L) {
+	check_param_count(L, 2);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	uint32 trace = lua_tointeger(L, 2);
+	bool remove_alias = false;
+	int32 enable = lua_toboolean(L, 3);
+	if (enable)
+		remove_alias = true;
+	lua_pushinteger(L, pcard->set_entity_code(trace, remove_alias));
+	return 1;
+}
+int32 scriptlib::card_set_card_data(lua_State *L) {
+	check_param_count(L, 3);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	duel* pduel = pcard->pduel;
+	int32 stype = lua_tointeger(L, 2);
+	switch(stype) {
+	case CARDDATA_CODE:
+		pcard->data.code = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_ALIAS:
+		pcard->data.alias = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_SETCODE:
+		pcard->data.setcode = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_TYPE:
+		pcard->data.type = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_LEVEL:
+		pcard->data.level = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_ATTRIBUTE:
+		pcard->data.attribute = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_RACE:
+		pcard->data.race = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_ATTACK:
+		pcard->data.attack = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_DEFENSE:
+		pcard->data.defense = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_LSCALE:
+		pcard->data.lscale = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_RSCALE:
+		pcard->data.rscale = lua_tointeger(L, 3);
+		break;
+	case CARDDATA_LINK_MARKER:
+		pcard->data.link_marker = lua_tointeger(L, 3);
+		break;
+	}
+	pduel->write_buffer8(MSG_MOVE);
+	pduel->write_buffer32(pcard->data.code);
+	pduel->write_buffer32(pcard->get_info_location());
+	pduel->write_buffer32(pcard->get_info_location());
+	pduel->write_buffer32(0);
+	return 0;
+}
+int32 scriptlib::card_get_link_marker(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	lua_pushinteger(L, pcard->get_link_marker());
+	return 1;
+}
+int32 scriptlib::card_get_origin_link_marker(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	if(pcard->status & STATUS_NO_LEVEL)
+		lua_pushinteger(L, 0);
+	else
+		lua_pushinteger(L, pcard->data.link_marker);
+	return 1;
+}
+int32 scriptlib::card_is_xyz_summonable_by_rose(lua_State *L) {
+	check_param_count(L, 3);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	check_param(L, PARAM_TYPE_CARD, 2);
+	check_param(L, PARAM_TYPE_CARD, 3);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	if(!(pcard->data.type & TYPE_XYZ))
+		return 0;
+	card* rcard = *(card**) lua_touserdata(L, 2);
+	card* mcard = *(card**) lua_touserdata(L, 3);
+	group* materials = pcard->pduel->new_group(rcard);
+	materials->container.insert(mcard);
+	uint32 p = pcard->pduel->game_field->core.reason_player;
+	pcard->pduel->game_field->core.limit_xyz = materials;
+	pcard->pduel->game_field->core.limit_xyz_minc = 2;
+	pcard->pduel->game_field->core.limit_xyz_maxc = 2;
+	pcard->pduel->game_field->rose_card = rcard;
+	pcard->pduel->game_field->rose_level = mcard->get_level();
+	int32 result = pcard->is_special_summonable(p, SUMMON_TYPE_XYZ);
+	pcard->pduel->game_field->rose_card = 0;
+	pcard->pduel->game_field->rose_level = 0;
+	lua_pushboolean(L, result);
+	return 1;
+}
+int32 scriptlib::card_get_removed_overlay_count(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	lua_pushinteger(L, pcard->removed_overlay_count);
+	return 1;
+}
+
 int32 scriptlib::card_get_code(lua_State *L) {
 	check_param_count(L, 1);
 	check_param(L, PARAM_TYPE_CARD, 1);
@@ -744,14 +867,14 @@ int32 scriptlib::card_get_summon_type(lua_State *L) {
 	check_param_count(L, 1);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**) lua_touserdata(L, 1);
-	lua_pushinteger(L, pcard->summon_info & 0xff00ffff);
+	lua_pushinteger(L, pcard->get_summon_info() & 0xff00ffff);
 	return 1;
 }
 int32 scriptlib::card_get_summon_location(lua_State *L) {
 	check_param_count(L, 1);
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**) lua_touserdata(L, 1);
-	lua_pushinteger(L, (pcard->summon_info >> 16) & 0xff);
+	lua_pushinteger(L, (pcard->get_summon_info() >> 16) & 0xff);
 	return 1;
 }
 int32 scriptlib::card_get_summon_player(lua_State *L) {
@@ -1060,7 +1183,7 @@ int32 scriptlib::card_is_summon_type(lua_State *L) {
 	check_param(L, PARAM_TYPE_CARD, 1);
 	card* pcard = *(card**)lua_touserdata(L, 1);
 	uint32 ttype = lua_tointeger(L, 2);
-	if(((pcard->summon_info & 0xff00ffff) & ttype) == ttype)
+	if(((pcard->get_summon_info() & 0xff00ffff) & ttype) == ttype)
 		lua_pushboolean(L, 1);
 	else
 		lua_pushboolean(L, 0);
@@ -2107,6 +2230,34 @@ int32 scriptlib::card_is_able_to_remove_as_cost(lua_State *L) {
 	card* pcard = *(card**) lua_touserdata(L, 1);
 	uint32 p = pcard->pduel->game_field->core.reason_player;
 	if(pcard->is_removeable_as_cost(p))
+		lua_pushboolean(L, 1);
+	else
+		lua_pushboolean(L, 0);
+	return 1;
+}
+int32 scriptlib::card_is_able_to_decrease_attack_as_cost(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	uint32 p = pcard->pduel->game_field->core.reason_player;
+	int32 val = 0;
+	if(lua_gettop(L) > 1)
+		val = lua_tointeger(L, 2);
+	if(pcard->is_attack_decreasable_as_cost(p, val))
+		lua_pushboolean(L, 1);
+	else
+		lua_pushboolean(L, 0);
+	return 1;
+}
+int32 scriptlib::card_is_able_to_decrease_defense_as_cost(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_CARD, 1);
+	card* pcard = *(card**) lua_touserdata(L, 1);
+	uint32 p = pcard->pduel->game_field->core.reason_player;
+	int32 val = 0;
+	if(lua_gettop(L) > 1)
+		val = lua_tointeger(L, 2);
+	if(pcard->is_defense_decreasable_as_cost(p, val))
 		lua_pushboolean(L, 1);
 	else
 		lua_pushboolean(L, 0);

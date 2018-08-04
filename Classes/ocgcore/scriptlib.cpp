@@ -65,7 +65,7 @@ int32 scriptlib::check_param_count(lua_State* L, int32 count) {
 }
 int32 scriptlib::check_action_permission(lua_State* L) {
 	duel* pduel = interpreter::get_duel_info(L);
-	if(pduel->lua->no_action)
+	if(pduel->lua->no_action && !pduel->lua->disable_action_check)
 		luaL_error(L, "Action is not allowed here.");
 	return TRUE;
 }

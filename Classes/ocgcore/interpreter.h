@@ -9,7 +9,7 @@
 #define INTERPRETER_H_
 
 extern "C" {
-#ifdef WIN32
+#if defined(WIN32) && !defined(YGOPRO_USE_YGOSHARP)
 #include <lua/lua.h>
 #include <lua/lauxlib.h>
 #include <lua/lualib.h>
@@ -44,6 +44,7 @@ public:
 	coroutine_map coroutines;
 	int32 no_action;
 	int32 call_depth;
+	int32 disable_action_check;
 
 	explicit interpreter(duel* pd);
 	~interpreter();

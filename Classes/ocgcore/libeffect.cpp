@@ -10,6 +10,40 @@
 #include "field.h"
 #include "card.h"
 #include "effect.h"
+int32 scriptlib::effect_set_owner(lua_State *L) {
+	check_param_count(L, 2);
+	check_param(L, PARAM_TYPE_EFFECT, 1);
+	check_param(L, PARAM_TYPE_CARD, 2);
+	effect* peffect = *(effect**) lua_touserdata(L, 1);
+	card* pcard = *(card**) lua_touserdata(L, 2);
+	peffect->owner = pcard;
+	return 0;
+}
+int32 scriptlib::effect_get_range(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_EFFECT, 1);
+	effect* peffect = *(effect**) lua_touserdata(L, 1);
+	if (peffect) {
+		lua_pushinteger(L, peffect->range);
+		return 1;
+	}
+	return 0;
+}
+int32 scriptlib::effect_get_count_limit(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_EFFECT, 1);
+	effect* peffect = *(effect**) lua_touserdata(L, 1);
+	uint32 args = 0;
+	if (peffect && (peffect->flag[0] & EFFECT_FLAG_COUNT_LIMIT)) {
+		args = args + 1;
+		lua_pushinteger(L, peffect->count_limit_max);
+		if (peffect->count_code) {
+			args = args + 1;
+			lua_pushinteger(L, peffect->count_code);			
+		}
+	}
+	return args;
+}
 
 int32 scriptlib::effect_new(lua_State *L) {
 	check_param_count(L, 1);
@@ -438,7 +472,11 @@ int32 scriptlib::effect_get_active_type(lua_State *L) {
 		if(peffect->active_type)
 			atype = peffect->active_type;
 		else if((peffect->type & EFFECT_TYPE_ACTIVATE) && (peffect->get_handler()->data.type & TYPE_PENDULUM))
+		{
 			atype = TYPE_PENDULUM + TYPE_SPELL;
+			if(peffect->is_flag(EFFECT_FLAG2_SPOSITCH))
+				atype |= TYPE_QUICKPLAY;
+		}
 		else
 			atype = peffect->get_handler()->get_type();
 	} else
@@ -456,7 +494,11 @@ int32 scriptlib::effect_is_active_type(lua_State *L) {
 		if(peffect->active_type)
 			atype = peffect->active_type;
 		else if((peffect->type & EFFECT_TYPE_ACTIVATE) && (peffect->get_handler()->data.type & TYPE_PENDULUM))
+		{
 			atype = TYPE_PENDULUM + TYPE_SPELL;
+			if(peffect->is_flag(EFFECT_FLAG2_SPOSITCH))
+				atype |= TYPE_QUICKPLAY;
+		}
 		else
 			atype = peffect->get_handler()->get_type();
 	} else

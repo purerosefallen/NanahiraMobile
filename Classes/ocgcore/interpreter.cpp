@@ -16,6 +16,15 @@
 #include "interpreter.h"
 
 static const struct luaL_Reg cardlib[] = {
+	//millux
+	{ "IsRitualType", scriptlib::card_is_ritual_type },
+	{ "SetEntityCode", scriptlib::card_set_entity_code },
+	{ "SetCardData", scriptlib::card_set_card_data },
+	{ "GetLinkMarker", scriptlib::card_get_link_marker },
+	{ "GetOriginalLinkMarker", scriptlib::card_get_origin_link_marker },
+	{ "IsXyzSummonableByRose", scriptlib::card_is_xyz_summonable_by_rose },
+	{ "GetRemovedOverlayCount", scriptlib::card_get_removed_overlay_count },
+	
 	{ "GetCode", scriptlib::card_get_code },
 	{ "GetOriginalCode", scriptlib::card_get_origin_code },
 	{ "GetOriginalCodeRule", scriptlib::card_get_origin_code_rule },
@@ -205,6 +214,8 @@ static const struct luaL_Reg cardlib[] = {
 	{ "IsAbleToDeckOrExtraAsCost", scriptlib::card_is_able_to_deck_or_extra_as_cost },
 	{ "IsAbleToGraveAsCost", scriptlib::card_is_able_to_grave_as_cost },
 	{ "IsAbleToRemoveAsCost", scriptlib::card_is_able_to_remove_as_cost },
+	{ "IsAbleToDecreaseAttackAsCost", scriptlib::card_is_able_to_decrease_attack_as_cost },
+	{ "IsAbleToDecreaseDefenseAsCost", scriptlib::card_is_able_to_decrease_defense_as_cost },
 	{ "IsReleasable", scriptlib::card_is_releasable },
 	{ "IsReleasableByEffect", scriptlib::card_is_releasable_by_effect },
 	{ "IsDiscardable", scriptlib::card_is_discardable },
@@ -270,6 +281,10 @@ static const struct luaL_Reg cardlib[] = {
 };
 
 static const struct luaL_Reg effectlib[] = {
+	{ "SetOwner", scriptlib::effect_set_owner },
+	{ "GetRange", scriptlib::effect_get_range },
+	{ "GetCountLimit", scriptlib::effect_get_count_limit },
+	
 	{ "CreateEffect", scriptlib::effect_new },
 	{ "GlobalEffect", scriptlib::effect_newex },
 	{ "Clone", scriptlib::effect_clone },
@@ -369,6 +384,16 @@ static const struct luaL_Reg grouplib[] = {
 };
 
 static const struct luaL_Reg duellib[] = {
+	{ "SelectField", scriptlib::duel_select_field },
+	{ "GetMasterRule", scriptlib::duel_get_master_rule },
+	{ "ReadCard", scriptlib::duel_read_card },
+	{ "Exile", scriptlib::duel_exile },
+	{ "DisableActionCheck", scriptlib::duel_disable_action_check },
+	{ "SetMetatable", scriptlib::duel_setmetatable },
+	{ "MoveTurnCount", scriptlib::duel_move_turn_count },
+	{ "GetCardsInZone", scriptlib::duel_get_cards_in_zone },
+	{ "XyzSummonByRose", scriptlib::duel_xyz_summon_by_rose },
+
 	{ "EnableGlobalFlag", scriptlib::duel_enable_global_flag },
 	{ "GetLP", scriptlib::duel_get_lp },
 	{ "SetLP", scriptlib::duel_set_lp },
@@ -600,15 +625,22 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	pduel = pd;
 	no_action = 0;
 	call_depth = 0;
+	disable_action_check = 0;
+
 	set_duel_info(lua_state, pd);
 	//Initial
 	luaL_openlibs(lua_state);
+	/*
 	lua_pushnil(lua_state);
 	lua_setglobal(lua_state, "file");
 	lua_pushnil(lua_state);
 	lua_setglobal(lua_state, "io");
 	lua_pushnil(lua_state);
 	lua_setglobal(lua_state, "os");
+	*/
+	//add bit lib back
+	lua_getglobal(lua_state, "bit32");
+	lua_setglobal(lua_state, "bit");
 	//open all libs
 	luaL_newlib(lua_state, cardlib);
 	lua_pushstring(lua_state, "__index");
@@ -632,6 +664,94 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	//extra scripts
 	load_script((char*) "./script/constant.lua");
 	load_script((char*) "./script/utility.lua");
+	load_script((char*) "./specials/special.lua");
+	//load kpro constant
+	//card data constants
+	lua_pushinteger(lua_state, CARDDATA_CODE);
+	lua_setglobal(lua_state, "CARDDATA_CODE");
+	lua_pushinteger(lua_state, CARDDATA_ALIAS);
+	lua_setglobal(lua_state, "CARDDATA_ALIAS");
+	lua_pushinteger(lua_state, CARDDATA_SETCODE);
+	lua_setglobal(lua_state, "CARDDATA_SETCODE");
+	lua_pushinteger(lua_state, CARDDATA_TYPE);
+	lua_setglobal(lua_state, "CARDDATA_TYPE");
+	lua_pushinteger(lua_state, CARDDATA_LEVEL);
+	lua_setglobal(lua_state, "CARDDATA_LEVEL");
+	lua_pushinteger(lua_state, CARDDATA_ATTRIBUTE);
+	lua_setglobal(lua_state, "CARDDATA_ATTRIBUTE");
+	lua_pushinteger(lua_state, CARDDATA_ATTRIBUTE);
+	lua_setglobal(lua_state, "CARDDATA_ATTRIBUTE");
+	lua_pushinteger(lua_state, CARDDATA_RACE);
+	lua_setglobal(lua_state, "CARDDATA_RACE");
+	lua_pushinteger(lua_state, CARDDATA_ATTACK);
+	lua_setglobal(lua_state, "CARDDATA_ATTACK");
+	lua_pushinteger(lua_state, CARDDATA_DEFENSE);
+	lua_setglobal(lua_state, "CARDDATA_DEFENSE");
+	lua_pushinteger(lua_state, CARDDATA_LSCALE);
+	lua_setglobal(lua_state, "CARDDATA_LSCALE");
+	lua_pushinteger(lua_state, CARDDATA_RSCALE);
+	lua_setglobal(lua_state, "CARDDATA_RSCALE");
+	lua_pushinteger(lua_state, CARDDATA_LINK_MARKER);
+	lua_setglobal(lua_state, "CARDDATA_LINK_MARKER");
+	//effect flag2s
+	lua_pushinteger(lua_state, EFFECT_FLAG2_SPOSITCH);
+	lua_setglobal(lua_state, "EFFECT_FLAG2_SPOSITCH");
+	//effects
+	lua_pushinteger(lua_state, EFFECT_CHANGE_LINK_MARKER_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_CHANGE_LINK_MARKER_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_ADD_LINK_MARKER_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_ADD_LINK_MARKER_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_REMOVE_LINK_MARKER_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_REMOVE_LINK_MARKER_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_CANNOT_LOSE_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_CANNOT_LOSE_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_EXTRA_TOMAIN_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_EXTRA_TOMAIN_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_OVERLAY_REMOVE_COST_CHANGE_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_OVERLAY_REMOVE_COST_CHANGE_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_ALLOW_SYNCHRO_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_ALLOW_SYNCHRO_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_MINIATURE_GARDEN_GIRL);
+	lua_setglobal(lua_state, "EFFECT_MINIATURE_GARDEN_GIRL");
+	lua_pushinteger(lua_state, EFFECT_ADD_SUMMON_TYPE_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_ADD_SUMMON_TYPE_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_REMOVE_SUMMON_TYPE_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_REMOVE_SUMMON_TYPE_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_CHANGE_SUMMON_TYPE_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_CHANGE_SUMMON_TYPE_KOISHI");
+	lua_pushinteger(lua_state, EFFECT_CHANGE_SUMMON_LOCATION_KOISHI);
+	lua_setglobal(lua_state, "EFFECT_CHANGE_SUMMON_LOCATION_KOISHI");
+	//music hints
+	lua_pushinteger(lua_state, HINT_MUSIC);
+	lua_setglobal(lua_state, "HINT_MUSIC");
+	lua_pushinteger(lua_state, HINT_SOUND);
+	lua_setglobal(lua_state, "HINT_SOUND");
+	lua_pushinteger(lua_state, HINT_MUSIC_OGG);
+	lua_setglobal(lua_state, "HINT_MUSIC_OGG");
+	//detect operating system
+#ifdef _WIN32
+	lua_pushboolean(lua_state, 1);
+	lua_setglobal(lua_state, "_WIN32");
+#endif
+	//load init.lua by MLD
+	load_script((char*) "./expansions/script/init.lua");
+	//nef
+	if(!load_script((char*) "./expansions/script/nef/afi.lua"))
+		load_script((char*) "./script/nef/afi.lua");
+	if(!load_script((char*) "./expansions/script/nef/cardList.lua"))
+		load_script((char*) "./script/nef/cardList.lua");
+	if(!load_script((char*) "./expansions/script/nef/nef.lua"))
+		load_script((char*) "./script/nef/nef.lua");
+	if(!load_script((char*) "./expansions/script/nef/elf.lua"))
+		load_script((char*) "./script/nef/elf.lua");
+	if(!load_script((char*) "./expansions/script/nef/ets.lua"))
+		load_script((char*) "./script/nef/ets.lua");
+	if(!load_script((char*) "./expansions/script/nef/fus.lua"))
+		load_script((char*) "./script/nef/fus.lua");
+	if(!load_script((char*) "./expansions/script/nef/msc.lua"))
+		load_script((char*) "./script/nef/msc.lua");
+	if(!load_script((char*) "./expansions/script/nef/uds.lua"))
+		load_script((char*) "./script/nef/uds.lua");
 }
 interpreter::~interpreter() {
 	lua_close(lua_state);
@@ -744,14 +864,20 @@ int32 interpreter::load_card_script(uint32 code) {
 		lua_pushstring(current_state, "__index");
 		lua_pushvalue(current_state, -2);
 		lua_rawset(current_state, -3);
-		//load extra scripts
-		sprintf(script_name, "./expansions/script/c%d.lua", code);
+		//load special and extra scripts first
+		sprintf(script_name, "./specials/c%d.lua", code);
 		if (!load_script(script_name)) {
-			sprintf(script_name, "./script/c%d.lua", code);
-	 		if (!load_script(script_name)) {
-	 			return OPERATION_FAIL;
- 			}
-  		}
+			sprintf(script_name, "./beta/script/c%d.lua", code);
+			if (!load_script(script_name)) {
+				sprintf(script_name, "./expansions/script/c%d.lua", code);
+				if (!load_script(script_name)) {
+					sprintf(script_name, "./script/c%d.lua", code);
+					if (!load_script(script_name)) {
+						return OPERATION_FAIL;
+					}
+				}
+			}
+		}
 	}
 	return OPERATION_SUCCESS;
 }
@@ -919,9 +1045,16 @@ int32 interpreter::call_code_function(uint32 code, char* f, uint32 param_count, 
 		params.clear();
 		return OPERATION_FAIL;
 	}
-	load_card_script(code);
+	if (code)
+		load_card_script(code);
+	else
+		lua_getglobal(current_state, "Auxiliary");
 	lua_getfield(current_state, -1, f);
 	if (!lua_isfunction(current_state, -1)) {
+		if(!code) {
+			params.clear();
+			return OPERATION_FAIL;
+		}
 		sprintf(pduel->strbuffer, "\"CallCodeFunction\": attempt to call an error function");
 		handle_message(pduel, 1);
 		lua_pop(current_state, 2);

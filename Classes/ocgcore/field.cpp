@@ -109,9 +109,6 @@ field::field(duel* pduel) {
 	nil_event.reason = 0;
 	nil_event.reason_effect = 0;
 	nil_event.reason_player = PLAYER_NONE;
-#ifdef _IRR_ANDROID_PLATFORM_
-	memset(&returns, 0, sizeof(return_value));
-#endif
 }
 field::~field() {
 
@@ -581,7 +578,7 @@ int32 field::get_useable_count_fromex(card* pcard, uint8 playerid, uint8 uplayer
 		pcard->current.location = LOCATION_EXTRA;
 	}
 	int32 useable_count = 0;
-	if(core.duel_rule >= 4)
+	if(core.duel_rule >= 4 && !is_player_affected_by_effect(playerid, EFFECT_EXTRA_TOMAIN_KOISHI) && !pcard->is_affected_by_effect(EFFECT_EXTRA_TOMAIN_KOISHI))
 		useable_count = get_useable_count_fromex_rule4(pcard, playerid, uplayer, zone, list);
 	else
 		useable_count = get_useable_count_other(pcard, playerid, LOCATION_MZONE, uplayer, LOCATION_REASON_TOFIELD, zone, list);
@@ -1784,13 +1781,13 @@ int32 field::get_draw_count(uint8 playerid) {
 void field::get_ritual_material(uint8 playerid, effect* peffect, card_set* material) {
 	for(auto cit = player[playerid].list_mzone.begin(); cit != player[playerid].list_mzone.end(); ++cit) {
 		card* pcard = *cit;
-		if(pcard && pcard->get_level() && pcard->is_affect_by_effect(peffect)
+		if(pcard && (pcard->get_level() || pcard->is_affected_by_effect(EFFECT_MINIATURE_GARDEN_GIRL)) && pcard->is_affect_by_effect(peffect)
 		        && pcard->is_releasable_by_nonsummon(playerid) && pcard->is_releasable_by_effect(playerid, peffect))
 			material->insert(pcard);
 	}
 	for(auto cit = player[1 - playerid].list_mzone.begin(); cit != player[1 - playerid].list_mzone.end(); ++cit) {
 		card* pcard = *cit;
-		if(pcard && pcard->get_level() && pcard->is_affect_by_effect(peffect)
+		if(pcard && (pcard->get_level() || pcard->is_affected_by_effect(EFFECT_MINIATURE_GARDEN_GIRL)) && pcard->is_affect_by_effect(peffect)
 		        && pcard->is_affected_by_effect(EFFECT_EXTRA_RELEASE)
 		        && pcard->is_releasable_by_nonsummon(playerid) && pcard->is_releasable_by_effect(playerid, peffect))
 			material->insert(pcard);
@@ -3231,13 +3228,32 @@ int32 field::is_player_can_remove_counter(uint8 playerid, card * pcard, uint8 s,
 	return FALSE;
 }
 int32 field::is_player_can_remove_overlay_card(uint8 playerid, card * pcard, uint8 s, uint8 o, uint16 min, uint32 reason) {
-	if((pcard && pcard->xyz_materials.size() >= min) || (!pcard && get_overlay_count(playerid, s, o) >= min))
+	int32 minc = min;
+	effect_set eset;
+	filter_player_effect(playerid, EFFECT_OVERLAY_REMOVE_COST_CHANGE_KOISHI, &eset);
+	for(int32 i = 0; i < eset.size(); ++i) {
+		pduel->lua->add_param(core.reason_effect, PARAM_TYPE_EFFECT);
+		pduel->lua->add_param(playerid, PARAM_TYPE_INT);
+		pduel->lua->add_param(minc, PARAM_TYPE_INT);
+		pduel->lua->add_param(reason, PARAM_TYPE_INT);
+		int32 param_count;
+		if(pcard) {
+			pduel->lua->add_param(pcard, PARAM_TYPE_CARD);
+			param_count = 5;
+		} else {
+			pduel->lua->add_param(s, PARAM_TYPE_INT);
+			pduel->lua->add_param(o, PARAM_TYPE_INT);
+			param_count = 6;
+		}
+		minc = eset[i]->get_value(param_count);
+	}
+	if((pcard && pcard->xyz_materials.size() >= minc) || (!pcard && get_overlay_count(playerid, s, o) >= minc))
 		return TRUE;
 	auto pr = effects.continuous_effect.equal_range(EFFECT_OVERLAY_REMOVE_REPLACE);
 	tevent e;
 	e.event_cards = 0;
 	e.event_player = playerid;
-	e.event_value = min;
+	e.event_value = minc;
 	e.reason = reason;
 	e.reason_effect = core.reason_effect;
 	e.reason_player = playerid;
