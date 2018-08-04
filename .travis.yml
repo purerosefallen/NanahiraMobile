@@ -1,12 +1,101 @@
-language: cpp
+language: android 
+sudo: false
+addons:
+  apt:
+    packages:
+      - imagemagick
+      - p7zip-full
+android:
+  update_sdk: true
+  components:
+  - platform-tools
+  - tools
+  - build-tools-27.0.3
+  - android-27
+  - extra-google-m2repository
+  - extra-android-m2repository
+
+cache:
+  directories:
+    - $HOME/.gradle
+    - $HOME/.android
+    - $ANDROID_HOME
+    - android-ndk-r15b
+    - .gradle
+    - .idea
+    - mobile/build
+    - libcore/build
+    - libcore/libs
+    - libcore/obj
+before_cache:
+  - find . -name *.lock -print | xargs -I {} -P 4 rm -rf {}
+  - find $HOME/.gradle -name *.lock -print | xargs -I {} -P 4 rm -rf {}
+  - find $HOME/.android -name *.lock -print | xargs -I {} -P 4 rm -rf {}
+
+env:
+- QUALITY=50 LIBWINDBOT_VERSION=0.2
+
+before_install:
+- git submodule update --init --recursive
+
+- yes | sdkmanager --update
+- yes | sdkmanager --licenses
+
+- if [[ ! -f "android-ndk-r15b/ndk-build" ]]; then
+    curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://dl.google.com/android/repository/android-ndk-r15b-linux-x86_64.zip;
+    7z x -y android-ndk-r15b-linux-x86_64.zip > /dev/null;
+  fi
+  
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/mercury233/libWindbot/releases/download/$LIBWINDBOT_VERSION/libWindbot.aar
+- mv -f libWindbot.aar mobile/libs/
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro/archive/master.zip
+- 7z x -y ygopro-master.zip > /dev/null
+- mv -f ygopro-master/cards.cdb mobile/assets/data
+- mv -f ygopro-master/strings.conf mobile/assets/data/conf
+- mv -f ygopro-master/lflist.conf mobile/assets/data/conf
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
+- 7z x -y ygopro222-images-master.zip > /dev/null
+- mv -f ygopro222-images-master pics
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/archive/master.zip
+- 7z x -y windbot-master.zip > /dev/null
+- mv -f windbot-master/BotWrapper/bot.conf mobile/assets/data/conf
+- mkdir mobile/assets/data/windbot
+- mv -f windbot-master/Decks mobile/assets/data/windbot
+- mv -f windbot-master/Dialogs mobile/assets/data/windbot
+
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
+- 7z x -y ygopro-starter-pack-master.zip > /dev/null
+- cp -rf ygopro-starter-pack-master/* mobile/assets/data
+
+- rm -rf pics/thumbnail pics/*.db
+- cd pics && ls *.jpg | xargs -I {} -P 4 convert -size 177x254! -quality $QUALITY {} {} && cd ..
+
+- mv -f Classes/script .
+- 7z a -mx0 -xr!.git* mobile/assets/data/pics.zip pics > /dev/null
+- 7z a -mx0 -xr!.git* mobile/assets/data/scripts.zip script > /dev/null
+
+- cp -rf tools/Application.mk libcore/jni
+- cp -rf tools/*.png mobile/src/main/res/drawable
+
+- chmod 777 ./gradlew
 
 script:
-- mkdir importion
-- cd importion
-- git init
-- echo $KEYSTORE_PASS > KEYSTORE_PASS.txt
-- echo $ALIAS_NAME > ALIAS_NAME.txt
-- echo $ALIAS_PASS > ALIAS_PASS.txt
-- git add .
-- git commit -m "That's all."
-- git push https://$NANAHIRA@github.com/purerosefallen/YGOMobile-importion master -f -u
+- cd libcore && ./../android-ndk-r15b/ndk-build -j8 && cd ..
+- ./gradlew :mobile:assembleMycardRelease
+
+before_deploy:
+- mv -f ./mobile/build/outputs/apk/mycard/release/mobile-mycard-release.apk ./KoishiMobile-$TRAVIS_TAG.apk
+- mv -f ./mobile/build/outputs/apk/mycard/release/output.json ./output-$TRAVIS_TAG.json
+
+deploy:
+  provider: releases
+  api-key: $NANAHIRA
+  file: 
+  - KoishiMobile-$TRAVIS_TAG.apk
+  - output-$TRAVIS_TAG.json
+  skip_cleanup: true
+  on:
+    tags: true
