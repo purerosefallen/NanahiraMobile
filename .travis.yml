@@ -36,8 +36,6 @@ env:
 - QUALITY=50 LIBWINDBOT_VERSION=0.2
 
 before_install:
-- git submodule update --init --recursive
-
 - yes | sdkmanager --update
 - yes | sdkmanager --licenses
 
@@ -87,14 +85,14 @@ script:
 - ./gradlew :mobile:assembleMycardRelease
 
 before_deploy:
-- mv -f ./mobile/build/outputs/apk/mycard/release/mobile-mycard-release.apk ./KoishiMobile-$TRAVIS_TAG.apk
+- mv -f ./mobile/build/outputs/apk/mycard/release/mobile-mycard-release.apk ./NanahiraMobile-$TRAVIS_TAG.apk
 - mv -f ./mobile/build/outputs/apk/mycard/release/output.json ./output-$TRAVIS_TAG.json
 
 deploy:
   provider: releases
   api-key: $NANAHIRA
   file: 
-  - KoishiMobile-$TRAVIS_TAG.apk
+  - NanahiraMobile-$TRAVIS_TAG.apk
   - output-$TRAVIS_TAG.json
   skip_cleanup: true
   on:
