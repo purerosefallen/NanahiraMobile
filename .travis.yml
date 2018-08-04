@@ -57,13 +57,6 @@ before_install:
 - 7z x -y ygopro222-images-master.zip > /dev/null
 - mv -f ygopro222-images-master pics
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/windbot/archive/master.zip
-- 7z x -y windbot-master.zip > /dev/null
-- mv -f windbot-master/BotWrapper/bot.conf mobile/assets/data/conf
-- mkdir mobile/assets/data/windbot
-- mv -f windbot-master/Decks mobile/assets/data/windbot
-- mv -f windbot-master/Dialogs mobile/assets/data/windbot
-
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
 - 7z x -y ygopro-starter-pack-master.zip > /dev/null
 - cp -rf ygopro-starter-pack-master/* mobile/assets/data
