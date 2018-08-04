@@ -45,7 +45,10 @@ obj/
 libYGOMobile.so
 /mobile/assets/data/scripts.zip
 /mobile/assets/data/pics.zip
+/mobile/assets/data/pics.zip
 /mobile/assets/*.cdb
+/mobile/assets/data/*.cdb
+/mobile/assets/data/deck
 /pics
 /script
 /*.zip
