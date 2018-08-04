@@ -1441,24 +1441,31 @@ void ClientField::UpdateDeclarableCode(bool enter) {
 		UpdateDeclarableCodeOpcode(enter);
 }
 void ClientField::RefreshCardCountDisplay() {
+	ClientCard* pcard;
 	for(int p = 0; p < 2; ++p) {
 		mainGame->dInfo.card_count[p] = hand[p].size();
 		for(auto it = mzone[p].begin(); it != mzone[p].end(); ++it) {
-			if(*it)
-				mainGame->dInfo.card_count[p]++;
+			pcard = *it;
+			if(pcard) {
+				if(pcard->type & TYPE_LINK && pcard->link)
+					mainGame->dInfo.card_count[p] += pcard->link;
+				else
+					mainGame->dInfo.card_count[p]++;
+			}
 		}
 		for(auto it = szone[p].begin(); it != szone[p].end(); ++it) {
-			if(*it)
+			pcard = *it;
+			if(pcard)
 				mainGame->dInfo.card_count[p]++;
 		}
 		myswprintf(mainGame->dInfo.str_card_count[p], L"%d", mainGame->dInfo.card_count[p]);
 	}
 	if(mainGame->dInfo.card_count[0] > mainGame->dInfo.card_count[1]) {
 		mainGame->dInfo.card_count_color[0] = 0xffffff00;
-		mainGame->dInfo.card_count_color[1] = 0xffff2a00;
+		mainGame->dInfo.card_count_color[1] = 0xffff0000;
 	} else if(mainGame->dInfo.card_count[1] > mainGame->dInfo.card_count[0]) {
 		mainGame->dInfo.card_count_color[1] = 0xffffff00;
-		mainGame->dInfo.card_count_color[0] = 0xffff2a00;
+		mainGame->dInfo.card_count_color[0] = 0xffff0000;
 	} else {
 		mainGame->dInfo.card_count_color[0] = 0xffffffff;
 		mainGame->dInfo.card_count_color[1] = 0xffffffff;
