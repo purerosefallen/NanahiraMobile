@@ -236,7 +236,7 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
                 startActivity(new Intent(this, DeckManagerActivity.getDeckManager()));
                 break;
             case R.id.action_join_qq_group:
-                String key = "dRkD2L9QgYiYmQoqJUgkR4QUth9UhuT4";
+                String key = "LqrY0AY-8NoMiAaRDymk5jIxFyU_MFSp";
                 joinQQGroup(key);
                 break;
             case R.id.action_help: {
