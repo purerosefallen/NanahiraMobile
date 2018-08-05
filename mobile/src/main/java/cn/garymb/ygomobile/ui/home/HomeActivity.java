@@ -106,7 +106,7 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
         QbSdk.initX5Environment(this,  cb);
 
         //trpay
-        TrPay.getInstance(HomeActivity.this).initPaySdk("e1014da420ea4405898c01273d6731b6", "YGOMobile");
+        //TrPay.getInstance(HomeActivity.this).initPaySdk("1111", "YGOMobile");
         //autoupadte checking
         checkForceUpdateSilent();
         //ServiceDuelAssistant
@@ -194,7 +194,9 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
                     //               startActivity(intent);
                 });
                 btnwechat.setOnClickListener((v) -> {
-                    AlipayPayUtils.inputMoney(HomeActivity.this);
+                    Uri uri = Uri.parse("https://afdian.net/@koishi");
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
                     dialog.dismiss();
                 });
                 btnpaypal.setOnClickListener((v) -> {
