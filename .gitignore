@@ -37,7 +37,7 @@ captures/
 .idea/workspace.xml
 
 # Keystore files
-*.jks
+# *.jks
 .idea/
 .externalNativeBuild/
 build/
