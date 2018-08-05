@@ -3,29 +3,43 @@
     <version>2</version>
     <server>
         <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO 222DIY</name>
-        <ip>koishi.ygopro.win</ip>
-        <port>222</port>
-        <keep>true</keep>
-    </server>
-	<server>
-        <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO 7210srv</name>
-        <ip>koishi.ygopro.win</ip>
+        <name>YGOPRO Koishi Server</name>
+        <ip>119.23.146.219</ip>
         <port>7210</port>
         <keep>true</keep>
     </server>
-	<server>
+    <server>
         <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO 7210srv TCG</name>
-        <ip>koishi.ygopro.win</ip>
+        <name>YGOPRO 222DIY</name>
+        <ip>119.23.146.219</ip>
+        <port>222</port>
+        <keep>true</keep>
+    </server>
+    <server>
+        <player-name>Komeiji Koishi</player-name>
+        <name>YGOPRO Koishi Server TCG</name>
+        <ip>119.23.146.219</ip>
         <port>1311</port>
         <keep>true</keep>
     </server>
-	<server>
+    <server>
+        <player-name>Komeiji Koishi</player-name>
+        <name>YGOPRO Nanahira Server</name>
+        <ip>213.159.202.230</ip>
+        <port>7210</port>
+        <keep>true</keep>
+    </server>
+    <server>
+        <player-name>Komeiji Koishi</player-name>
+        <name>YGOPRO 222DIY Backup</name>
+        <ip>213.159.202.230</ip>
+        <port>222</port>
+        <keep>true</keep>
+    </server>
+    <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO THC</name>
-        <ip>koishi.ygopro.win</ip>
+        <ip>119.23.146.219</ip>
         <port>666</port>
         <keep>true</keep>
     </server>
