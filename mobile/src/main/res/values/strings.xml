@@ -72,7 +72,7 @@
     <string name="settings_game_immersive_mode">Immersive Mode</string>
     <string name="settings_game_opengl">OpenGL</string>
     <string name="settings_game_avatar">Game Avatar</string>
-    <string name="settings_author" translatable="false">菜菜、暗星</string>
+    <string name="settings_author" translatable="false">菜菜、暗星、Nanahira</string>
     <string name="restart_app">"Please restart app！"</string>
     <string-array name="opengl_version">
         <item>OpenGL ES 1.X</item>
