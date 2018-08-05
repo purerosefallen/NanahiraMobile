@@ -49,7 +49,7 @@ libYGOMobile.so
 /mobile/assets/*.cdb
 /mobile/assets/data/*.cdb
 /mobile/assets/data/deck
-/pics
+/pics*
 /script
 /*.zip
 /*.cdb
