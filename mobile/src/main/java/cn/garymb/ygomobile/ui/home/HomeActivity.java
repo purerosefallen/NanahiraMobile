@@ -394,11 +394,13 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
     }
 
     public void checkForceUpdateSilent() {
+/*
         new PgyUpdateManager.Builder()
                 .setForced(false)                //设置是否强制更新
                 .setUserCanRetry(false)         //失败后是否提示重新下载
                 .setDeleteHistroyApk(true)     // 检查更新前是否删除本地历史 Apk
                 .register();
+*/
     }
 
     public void AnimationShake() {
