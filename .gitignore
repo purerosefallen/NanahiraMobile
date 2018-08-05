@@ -60,4 +60,4 @@ libYGOMobile.so
 Thumbs.db
 
 /android-ndk*
-/install.sh
+/*.sh
