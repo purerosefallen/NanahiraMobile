@@ -198,7 +198,7 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
                     dialog.dismiss();
                 });
                 btnpaypal.setOnClickListener((v) -> {
-                    Uri uri = Uri.parse("https://www.paypal.me/YGOmobile3");
+                    Uri uri = Uri.parse("https://www.paypal.me/sekkananahira");
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
                     dialog.dismiss();
