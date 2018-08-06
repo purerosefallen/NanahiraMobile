@@ -2380,7 +2380,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		int cs = BufferIO::ReadInt8(pbuf);
 		int cp = BufferIO::ReadInt8(pbuf);
 		int reason = BufferIO::ReadInt32(pbuf);
-		if (reason &= REASON_DESTROY) {
+		if (!mainGame->dInfo.isReplaySkiping && reason & REASON_DESTROY && pl != cl) {
 			mainGame->soundEffectPlayer->doDestroyEffect();
 		}
 		if (pl == 0) {
