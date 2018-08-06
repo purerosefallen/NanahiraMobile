@@ -1683,6 +1683,8 @@ int32 field::process_point_event(int16 step, int32 skip_trigger, int32 skip_free
 		for (auto clit = core.new_fchain_s.begin(); clit != core.new_fchain_s.end(); ) {
 			effect* peffect = clit->triggering_effect;
 			card* phandler = peffect->get_handler();
+			if(phandler->is_has_relation(*clit))
+				clit->set_triggering_place(phandler);
 			uint8 tp = clit->triggering_player;
 			bool act = true;
 			if(!peffect->is_flag(EFFECT_FLAG_FIELD_ONLY)
@@ -1746,6 +1748,8 @@ int32 field::process_point_event(int16 step, int32 skip_trigger, int32 skip_free
 		for (auto clit = core.new_ochain_s.begin(); clit != core.new_ochain_s.end(); ) {
 			effect* peffect = clit->triggering_effect;
 			card* phandler = peffect->get_handler();
+			if(phandler->is_has_relation(*clit))
+				clit->set_triggering_place(phandler);
 			if(!peffect->is_flag(EFFECT_FLAG_FIELD_ONLY) && (peffect->type & EFFECT_TYPE_FIELD)
 				&& (peffect->range & LOCATION_HAND) && phandler->current.location == LOCATION_HAND) {
 				if(!phandler->is_has_relation(*clit))
@@ -4022,8 +4026,6 @@ int32 field::process_turn(uint16 step, uint8 turn_player) {
 			tag_swap(turn_player);
 		if(is_player_affected_by_effect(infos.turn_player, EFFECT_SKIP_TURN)) {
 			core.units.begin()->step = 17;
-			reset_phase(PHASE_DRAW);
-			reset_phase(PHASE_STANDBY);
 			reset_phase(PHASE_END);
 			adjust_all();
 			return FALSE;
