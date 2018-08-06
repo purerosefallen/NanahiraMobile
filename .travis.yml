@@ -66,9 +66,6 @@ before_install:
 - 7z a -mx0 -xr!.git* mobile/assets/data/pics.zip pics > /dev/null
 - 7z a -mx0 -xr!.git* mobile/assets/data/scripts.zip script > /dev/null
 
-- cp -rf tools/Application.mk libcore/jni
-- cp -rf tools/*.png mobile/src/main/res/drawable
-
 - chmod 777 ./gradlew
 
 script:
