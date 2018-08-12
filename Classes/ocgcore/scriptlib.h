@@ -13,6 +13,7 @@
 
 class scriptlib {
 public:
+	static int32 check_data_type(lua_State* L, int32 index, const char* tname);
 	static int32 check_param(lua_State* L, int32 param_type, int32 index, BOOL retfalse = FALSE);
 	static int32 check_param_count(lua_State* L, int32 count);
 	static int32 check_action_permission(lua_State* L);
@@ -36,6 +37,7 @@ public:
 	static int32 duel_move_turn_count(lua_State *L);
 	static int32 duel_get_cards_in_zone(lua_State *L);
 	static int32 duel_xyz_summon_by_rose(lua_State *L);
+	static int32 duel_load_script(lua_State *L);
 	//card lib
 	static int32 card_get_code(lua_State *L);
 	static int32 card_get_origin_code(lua_State *L);

@@ -1361,9 +1361,6 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->dField.select_options.push_back(BufferIO::ReadInt32(pbuf));
 		mainGame->dField.ShowSelectOption(select_hint);
 		select_hint = 0;
-		mainGame->wOptions->setText(textBuffer);
-		mainGame->PopupElement(mainGame->wOptions);
-		mainGame->gMutex.Unlock();
 		return false;
 	}
 	case MSG_SELECT_CARD: {
@@ -3384,13 +3381,13 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		list<IGUIElement*> children = mainGame->wANRace->getChildren();
 		int count = children.size();
 		int i = 0;
-		int filter = 0x1;//ÊôÐÔÖÖ×åÐûÑÔfixme
+		int filter = 0x1;//å±žæ€§ç§æ—å®£è¨€fixme
 		list<IGUIElement*>::Iterator current = children.begin();
 		contents = (char **) malloc(count * sizeof(char *));
 		do {
 			if ((*current)->getType() == EGUIET_CHECK_BOX) {
 				content = (char *) malloc(256 * 4);
-				if (filter & available) {//ÊôÐÔÖÖ×åÐûÑÔfixme
+				if (filter & available) {//å±žæ€§ç§æ—å®£è¨€fixme
 				BufferIO::EncodeUTF8(((IGUICheckBox*) (*current))->getText(),
 						content);
 				}
@@ -3437,13 +3434,13 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		list<IGUIElement*> children = mainGame->wANAttribute->getChildren();
 		int count = children.size();
 		int i = 0;
-		int filter = 0x1;//ÊôÐÔÖÖ×åÐûÑÔfixme
+		int filter = 0x1;
 		list<IGUIElement*>::Iterator current = children.begin();
 		contents = (char **) malloc(count * sizeof(char *));
 		do {
 			if ((*current)->getType() == EGUIET_CHECK_BOX) {
 				content = (char *) malloc(256 * 4);
-				if (filter & available) {//ÊôÐÔÖÖ×åÐûÑÔfixme
+				if (filter & available) {
 				BufferIO::EncodeUTF8(((IGUICheckBox*) (*current))->getText(),
 						content);
 				}

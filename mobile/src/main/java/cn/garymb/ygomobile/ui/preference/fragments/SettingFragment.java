@@ -184,6 +184,7 @@ public class SettingFragment extends PreferenceFragmentPlus {
                         public void onNoUpdateAvailable() {
                             Toast.makeText(getContext(), R.string.Already_Lastest, Toast.LENGTH_SHORT).show();
                         }
+
                         @Override
                         public void onUpdateAvailable(AppBean appBean) {
                             PgyUpdateManager.downLoadApk(appBean.getDownloadURL());

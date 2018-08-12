@@ -8,8 +8,8 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 33030723
-        versionName "3.3.3-Koishi"
+        versionCode 33030810
+        versionName "3.3.4-Koishi"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -21,11 +21,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     productFlavors {
-        core {
-            applicationIdSuffix ""
+        cn {}
+        en {
+            applicationIdSuffix ".EN"
         }
-        mycard {
-
+        ko {
+            applicationIdSuffix ".KO"
         }
         signingConfigs {
             releaseConfig {
@@ -53,6 +54,13 @@ android {
         main {
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
+        }
+        cn {}
+        en {
+            assets.srcDirs = ['assets_en']
+        }
+        ko {
+            assets.srcDirs = ['assets_ko']
         }
     }
     lintOptions {

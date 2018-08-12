@@ -43,14 +43,21 @@ captures/
 build/
 obj/
 libYGOMobile.so
+/mobile/assets/*.cdb
 /mobile/assets/data/scripts.zip
 /mobile/assets/data/pics.zip
-/mobile/assets/data/pics.zip
-/mobile/assets/*.cdb
 /mobile/assets/data/*.cdb
 /mobile/assets/data/deck
 /pics*
 /script
+/mobile/assets_ko/data/*.cdb
+/mobile/assets_ko/data/scripts.zip
+/mobile/assets_ko/data/pics.zip
+/mobile/assets_ko/data/deck
+/mobile/assets_en/data/*.cdb
+/mobile/assets_en/data/scripts.zip
+/mobile/assets_en/data/pics.zip
+/mobile/assets_en/data/deck
 /*.zip
 /*.cdb
 *.orig
@@ -61,3 +68,4 @@ Thumbs.db
 
 /android-ndk*
 /*.sh
+

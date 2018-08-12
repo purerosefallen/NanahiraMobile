@@ -118,7 +118,6 @@ public:
 	void UpdateDeclarableCodeType(bool enter);
 	void UpdateDeclarableCodeOpcode(bool enter);
 	void UpdateDeclarableCode(bool enter);
-
 	void RefreshCardCountDisplay();
 
 	irr::gui::IGUIElement* panel;

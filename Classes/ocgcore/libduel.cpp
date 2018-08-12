@@ -197,6 +197,16 @@ int32 scriptlib::duel_xyz_summon_by_rose(lua_State *L) {
 	pduel->game_field->special_summon_rule(playerid, pcard, SUMMON_TYPE_XYZ);
 	return lua_yield(L, 0);
 }
+int32 scriptlib::duel_load_script(lua_State *L) {
+	check_param_count(L, 1);
+	check_param(L, PARAM_TYPE_STRING, 1);
+	duel* pduel = interpreter::get_duel_info(L); 
+	const char* pstr = lua_tostring(L, 1);
+	char filename[64];
+	sprintf(filename, "./script/%s", pstr);
+	lua_pushboolean(L, pduel->lua->load_script((char*) filename));
+	return 1;
+}
 
 int32 scriptlib::duel_enable_global_flag(lua_State *L) {
 	check_param_count(L, 1);
