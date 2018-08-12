@@ -73,8 +73,8 @@ script:
 - ./gradlew :mobile:assembleMycardRelease
 
 before_deploy:
-- mv -f ./mobile/build/outputs/apk/mycard/release/mobile-mycard-release.apk ./NanahiraMobile-$TRAVIS_TAG.apk
-- mv -f ./mobile/build/outputs/apk/mycard/release/output.json ./output-$TRAVIS_TAG.json
+- mv -f ./mobile/build/outputs/apk/cn/release/mobile-cn-release.apk ./NanahiraMobile-$TRAVIS_TAG.apk
+- mv -f ./mobile/build/outputs/apk/cn/release/output.json ./output-$TRAVIS_TAG.json
 
 deploy:
   provider: releases
