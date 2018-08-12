@@ -70,7 +70,7 @@ before_install:
 
 script:
 - cd libcore && ./../android-ndk-r15b/ndk-build -j8 && cd ..
-- ./gradlew :mobile:assembleMycardRelease
+- ./gradlew :mobile:assembleCnRelease
 
 before_deploy:
 - mv -f ./mobile/build/outputs/apk/cn/release/mobile-cn-release.apk ./NanahiraMobile-$TRAVIS_TAG.apk
