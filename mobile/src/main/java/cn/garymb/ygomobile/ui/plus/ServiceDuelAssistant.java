@@ -23,6 +23,7 @@ import java.io.InputStream;
 import cn.garymb.ygomobile.Constants;
 import cn.garymb.ygomobile.bean.ServerInfo;
 import cn.garymb.ygomobile.bean.ServerList;
+import cn.garymb.ygomobile.lite.BuildConfig;
 import cn.garymb.ygomobile.lite.R;
 import cn.garymb.ygomobile.ui.adapters.ServerListAdapter;
 import cn.garymb.ygomobile.ui.home.ServerListManager;
@@ -194,7 +195,7 @@ public class ServiceDuelAssistant extends Service {
         intent1.putExtra("port", dk);
         intent1.putExtra("user", name);
         intent1.putExtra("room", password);
-        intent1.setPackage("cn.garymb.ygomobile.koishi");
+        intent1.setPackage(BuildConfig.APPLICATION_ID);
         intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent1);
     }
