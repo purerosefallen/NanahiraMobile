@@ -61,7 +61,10 @@ before_install:
 - cp -rf ygopro-starter-pack-master/* mobile/assets/data
 
 - rm -rf pics/thumbnail pics/*.db
-- cd pics && ls *.jpg | xargs -I {} -P 4 convert -size 177x254! -quality $QUALITY {} {} && cd ..
+- cd pics
+- ls *.jpg | xargs -I {} convert {} -size 177x254! {}
+- ls *.jpg | xargs -I {} convert {} -quality $QUALITY {}
+- cd ..
 
 - 7z a -mx0 -xr!.git* mobile/assets/data/pics.zip pics > /dev/null
 - 7z a -mx0 -xr!.git* mobile/assets/data/scripts.zip script > /dev/null
