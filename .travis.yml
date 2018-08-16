@@ -62,8 +62,7 @@ before_install:
 
 - rm -rf pics/thumbnail pics/*.db
 - cd pics
-- ls *.jpg | xargs -I {} convert {} -size 177x254! {}
-- ls *.jpg | xargs -I {} convert {} -quality $QUALITY {}
+- ls *.jpg | xargs -I {} convert {} -resize 177x254! -quality $QUALITY {}
 - cd ..
 
 - 7z a -mx0 -xr!.git* mobile/assets/data/pics.zip pics > /dev/null
