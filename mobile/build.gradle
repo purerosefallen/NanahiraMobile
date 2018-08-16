@@ -8,7 +8,7 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 33040816
+        versionCode 33040817
         versionName "3.3.4-Koishi"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
@@ -54,6 +54,9 @@ android {
         main {
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
+        }
+        cn{
+            assets.srcDirs = ['assets_cn']
         }
         en {
             assets.srcDirs = ['assets_en']
