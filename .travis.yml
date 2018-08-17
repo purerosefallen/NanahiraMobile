@@ -54,7 +54,9 @@ before_install:
 - 7z x -y ygopro222-images-master.zip > /dev/null
 - mv -f ygopro222-images-master pics
 
-- git clone --depth=1 https://github.com/purerosefallen/ygopro-scripts script
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro-scripts/archive/master.zip
+- 7z x -y ygopro-scripts-master.zip > /dev/null
+- mv -f ygopro-scripts-master pics
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
 - 7z x -y ygopro-starter-pack-master.zip > /dev/null
