@@ -737,6 +737,7 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	//load init.lua by MLD
 	load_script((char*) "./script/init.lua");
 	//nef
+	/*
 	load_script((char*) "./script/nef/afi.lua");
 	load_script((char*) "./script/nef/cardList.lua");
 	load_script((char*) "./script/nef/nef.lua");
@@ -745,6 +746,7 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	load_script((char*) "./script/nef/fus.lua");
 	load_script((char*) "./script/nef/msc.lua");
 	load_script((char*) "./script/nef/uds.lua");
+	*/
 }
 interpreter::~interpreter() {
 	lua_close(lua_state);
