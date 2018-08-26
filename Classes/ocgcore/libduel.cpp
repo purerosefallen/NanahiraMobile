@@ -228,7 +228,7 @@ int32 scriptlib::duel_get_lp(lua_State *L) {
 int32 scriptlib::duel_set_lp(lua_State *L) {
 	check_param_count(L, 2);
 	int32 p = lua_tointeger(L, 1);
-	int32 lp = round(lua_tonumber(L, 2));
+	int32 lp = std::round(lua_tonumber(L, 2));
 	if(lp < 0) lp = 0;
 	if(p != 0 && p != 1)
 		return 0;
@@ -3363,6 +3363,11 @@ int32 scriptlib::duel_select_position(lua_State * L) {
 	pduel->game_field->add_process(PROCESSOR_SELECT_POSITION_S, 0, 0, 0, playerid + (positions << 16), pcard->data.code);
 	return lua_yield(L, 0);
 }
+int32 scriptlib::duel_get_disable_field(lua_State * L){
+	duel* pduel = interpreter::get_duel_info(L);
+	lua_pushinteger(L, pduel->game_field->player[0].disabled_location + (pduel->game_field->player[1].disabled_location << 16));
+	return 1;
+}
 int32 scriptlib::duel_select_disable_field(lua_State * L) {
 	check_action_permission(L);
 	check_param_count(L, 5);
@@ -3680,7 +3685,7 @@ int32 scriptlib::duel_is_player_can_summon(lua_State * L) {
 		check_param(L, PARAM_TYPE_CARD, 3);
 		int32 sumtype = lua_tointeger(L, 2);
 		card* pcard = *(card**) lua_touserdata(L, 3);
-		lua_pushboolean(L, pduel->game_field->is_player_can_summon(sumtype, playerid, pcard));
+		lua_pushboolean(L, pduel->game_field->is_player_can_summon(sumtype, playerid, pcard, playerid));
 	}
 	return 1;
 }

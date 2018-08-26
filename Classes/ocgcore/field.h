@@ -8,7 +8,6 @@
 #ifndef FIELD_H_
 #define FIELD_H_
 
-#include "memory.h"
 #include "common.h"
 #include "effectset.h"
 #include <vector>
@@ -19,7 +18,6 @@
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
-#include <cmath>
 
 class card;
 struct card_data;
@@ -206,7 +204,6 @@ struct processor {
 	chain_list new_ochain_b;
 	chain_list new_ochain_h;
 	chain_list new_chains;
-	chain_list tmp_chain;
 	delayed_effect_collection delayed_quick_tmp;
 	delayed_effect_collection delayed_quick_break;
 	delayed_effect_collection delayed_quick;
@@ -449,8 +446,8 @@ public:
 	int32 is_player_can_discard_deck_as_cost(uint8 playerid, int32 count);
 	int32 is_player_can_discard_hand(uint8 playerid, card* pcard, effect* peffect, uint32 reason);
 	int32 is_player_can_summon(uint8 playerid);
-	int32 is_player_can_summon(uint32 sumtype, uint8 playerid, card* pcard);
-	int32 is_player_can_mset(uint32 sumtype, uint8 playerid, card* pcard);
+	int32 is_player_can_summon(uint32 sumtype, uint8 playerid, card* pcard, uint8 toplayer);
+	int32 is_player_can_mset(uint32 sumtype, uint8 playerid, card* pcard, uint8 toplayer);
 	int32 is_player_can_sset(uint8 playerid, card* pcard);
 	int32 is_player_can_spsummon(uint8 playerid);
 	int32 is_player_can_spsummon(effect* peffect, uint32 sumtype, uint8 sumpos, uint8 playerid, uint8 toplayer, card* pcard);
