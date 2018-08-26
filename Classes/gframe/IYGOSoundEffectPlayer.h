@@ -30,6 +30,10 @@ public:
 
 	virtual void doSpecialSummonEffect() = 0;
 
+	virtual void doTokenEffect() = 0;
+
+	virtual void doNegateEffect() = 0;
+
 	virtual void doFlipCardEffect() = 0;
 
 	virtual void doActivateEffect() = 0;

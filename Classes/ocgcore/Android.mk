@@ -21,6 +21,7 @@ LOCAL_SRC_FILES := card.cpp \
                    operations.cpp \
                    playerop.cpp \
                    processor.cpp \
+                   patch_round.cpp \
                    scriptlib.cpp
                    
 LOCAL_CFLAGS    := -frtti -std=gnu++0x -D_IRR_ANDROID_PLATFORM_ -DLUA_COMPAT_5_2
