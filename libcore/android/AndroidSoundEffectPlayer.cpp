@@ -79,6 +79,20 @@ void AndroidSoundEffectPlayer::doSpecialSummonEffect() {
 	}
 }
 
+void AndroidSoundEffectPlayer::doTokenEffect() {
+	if (m_isEnabled) {
+		m_pAudioTracker->playBGM(irr::io::path("sound/token.ogg"),
+				AP_TYPE_ASSET);
+	}
+}
+
+void AndroidSoundEffectPlayer::doNegateEffect() {
+	if (m_isEnabled) {
+		m_pAudioTracker->playBGM(irr::io::path("sound/negate.ogg"),
+				AP_TYPE_ASSET);
+	}
+}
+
 void AndroidSoundEffectPlayer::doFlipCardEffect() {
 	if (m_isEnabled) {
 		m_pAudioTracker->playBGM(irr::io::path("sound/flip.ogg"),

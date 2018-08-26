@@ -2687,13 +2687,18 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		return true;
 	}
 	case MSG_SPSUMMONING: {
-		mainGame->soundEffectPlayer->doSpecialSummonEffect();
+		//mainGame->soundEffectPlayer->doSpecialSummonEffect();
 		unsigned int code = (unsigned int)BufferIO::ReadInt32(pbuf);
 		/*int cc = */mainGame->LocalPlayer(BufferIO::ReadInt8(pbuf));
 		/*int cl = */BufferIO::ReadInt8(pbuf);
 		/*int cs = */BufferIO::ReadInt8(pbuf);
 		/*int cp = */BufferIO::ReadInt8(pbuf);
 		if(!mainGame->dInfo.isReplay || !mainGame->dInfo.isReplaySkiping) {
+			CardData cd;
+			if(dataManager.GetData(code, &cd) && (cd.type & TYPE_TOKEN))
+				mainGame->soundEffectPlayer->doTokenEffect();
+			else
+				mainGame->soundEffectPlayer->doSpecialSummonEffect();
 			myswprintf(event_string, dataManager.GetSysString(1605), dataManager.GetName(code));
 			mainGame->showcardcode = code;
 			mainGame->showcarddif = 1;
@@ -2833,6 +2838,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 	case MSG_CHAIN_DISABLED: {
 		int ct = BufferIO::ReadInt8(pbuf);
 		if(!mainGame->dInfo.isReplay || !mainGame->dInfo.isReplaySkiping) {
+			mainGame->soundEffectPlayer->doNegateEffect();
 			mainGame->showcardcode = mainGame->dField.chains[ct - 1].code;
 			mainGame->showcarddif = 0;
 			mainGame->showcard = 3;
