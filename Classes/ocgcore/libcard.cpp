@@ -11,7 +11,6 @@
 #include "card.h"
 #include "effect.h"
 #include "group.h"
-#include <iostream>
 
 int32 scriptlib::card_is_ritual_type(lua_State *L) {
 	check_param_count(L, 2);
