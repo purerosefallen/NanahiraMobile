@@ -663,9 +663,9 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	luaL_newlib(lua_state, debuglib);
 	lua_setglobal(lua_state, "Debug");
 	//extra scripts
-	load_script((char*) "./script/constant.lua");
-	load_script((char*) "./script/utility.lua");
-	load_script((char*) "./script/special.lua");
+	load_script("./script/constant.lua");
+	load_script("./script/utility.lua");
+	load_script("./script/special.lua");
 	//load kpro constant
 	//card data constants
 	lua_pushinteger(lua_state, CARDDATA_CODE);
@@ -735,17 +735,17 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	lua_setglobal(lua_state, "_WIN32");
 #endif
 	//load init.lua by MLD
-	load_script((char*) "./script/init.lua");
+	load_script("./script/init.lua");
 	//nef
 	/*
-	load_script((char*) "./script/nef/afi.lua");
-	load_script((char*) "./script/nef/cardList.lua");
-	load_script((char*) "./script/nef/nef.lua");
-	load_script((char*) "./script/nef/elf.lua");
-	load_script((char*) "./script/nef/ets.lua");
-	load_script((char*) "./script/nef/fus.lua");
-	load_script((char*) "./script/nef/msc.lua");
-	load_script((char*) "./script/nef/uds.lua");
+	load_script("./script/nef/afi.lua");
+	load_script("./script/nef/cardList.lua");
+	load_script("./script/nef/nef.lua");
+	load_script("./script/nef/elf.lua");
+	load_script("./script/nef/ets.lua");
+	load_script("./script/nef/fus.lua");
+	load_script("./script/nef/msc.lua");
+	load_script("./script/nef/uds.lua");
 	*/
 }
 interpreter::~interpreter() {
@@ -770,7 +770,7 @@ int32 interpreter::register_card(card *pcard) {
 	if(pcard->data.code && (!(pcard->data.type & TYPE_NORMAL) || (pcard->data.type & TYPE_PENDULUM))) {
 		pcard->set_status(STATUS_INITIALIZING, TRUE);
 		add_param(pcard, PARAM_TYPE_CARD);
-		call_card_function(pcard, (char*) "initial_effect", 1, 0);
+		call_card_function(pcard, "initial_effect", 1, 0);
 		pcard->set_status(STATUS_INITIALIZING, FALSE);
 	}
 	pcard->cardid = pduel->game_field->infos.card_id++;
@@ -824,14 +824,14 @@ void interpreter::unregister_group(group *pgroup) {
 	luaL_unref(lua_state, LUA_REGISTRYINDEX, pgroup->ref_handle);
 	pgroup->ref_handle = 0;
 }
-int32 interpreter::load_script(char* script_name) {
+int32 interpreter::load_script(const char* script_name) {
 	int32 error;
 	int32 len = 0;
 	byte* buffer = read_script(script_name, &len);
 	if (!buffer)
 		return OPERATION_FAIL;
 	no_action++;
-	error = luaL_loadbuffer(current_state, (const char*) buffer, len, (const char*) script_name) || lua_pcall(current_state, 0, 0, 0);
+	error = luaL_loadbuffer(current_state, (char*)buffer, len, script_name) || lua_pcall(current_state, 0, 0, 0);
 	if (error) {
 		interpreter::strcpy(pduel->strbuffer, lua_tostring(current_state, -1));
 		handle_message(pduel, 1);
@@ -881,45 +881,45 @@ void interpreter::add_param(ptr param, int32 type, bool front) {
 void interpreter::push_param(lua_State* L, bool is_coroutine) {
 	uint32 type;
 	int32 pushed = 0;
-	for (auto it = params.begin(); it != params.end(); ++it) {
-		type = it->second;
+	for (const auto& it : params) {
+		type = it.second;
 		switch(type) {
 		case PARAM_TYPE_INT:
-			lua_pushinteger(L, (ptr) it->first);
+			lua_pushinteger(L, (ptr) it.first);
 			break;
 		case PARAM_TYPE_STRING:
-			lua_pushstring(L, (const char *) it->first);
+			lua_pushstring(L, (const char *) it.first);
 			break;
 		case PARAM_TYPE_BOOLEAN:
-			lua_pushboolean(L, (ptr) it->first);
+			lua_pushboolean(L, (ptr) it.first);
 			break;
 		case PARAM_TYPE_CARD: {
-			if (it->first)
-				lua_rawgeti(L, LUA_REGISTRYINDEX, ((card*)it->first)->ref_handle);
+			if (it.first)
+				lua_rawgeti(L, LUA_REGISTRYINDEX, ((card*)it.first)->ref_handle);
 			else
 				lua_pushnil(L);
 			break;
 		}
 		case PARAM_TYPE_EFFECT: {
-			if (it->first)
-				lua_rawgeti(L, LUA_REGISTRYINDEX, ((effect*)it->first)->ref_handle);
+			if (it.first)
+				lua_rawgeti(L, LUA_REGISTRYINDEX, ((effect*)it.first)->ref_handle);
 			else
 				lua_pushnil(L);
 			break;
 		}
 		case PARAM_TYPE_GROUP: {
-			if (it->first)
-				lua_rawgeti(L, LUA_REGISTRYINDEX, ((group*)it->first)->ref_handle);
+			if (it.first)
+				lua_rawgeti(L, LUA_REGISTRYINDEX, ((group*)it.first)->ref_handle);
 			else
 				lua_pushnil(L);
 			break;
 		}
 		case PARAM_TYPE_FUNCTION: {
-			function2value(L, (ptr)it->first);
+			function2value(L, (ptr)it.first);
 			break;
 		}
 		case PARAM_TYPE_INDEX: {
-			int32 index = (int32)(ptr)it->first;
+			int32 index = (int32)(ptr)it.first;
 			if(index > 0)
 				lua_pushvalue(L, index);
 			else if(is_coroutine) {
@@ -983,7 +983,7 @@ int32 interpreter::call_function(int32 f, uint32 param_count, int32 ret_count) {
 	}
 	return OPERATION_SUCCESS;
 }
-int32 interpreter::call_card_function(card* pcard, char* f, uint32 param_count, int32 ret_count) {
+int32 interpreter::call_card_function(card* pcard, const char* f, uint32 param_count, int32 ret_count) {
 	if (param_count != params.size()) {
 		sprintf(pduel->strbuffer, "\"CallCardFunction\"(c%d.%s): incorrect parameter count", pcard->data.code, f);
 		handle_message(pduel, 1);
@@ -1023,7 +1023,7 @@ int32 interpreter::call_card_function(card* pcard, char* f, uint32 param_count, 
 	}
 	return OPERATION_SUCCESS;
 }
-int32 interpreter::call_code_function(uint32 code, char* f, uint32 param_count, int32 ret_count) {
+int32 interpreter::call_code_function(uint32 code, const char* f, uint32 param_count, int32 ret_count) {
 	if (param_count != params.size()) {
 		sprintf(pduel->strbuffer, "\"CallCodeFunction\": incorrect parameter count");
 		handle_message(pduel, 1);

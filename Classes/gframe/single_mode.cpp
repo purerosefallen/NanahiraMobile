@@ -38,9 +38,7 @@ int SingleMode::SinglePlayThread(void* param) {
 	mtrandom rnd;
 	time_t seed = time(0);
 	rnd.reset(seed);
-#ifdef _IRR_ANDROID_PLATFORM_
 	set_script_reader((script_reader)ScriptReaderEx);
-#endif
 	set_card_reader((card_reader)DataManager::CardReader);
 	set_message_handler((message_handler)MessageHandler);
 	pduel = create_duel(rnd.rand());
@@ -58,17 +56,12 @@ int SingleMode::SinglePlayThread(void* param) {
 	mainGame->dInfo.announce_cache.clear();
 	char filename[256];
 	size_t slen = 0;
-		if(!preload_script(pduel, filename, slen)) {
-			wchar_t fname[256];
-			myswprintf(fname, L"./single/%ls");
-			if(!preload_script(pduel, filename, slen))
-				slen = 0;
-		const wchar_t* name = mainGame->lstSinglePlayList->getListItem(mainGame->lstSinglePlayList->getSelected());
-		myswprintf(fname, L"./single/%ls", name);
-		slen = BufferIO::EncodeUTF8(fname, filename);
-		if(!preload_script(pduel, filename, slen))
-			slen = 0;
-	}
+	const wchar_t* name = mainGame->lstSinglePlayList->getListItem(mainGame->lstSinglePlayList->getSelected());
+	wchar_t fname[256];
+	myswprintf(fname, L"./single/%ls", name);
+	slen = BufferIO::EncodeUTF8(fname, filename);
+	if(!preload_script(pduel, filename, slen))
+		slen = 0;
 	if(slen == 0) {
 		end_duel(pduel);
 		return 0;

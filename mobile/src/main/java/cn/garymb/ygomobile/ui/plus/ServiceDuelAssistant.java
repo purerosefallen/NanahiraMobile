@@ -1,6 +1,7 @@
 package cn.garymb.ygomobile.ui.plus;
 
 import android.app.Service;
+import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -81,10 +82,10 @@ public class ServiceDuelAssistant extends Service {
         createFloatView();
         cm.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
 
-
             @Override
             public void onPrimaryClipChanged() {
-                final String ss = cm.getText().toString().trim();
+                ClipData clipData = cm.getPrimaryClip();
+                final String ss = clipData.getItemAt(0).getText().toString();
 					/*final int ssi=ss.indexOf("卡查");
 					if (ssi != -1) {
 						cxCard(ss, ssi);
