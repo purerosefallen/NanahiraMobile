@@ -44,7 +44,6 @@ public class MainActivity extends HomeActivity {
     private GameUriManager mGameUriManager;
     private ImageUpdater mImageUpdater;
     private boolean enableStart;
-    private MessageReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +96,6 @@ public class MainActivity extends HomeActivity {
     protected void onDestroy() {
         YGOStarter.onDestroy(this);
         super.onDestroy();
-if (mReceiver != null)
         unregisterReceiver(mReceiver);
     }
 
@@ -185,7 +183,7 @@ if (mReceiver != null)
         }catch (Throwable e){
             e.printStackTrace();
         }
-        mReceiver = new MessageReceiver();
+        MessageReceiver mReceiver = new MessageReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction("RUN_WINDBOT");
         registerReceiver(mReceiver, filter);
