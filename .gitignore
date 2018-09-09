@@ -55,7 +55,9 @@ libYGOMobile.so
 /mobile/assets_ko/data/pics.zip
 /mobile/assets_ko/data/deck
 /mobile/assets_en/data/*.cdb
-/mobile/libs/*.aar
+/mobile/assets_en/data/scripts.zip
+/mobile/assets_en/data/pics.zip
+/mobile/assets_en/data/deck
 /*.zip
 /*.cdb
 *.orig
