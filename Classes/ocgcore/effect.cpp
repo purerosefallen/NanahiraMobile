@@ -248,8 +248,7 @@ int32 effect::is_activateable(uint8 playerid, const tevent& e, int32 neglect_con
 				return FALSE;
 		} else if(!(type & EFFECT_TYPE_CONTINUOUS)) {
 			card* phandler = get_handler();
-			if((phandler->data.type & TYPE_MONSTER) && (phandler->current.location & LOCATION_SZONE)
-					&& !in_range(phandler))
+			if(!(phandler->get_type() & TYPE_MONSTER) && (get_active_type() & TYPE_MONSTER))
 				return FALSE;
 			if(!neglect_faceup && (phandler->current.location & (LOCATION_ONFIELD | LOCATION_REMOVED))) {
 				// effects which can be activated while face-down:
@@ -754,4 +753,28 @@ void effect::set_activate_location() {
 	card* phandler = get_handler();
 	active_location = phandler->current.location;
 	active_sequence = phandler->current.sequence;
+}
+void effect::set_active_type() {
+	card* phandler = get_handler();
+	active_type = phandler->get_type();
+	if(active_type & TYPE_TRAPMONSTER)
+		active_type &= ~TYPE_TRAP;
+	if((type & EFFECT_TYPE_ACTIVATE) && is_flag(EFFECT_FLAG2_SPOSITCH))
+		active_type |= TYPE_QUICKPLAY;
+}
+uint32 effect::get_active_type() {
+	if(type & 0x7f0) {
+		if(active_type)
+			return active_type;
+		else if((type & EFFECT_TYPE_ACTIVATE) && (get_handler()->data.type & TYPE_PENDULUM))
+		{
+			if(is_flag(EFFECT_FLAG2_SPOSITCH))
+				return TYPE_PENDULUM + TYPE_SPELL + TYPE_QUICKPLAY;
+			else
+				return TYPE_PENDULUM + TYPE_SPELL;
+		}
+		else
+			return get_handler()->get_type();
+	} else
+		return owner->get_type();
 }
