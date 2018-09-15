@@ -801,6 +801,14 @@ uint32 field::get_linked_zone(int32 playerid) {
 				zones |= 1u << (2 - i * 2);
 		}
 	}
+	for(uint32 i = 0; i < 5; ++i) {
+		if(i > 0 && player[playerid].list_szone[i] && player[playerid].list_szone[i]->is_link_marker(LINK_MARKER_TOP_LEFT))
+			zones |= 1u << (i - 1);
+		if(player[playerid].list_szone[i] && player[playerid].list_szone[i]->is_link_marker(LINK_MARKER_TOP))
+			zones |= 1u << i;
+		if(i < 4 && player[playerid].list_szone[i] && player[playerid].list_szone[i]->is_link_marker(LINK_MARKER_TOP_RIGHT))
+			zones |= 1u << (i + 1);
+	}
 	return zones;
 }
 void field::get_linked_cards(uint8 self, uint8 s, uint8 o, card_set* cset) {
