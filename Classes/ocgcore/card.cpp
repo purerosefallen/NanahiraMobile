@@ -1318,7 +1318,7 @@ uint32 card::get_linked_zone() {
 }
 void card::get_linked_cards(card_set* cset) {
 	cset->clear();
-	if(!(data.type & TYPE_LINK) || current.location != LOCATION_MZONE)
+	if((!(data.type & TYPE_LINK) || current.location != LOCATION_MZONE) && (!is_affected_by_effect(EFFECT_LINK_SPELL_KOISHI) || current.location != LOCATION_SZONE))
 		return;
 	int32 p = current.controler;
 	uint32 linked_zone = get_linked_zone();
