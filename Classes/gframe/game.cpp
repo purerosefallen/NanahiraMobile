@@ -589,7 +589,7 @@ bool Game::Initialize() {
 	wANAttribute->getCloseButton()->setVisible(false);
 	wANAttribute->setVisible(false);
 	for(int filter = 0x1, i = 0; i < 7; filter <<= 1, ++i)
-		chkAttribute[i] = env->addCheckBox(false, rect<s32>((20 + (i % 4) * 80) * xScale, (50 + (i / 4) * 55) * yScale, (100 + (i % 4) * 80) * xScale, (75 + (i / 4) * 55) * yScale),
+		chkAttribute[i] = env->addCheckBox(false, rect<s32>((10 + (i % 4) * 80) * xScale, (50 + (i / 4) * 55) * yScale, (90 + (i % 4) * 80) * xScale, (75 + (i / 4) * 55) * yScale),
 		                                   wANAttribute, CHECK_ATTRIBUTE, dataManager.FormatAttribute(filter));
 	//announce race
 	wANRace = env->addWindow(rect<s32>(480 * xScale, 100 * yScale, 850 * xScale, 530 * yScale), false, dataManager.GetSysString(563));
