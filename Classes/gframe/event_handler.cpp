@@ -1487,6 +1487,12 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						if(mcard->position & POS_FACEDOWN)
 							mcard = 0;
 					}
+				} else if(hovered_location == LOCATION_EXTRA) {
+					if(extra[hovered_controler].size()) {
+						mcard = extra[hovered_controler].back();
+						if(mcard->position & POS_FACEDOWN)
+							mcard = 0;
+					}
 				} else if(hovered_location == LOCATION_DECK) {
 					if(deck[hovered_controler].size())
 						mcard = deck[hovered_controler].back();
@@ -1812,6 +1818,9 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case CHECKBOX_QUICK_ANIMATION: {
+ 				mainGame->gameConf.quick_animation = mainGame->chkQuickAnimation->isChecked() ? 1 : 0;
+ 			}
 			}
 			break;
 		}
