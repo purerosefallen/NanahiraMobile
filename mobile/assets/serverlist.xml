@@ -4,21 +4,21 @@
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO Koishi Server</name>
-        <ip>koishi.ygopro.cn</ip>
+        <ip>222.73.218.25</ip>
         <port>7210</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO 222DIY</name>
-        <ip>koishi.ygopro.cn</ip>
+        <ip>222.73.218.25</ip>
         <port>222</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO Koishi Server TCG</name>
-        <ip>koishi.ygopro.cn</ip>
+        <ip>222.73.218.25</ip>
         <port>1311</port>
         <keep>true</keep>
     </server>
@@ -39,7 +39,7 @@
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO THC</name>
-        <ip>koishi.ygopro.cn</ip>
+        <ip>222.73.218.25</ip>
         <port>666</port>
         <keep>true</keep>
     </server>
