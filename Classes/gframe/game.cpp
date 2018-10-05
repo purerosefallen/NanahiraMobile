@@ -433,40 +433,41 @@ bool Game::Initialize() {
 	irr::gui::IGUITab* tabHelper = wInfos->addTab(dataManager.GetSysString(1298));
 	int posX = 20 * xScale;
 	int posY = 20 * yScale;
-	chkMAutoPos = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 25 * yScale), tabHelper, -1, dataManager.GetSysString(1274));
+	chkMAutoPos = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, -1, dataManager.GetSysString(1274));
 	chkMAutoPos->setChecked(gameConf.chkMAutoPos != 0);
 	posY += 60;
-	chkSTAutoPos = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 25 * yScale), tabHelper, -1, dataManager.GetSysString(1278));
+	chkSTAutoPos = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, -1, dataManager.GetSysString(1278));
 	chkSTAutoPos->setChecked(gameConf.chkSTAutoPos != 0);
 	posY += 60;
-	chkRandomPos = env->addCheckBox(false, rect<s32>(posX + 20 * xScale, posY, posX + (20 + 260) * xScale, posY + 25 * yScale), tabHelper, -1, dataManager.GetSysString(1275));
+	chkRandomPos = env->addCheckBox(false, rect<s32>(posX + 20 * xScale, posY, posX + (20 + 260) * xScale, posY + 30 * yScale), tabHelper, -1, dataManager.GetSysString(1275));
 	chkRandomPos->setChecked(gameConf.chkRandomPos != 0);
 	posY += 60;
-	chkAutoChain = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 25 * yScale), tabHelper, -1, dataManager.GetSysString(1276));
+	chkAutoChain = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, -1, dataManager.GetSysString(1276));
 	chkAutoChain->setChecked(gameConf.chkAutoChain != 0);
 	posY += 60;
-	chkWaitChain = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 25 * yScale), tabHelper, -1, dataManager.GetSysString(1277));
+	chkWaitChain = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, -1, dataManager.GetSysString(1277));
 	chkWaitChain->setChecked(gameConf.chkWaitChain != 0);
-	posY += 60;
- 	chkQuickAnimation = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 25 * yScale), tabHelper, CHECKBOX_QUICK_ANIMATION, dataManager.GetSysString(1299));
- 	chkQuickAnimation->setChecked(gameConf.quick_animation != 0);
+
 	//system
 	irr::gui::IGUITab* tabSystem = wInfos->addTab(dataManager.GetSysString(1273));
 	posY = 20 * xScale;
-	chkIgnore1 = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25 * yScale), tabSystem, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
+	chkIgnore1 = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 30 * yScale), tabSystem, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
 	chkIgnore1->setChecked(gameConf.chkIgnore1 != 0);
 	posY += 60;
-	chkIgnore2 = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25 * yScale), tabSystem, -1, dataManager.GetSysString(1291));
+	chkIgnore2 = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 30 * yScale), tabSystem, -1, dataManager.GetSysString(1291));
 	chkIgnore2->setChecked(gameConf.chkIgnore2 != 0);
 	posY += 60;
-	chkHideSetname = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 25 * yScale), tabSystem, -1, dataManager.GetSysString(1354));
+	chkHideSetname = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 30 * yScale), tabSystem, -1, dataManager.GetSysString(1354));
 	chkHideSetname->setChecked(gameConf.chkHideSetname != 0);
 	posY += 60;
-	chkIgnoreDeckChanges = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 25 * yScale), tabSystem, -1, dataManager.GetSysString(1357));
+	chkIgnoreDeckChanges = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabSystem, -1, dataManager.GetSysString(1357));
 	chkIgnoreDeckChanges->setChecked(gameConf.chkIgnoreDeckChanges != 0);
 	posY += 60;
-	chkAutoSearch = env->addCheckBox(false, rect<s32>(posX, posY, posX + 225 * xScale, posY + 25 * yScale), tabSystem, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
-	chkAutoSearch->setChecked(gameConf.auto_search_limit >= 0);
+    chkDrawFieldSpell = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabSystem, CHECKBOX_DRAW_FIELD_SPELL, dataManager.GetSysString(1279));
+    chkDrawFieldSpell->setChecked(gameConf.draw_field_spell != 0);
+    posY += 60;
+    chkQuickAnimation = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabSystem, CHECKBOX_QUICK_ANIMATION, dataManager.GetSysString(1299));
+    chkQuickAnimation->setChecked(gameConf.quick_animation != 0);
 	//
 	wHand = env->addWindow(rect<s32>(500 * xScale, 450 * yScale, 825 * xScale, 605 * yScale), false, L"");
 	wHand->getCloseButton()->setVisible(false);
@@ -1374,98 +1375,59 @@ void Game::LoadConfig() {
 	gameConf.lasthost[0] = 0;
 	gameConf.lastport[0] = 0;
 	gameConf.roompass[0] = 0;
-	//settings
+	//helper
 	gameConf.chkMAutoPos = android::getIntSetting(appMain, "chkMAutoPos", 0);
 	gameConf.chkSTAutoPos = android::getIntSetting(appMain, "chkSTAutoPos", 0);
 	gameConf.chkRandomPos = android::getIntSetting(appMain, "chkRandomPos", 0);
 	gameConf.chkAutoChain = android::getIntSetting(appMain, "chkAutoChain", 0);
 	gameConf.chkWaitChain = android::getIntSetting(appMain, "chkWaitChain", 0);
+	gameConf.draw_field_spell = android::getIntSetting(appMain, "draw_field_spell", 0);
+	gameConf.quick_animation = android::getIntSetting(appMain, "quick_animation", 0);
+	//system
 	gameConf.chkIgnore1 = android::getIntSetting(appMain, "chkIgnore1", 0);
 	gameConf.chkIgnore2 = android::getIntSetting(appMain, "chkIgnore2", 0);
 	gameConf.chkHideSetname = android::getIntSetting(appMain, "chkHideSetname", 0);
 	gameConf.control_mode = android::getIntSetting(appMain, "control_mode", 0);
 	gameConf.draw_field_spell = android::getIntSetting(appMain, "draw_field_spell", 1);
 	gameConf.separate_clear_button = android::getIntSetting(appMain, "separate_clear_button", 1);
-	gameConf.auto_search_limit = android::getIntSetting(appMain, "auto_search_limit", 1);
 	gameConf.chkIgnoreDeckChanges = android::getIntSetting(appMain, "chkIgnoreDeckChanges", 0);
 	gameConf.defaultOT = android::getIntSetting(appMain, "defaultOT", 1);
+	gameConf.auto_search_limit = 1;
 	//TEST BOT MODE
 	gameConf.enable_bot_mode = 1;
-	gameConf.quick_animation = 0;
 }
 
 void Game::SaveConfig() {
-	//char linebuf[256];	
-	//BufferIO::EncodeUTF8(gameConf.lastdeck, linebuf);
-	//android::setLastDeck(appMain, linebuf);
-	int cur;
-	cur = chkMAutoPos->isChecked()?1:0;
-	if(cur != gameConf.chkMAutoPos){
-		gameConf.chkMAutoPos = cur;
-		 android::saveIntSetting(appMain, "chkMAutoPos", gameConf.chkMAutoPos);
-	}
-	
-	cur = chkSTAutoPos->isChecked()?1:0;
-	if(cur != gameConf.chkSTAutoPos){
-		gameConf.chkSTAutoPos = cur;
-		 android::saveIntSetting(appMain, "chkSTAutoPos", gameConf.chkSTAutoPos);
-	}
-	
-	
-	cur = chkRandomPos->isChecked()?1:0;
-	if(cur != gameConf.chkRandomPos){
-		gameConf.chkRandomPos = cur;
-		 android::saveIntSetting(appMain, "chkRandomPos", gameConf.chkRandomPos);
-	}
-	
-	cur = chkAutoChain->isChecked()?1:0;
-	if(cur != gameConf.chkAutoChain){
-		gameConf.chkAutoChain = cur;
-		 android::saveIntSetting(appMain, "chkAutoChain", gameConf.chkAutoChain);
-	}
+	//helper
+	gameConf.chkMAutoPos = chkMAutoPos->isChecked() ? 1 : 0;
+	    android::saveIntSetting(appMain, "chkMAutoPos", gameConf.chkMAutoPos);
+	gameConf.chkSTAutoPos = chkSTAutoPos->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkSTAutoPos", gameConf.chkSTAutoPos);
+	gameConf.chkRandomPos = chkRandomPos->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkRandomPos", gameConf.chkRandomPos);
+	gameConf.chkAutoChain = chkAutoChain->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkAutoChain", gameConf.chkAutoChain);
+    gameConf.chkWaitChain = chkWaitChain->isChecked() ? 1 : 0;
+    	android::saveIntSetting(appMain, "chkWaitChain", gameConf.chkWaitChain);
+    gameConf.draw_field_spell = chkDrawFieldSpell->isChecked() ? 1 : 0;
+        android::saveIntSetting(appMain, "draw_field_spell", gameConf.draw_field_spell);
+    gameConf.quick_animation = chkQuickAnimation->isChecked() ? 1 : 0;
+        android::saveIntSetting(appMain, "quick_animation", gameConf.quick_animation);
 
-	cur = chkIgnore1->isChecked()?1:0;
-	if(cur != gameConf.chkIgnore1){
-		gameConf.chkIgnore1 = cur;
-		 android::saveIntSetting(appMain, "chkIgnore1", gameConf.chkIgnore1);
-	}
-	
-	cur = chkIgnore2->isChecked()?1:0;
-	if(cur != gameConf.chkIgnore2){
-		gameConf.chkIgnore2 = cur;
-		 android::saveIntSetting(appMain, "chkIgnore2", gameConf.chkIgnore2);
-	}
-	
-	cur = chkHideSetname->isChecked()?1:0;
-	if(cur != gameConf.chkHideSetname){
-		gameConf.chkHideSetname = cur;
-		 android::saveIntSetting(appMain, "chkHideSetname", gameConf.chkHideSetname);
-	}
-
-	cur = chkIgnoreDeckChanges->isChecked()?1:0;
-	if(cur != gameConf.chkIgnoreDeckChanges){
-		gameConf.chkIgnoreDeckChanges = cur;
-		 android::saveIntSetting(appMain, "chkIgnoreDeckChanges", gameConf.chkIgnoreDeckChanges);
-	}
-	
-	cur = chkAutoSearch->isChecked()?0:-1;
-	if(cur != gameConf.auto_search_limit){
-		gameConf.auto_search_limit = cur;
-		 android::saveIntSetting(appMain, "auto_search_limit", gameConf.auto_search_limit);
-	}
-
-	cur = chkQuickAnimation->isChecked()?1:0;
-    if(cur != gameConf.quick_animation){
-        gameConf.quick_animation = cur;
-         android::saveIntSetting(appMain, "quick_animation", gameConf.quick_animation);
-    }
+	//system
+	gameConf.chkIgnore1 = chkIgnore1->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkIgnore1", gameConf.chkIgnore1);
+	gameConf.chkIgnore2 = chkIgnore2->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkIgnore2", gameConf.chkIgnore2);
+	gameConf.chkHideSetname = chkHideSetname->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkHideSetname", gameConf.chkHideSetname);
+	gameConf.chkIgnoreDeckChanges = chkIgnoreDeckChanges->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkIgnoreDeckChanges", gameConf.chkIgnoreDeckChanges);
 
 //gameConf.defaultOT = defaultOT->isChecked()?1:0;
 //    android::saveIntSetting(appMain, "defaultOT", gameConf.defaultOT);
 //gameConf.control_mode = control_mode->isChecked()?1:0;
 //	  android::saveIntSetting(appMain, "control_mode", gameConf.control_mode);
-//gameConf.draw_field_spell = draw_field_spell->isChecked()?1:0;
-//	  android::saveIntSetting(appMain, "draw_field_spell", gameConf.draw_field_spell);
 //gameConf.separate_clear_button = separate_clear_button->isChecked()?1:0;
 //	  android::saveIntSetting(appMain, "separate_clear_button", gameConf.separate_clear_button);
 //TEST BOT MODE
@@ -1548,6 +1510,15 @@ void Game::ShowCardInfo(int code) {
 	showingtext = dataManager.GetText(code);
 	const auto& tsize = stText->getRelativePosition();
 	InitStaticText(stText, tsize.getWidth(), tsize.getHeight(), textFont, showingtext);
+}
+void Game::ClearCardInfo(int player) {
+	imgCard->setImage(imageManager.tCover[player]);
+	stName->setText(L"");
+	stInfo->setText(L"");
+	stDataInfo->setText(L"");
+	stSetName->setText(L"");
+	stText->setText(L"");
+	scrCardText->setVisible(false);
 }
 void Game::AddChatMsg(wchar_t* msg, int player) {
 	for(int i = 7; i > 0; --i) {
