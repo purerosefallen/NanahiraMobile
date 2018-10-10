@@ -8,8 +8,13 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 16
         targetSdkVersion 22
+<<<<<<< HEAD
         versionCode 330601002
         versionName "3.3.6-Koishi"
+=======
+        versionCode 330701009
+        versionName "3.3.7"
+>>>>>>> 763e3bc7fff1f5e2c9710da32c3e7e508fb8d368
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -22,15 +27,15 @@ android {
     }
     productFlavors {
         cn {
-            manifestPlaceholders=[PGYER_APPID:"dd147e8542b85a64111d98290892d8bd"]
+            manifestPlaceholders = [PGYER_APPID: "dd147e8542b85a64111d98290892d8bd"]
         }
         en {
             applicationIdSuffix ".EN"
-            manifestPlaceholders=[PGYER_APPID:"242ad8311ed1c943f48cfc8238d06210"]
+            manifestPlaceholders = [PGYER_APPID: "242ad8311ed1c943f48cfc8238d06210"]
         }
         ko {
             applicationIdSuffix ".KO"
-            manifestPlaceholders=[PGYER_APPID:"8e985218b1f02bda5fa456557c886f54"]
+            manifestPlaceholders = [PGYER_APPID: "8e985218b1f02bda5fa456557c886f54"]
         }
         signingConfigs {
             releaseConfig {
@@ -76,16 +81,16 @@ android {
         exclude 'META-INF/LICENSE'
     }
     aaptOptions {
-        noCompress 'dll',"config"
+        noCompress 'dll', "config"
     }
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.2'
 }
 
-    repositories {
-        flatDir {
-            dirs 'libs'
-        }
+repositories {
+    flatDir {
+        dirs 'libs'
     }
+}
 dependencies {
     implementation 'junit:junit:4.12'
     implementation project(':libcore')

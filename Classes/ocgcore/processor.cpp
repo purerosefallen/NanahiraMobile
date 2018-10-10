@@ -815,9 +815,9 @@ int32 field::process() {
 	case PROCESSOR_SELECT_SYNCHRO: {
 		int32 ret = TRUE;
 		if(!(it->arg1 >> 16))
-			ret = select_synchro_material(it->step, it->arg1 & 0xffff,  (card*)it->ptarget, it->arg2 & 0xffff, it->arg2 >> 16, 0, (group*)it->peffect);
+			ret = select_synchro_material(it->step, it->arg1 & 0xffff, (card*)it->ptarget, it->arg2 & 0xffff, it->arg2 >> 16, 0, (group*)it->peffect);
 		else
-			ret = select_synchro_material(it->step, it->arg1 & 0xffff,  (card*)it->ptarget, it->arg2 & 0xffff, it->arg2 >> 16, (card*)it->peffect, 0);
+			ret = select_synchro_material(it->step, it->arg1 & 0xffff, (card*)it->ptarget, it->arg2 & 0xffff, it->arg2 >> 16, (card*)it->peffect, 0);
 		if(ret)
 			core.units.pop_front();
 		else
@@ -4923,7 +4923,7 @@ int32 field::refresh_location_info(uint16 step) {
 		return FALSE;
 	}
 	case 1: {
-		if(core.disfield_effects.count == 0) {
+		if(core.disfield_effects.size() == 0) {
 			core.units.begin()->step = 2;
 			return FALSE;
 		}
@@ -4957,7 +4957,7 @@ int32 field::refresh_location_info(uint16 step) {
 	}
 	case 3: {
 		// If the blocking number is not reached, we should block more slots.
-		if(core.extram_effects.count == 0) {
+		if(core.extram_effects.size() == 0) {
 			core.units.begin()->step = 4;
 			return FALSE;
 		}
@@ -4997,7 +4997,7 @@ int32 field::refresh_location_info(uint16 step) {
 	}
 	case 5: {
 		// EFFECT_USE_EXTRA_SZONE version
-		if(core.extras_effects.count == 0) {
+		if(core.extras_effects.size() == 0) {
 			core.units.begin()->step = 6;
 			return FALSE;
 		}
