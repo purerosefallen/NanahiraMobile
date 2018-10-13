@@ -638,9 +638,9 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	luaL_getsubtable(lua_state, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
 	lua_pushnil(lua_state);
 	lua_setfield(lua_state, -2, "io");
-	luaL_getsubtable(lua_state, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
 	lua_pushnil(lua_state);
 	lua_setfield(lua_state, -2, "os");
+	lua_pop(lua_state, 1);
 	*/
 	//add bit lib back
 	lua_getglobal(lua_state, "bit32");

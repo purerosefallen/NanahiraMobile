@@ -39,6 +39,7 @@ public:
 	int32 no_action;
 	int32 call_depth;
 	int32 disable_action_check;
+	int32 preloaded;
 
 	explicit interpreter(duel* pd);
 	~interpreter();
