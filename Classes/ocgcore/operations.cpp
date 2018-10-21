@@ -2268,14 +2268,14 @@ int32 field::mset(uint16 step, uint8 setplayer, card* target, effect* proc, uint
 	}
 	return TRUE;
 }
-int32 field::sset(uint16 step, uint8 setplayer, uint8 toplayer, card * target) {
+int32 field::sset(uint16 step, uint8 setplayer, uint8 toplayer, card * target, uint32 zone) {
 	switch(step) {
 	case 0: {
-		if(!(target->data.type & TYPE_FIELD) && get_useable_count(target, toplayer, LOCATION_SZONE, setplayer, LOCATION_REASON_TOFIELD) <= 0)
+		if(!(target->data.type & TYPE_FIELD) && get_useable_count(target, toplayer, LOCATION_SZONE, setplayer, LOCATION_REASON_TOFIELD, zone ? zone : 0xff) <= 0)
 			return TRUE;
 		if(target->data.type & TYPE_MONSTER && !target->is_affected_by_effect(EFFECT_MONSTER_SSET))
 			return TRUE;
-		if(target->current.location == LOCATION_SZONE)
+		if(target->current.location == LOCATION_SZONE && target->current.controler == toplayer)
 			return TRUE;
 		if(!is_player_can_sset(setplayer, target))
 			return TRUE;
@@ -2293,7 +2293,7 @@ int32 field::sset(uint16 step, uint8 setplayer, uint8 toplayer, card * target) {
 	}
 	case 1: {
 		target->enable_field_effect(false);
-		move_to_field(target, setplayer, toplayer, LOCATION_SZONE, POS_FACEDOWN);
+		move_to_field(target, setplayer, toplayer, LOCATION_SZONE, POS_FACEDOWN, FALSE, 0, FALSE, zone ? zone : 0xff);
 		return FALSE;
 	}
 	case 2: {

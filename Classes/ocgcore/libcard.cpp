@@ -1999,9 +1999,15 @@ int32 scriptlib::card_is_ssetable(lua_State *L) {
 	card* pcard = *(card**) lua_touserdata(L, 1);
 	uint32 p = pcard->pduel->game_field->core.reason_player;
 	uint32 ign = FALSE;
+	uint32 tp = 2;
+	uint32 zone = 0xff;
 	if(lua_gettop(L) >= 2)
 		ign = lua_toboolean(L, 2);
-	lua_pushboolean(L, pcard->is_setable_szone(p, ign));
+	if(lua_gettop(L) >= 3)
+		tp = lua_tointeger(L, 3);
+	if(lua_gettop(L) >= 4)
+		zone = lua_tointeger(L, 4);
+	lua_pushboolean(L, pcard->is_setable_szone(p, ign, tp, zone));
 	return 1;
 }
 int32 scriptlib::card_is_special_summonable(lua_State *L) {

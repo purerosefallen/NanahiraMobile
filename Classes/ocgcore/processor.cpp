@@ -395,7 +395,7 @@ int32 field::process() {
 		return pduel->bufferlen;
 	}
 	case PROCESSOR_SSET: {
-		if (sset(it->step, it->arg1, it->arg2, (card*)(it->ptarget)))
+		if (sset(it->step, it->arg1, it->arg2, (card*)(it->ptarget), it->arg3))
 			core.units.pop_front();
 		else
 			it->step++;

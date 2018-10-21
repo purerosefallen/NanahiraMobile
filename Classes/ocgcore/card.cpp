@@ -3291,8 +3291,11 @@ int32 card::is_setable_mzone(uint8 playerid, uint8 ignore_count, effect* peffect
 	pduel->game_field->restore_lp_cost();
 	return TRUE;
 }
-int32 card::is_setable_szone(uint8 playerid, uint8 ignore_fd) {
-	if(!(data.type & TYPE_FIELD) && !ignore_fd && pduel->game_field->get_useable_count(this, current.controler, LOCATION_SZONE, current.controler, LOCATION_REASON_TOFIELD) <= 0)
+int32 card::is_setable_szone(uint8 playerid, uint8 ignore_fd, uint8 toplayer, uint32 zone) {
+	uint32 tp = current.controler;
+	if(toplayer < 2)
+		tp = toplayer;
+	if(!(data.type & TYPE_FIELD) && !ignore_fd && pduel->game_field->get_useable_count(this, tp, LOCATION_SZONE, tp, LOCATION_REASON_TOFIELD, zone) <= 0)
 		return FALSE;
 	if(data.type & TYPE_MONSTER && !is_affected_by_effect(EFFECT_MONSTER_SSET))
 		return FALSE;
