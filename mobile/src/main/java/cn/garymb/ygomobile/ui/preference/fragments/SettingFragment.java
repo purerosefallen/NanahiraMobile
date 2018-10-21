@@ -179,7 +179,7 @@ public class SettingFragment extends PreferenceFragmentPlus {
         }
         if (PREF_CHECK_UPDATE.equals(preference.getKey())) {
 /*
-            HomeActivity.checkPgyerUpdateSilent();
+            HomeActivity.checkPgyerUpdateSilent(getContext());
 */
         }
         if (PREF_PENDULUM_SCALE.equals(key)) {

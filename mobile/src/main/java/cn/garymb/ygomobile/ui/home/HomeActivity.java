@@ -1,5 +1,6 @@
 package cn.garymb.ygomobile.ui.home;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.base.bj.trpayjar.utils.TrPay;
@@ -61,7 +63,7 @@ import cn.garymb.ygomobile.ui.plus.ServiceDuelAssistant;
 import cn.garymb.ygomobile.ui.preference.SettingsActivity;
 import cn.garymb.ygomobile.utils.AlipayPayUtils;
 
-abstract class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+public abstract class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     protected SwipeMenuRecyclerView mServerList;
     long exitLasttime = 0;
     private ServerListAdapter mServerListAdapter;
@@ -110,7 +112,7 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
         //trpay
         //TrPay.getInstance(HomeActivity.this).initPaySdk("1111", "YGOMobile");
         //autoupadte checking
-        checkPgyerUpdateSilent();
+        checkPgyerUpdateSilent(getContext());
         //ServiceDuelAssistant
         startService(new Intent(this, ServiceDuelAssistant.class));
         StartMycard();
@@ -395,8 +397,9 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
         mMenuIds.put(mMenuIds.size(), menuId);
     }
 
-    public static void checkPgyerUpdateSilent() {
+    public static void checkPgyerUpdateSilent(Context context) {
 /*
+    final DialogPlus builder = new DialogPlus(context);;
         //蒲公英自动检查更新
         new PgyUpdateManager.Builder()
                 .setForced(true)
@@ -405,52 +408,48 @@ abstract class HomeActivity extends BaseActivity implements NavigationView.OnNav
                 .setUpdateManagerListener(new UpdateManagerListener() {
                     @Override
                     public void onNoUpdateAvailable() {
-                        Toast.makeText(getContext(), R.string.Already_Lastest, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.Already_Lastest, Toast.LENGTH_SHORT).show();
                     }
                     @Override
                     public void onUpdateAvailable(AppBean appBean) {
                         final String versionName,updateMessage;
                         versionName = appBean.getVersionName();
                         updateMessage = appBean.getReleaseNote();
-                        DialogPlus builder = new DialogPlus(getContext());
-                        builder.setTitle("发现新版本"+versionName);
+                        builder.setTitle(R.string.Update_Found + versionName);
                         builder.setMessage(updateMessage);
-                        builder.setRightButtonText("下载");
+                        builder.setRightButtonText(R.string.Download);
                         builder.setRightButtonListener((dlg, i) -> {
+                            builder.showProgressBar2();
+                            builder.hideButton();
                             PgyUpdateManager.downLoadApk(appBean.getDownloadURL());
-                            dlg.dismiss();
                         });
+
                         builder.show();
                     }
 
                     @Override
                     public void checkUpdateFailed(Exception e) {
-                        //更新检测失败回调
-                        //更新拒绝（应用被下架，过期，不在安装有效期，下载次数用尽）以及无网络情况会调用此接口
-                        Log.e("pgyer", "check update failed ", e);
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse("https://www.taptap.com/app/37972"));
+                        context.startActivity(intent);
                     }
                 })
-                //注意 ：
-                //下载方法调用 PgyUpdateManager.downLoadApk(appBean.getDownloadURL()); 此回调才有效
-                //此方法是方便用户自己实现下载进度和状态的 UI 提供的回调
-                //想要使用蒲公英的默认下载进度的UI则不设置此方法
                 .setDownloadFileListener(new DownloadFileListener() {
                     @Override
                     public void downloadFailed() {
-                        //下载失败
-                        Log.e("pgyer", "download apk failed");
+                        builder.dismiss();
                     }
 
                     @Override
                     public void downloadSuccessful(Uri uri) {
-                        Log.e("pgyer", "download apk failed");
-                        // 使用蒲公英提供的安装方法提示用户 安装apk
+                        builder.dismiss();
                         PgyUpdateManager.installApk(uri);
                     }
 
                     @Override
                     public void onProgressUpdate(Integer... integers) {
-                        Log.e("pgyer", "update download apk progress" + integers);
+                        builder.getProgressBar2().setProgress(integers[0]);
                     }})
                 .register();
 */
