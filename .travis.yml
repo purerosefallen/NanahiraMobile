@@ -58,10 +58,6 @@ before_install:
 - 7z x -y ygopro-scripts-master.zip > /dev/null
 - mv -f ygopro-scripts-master script
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/moecube/ygopro-starter-pack/archive/master.zip
-- 7z x -y ygopro-starter-pack-master.zip > /dev/null
-- cp -rf ygopro-starter-pack-master/* mobile/assets/data
-
 - rm -rf pics/thumbnail pics/*.db
 - cd pics
 - ls *.jpg | xargs -I {} convert {} -resize 177x254! -quality $QUALITY {}
