@@ -11,25 +11,26 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import cn.garymb.ygomobile.AppsSettings;
 import cn.garymb.ygomobile.Constants;
 import cn.garymb.ygomobile.lite.R;
 import cn.garymb.ygomobile.ui.plus.DialogPlus;
 import cn.garymb.ygomobile.ui.plus.VUiKit;
-import ocgcore.CardManager;
-import ocgcore.DataManager;
 import ocgcore.LimitManager;
 import ocgcore.data.Card;
 import ocgcore.data.LimitList;
 import ocgcore.enums.LimitType;
+import ocgcore.handler.CardManager;
 
 public class CardLoader implements ICardLoader {
-    private LimitManager mLimitManager;
-    private CardManager mCardManager;
+    //    private StringManager mStringManager = StringManager.get();
+    private LimitManager mLimitManager = LimitManager.get();
     private Context context;
     private CallBack mCallBack;
     private LimitList mLimitList;
     private static final String TAG = CardLoader.class.getSimpleName();
     private final static boolean DEBUG = false;
+    private final CardManager mCardManager;
 
     public interface CallBack {
         void onSearchStart();
@@ -43,8 +44,9 @@ public class CardLoader implements ICardLoader {
 
     public CardLoader(Context context) {
         this.context = context;
-        mLimitManager = DataManager.get().getLimitManager();
-        mCardManager = DataManager.get().getCardManager();
+        mCardManager = new CardManager(
+                AppsSettings.get().getDataBasePath(),
+                AppsSettings.get().getExpansionsPath().getAbsolutePath());
     }
 
     @Override
@@ -70,6 +72,11 @@ public class CardLoader implements ICardLoader {
             }
         }
         return map;
+    }
+
+    public boolean openDb() {
+        mCardManager.loadCards();
+        return true;
     }
 
     public boolean isOpen() {
@@ -173,10 +180,11 @@ public class CardLoader implements ICardLoader {
         }
     }
 
+
     @Override
     public void search(String prefixWord, String suffixWord,
                        long attribute, long level, long race,
-                       String limitName, long limit,
+                       long limitlist, long limit,
                        String atk, String def, long pscale,
                        long setcode, long category, long ot, int linkKey, long... types) {
         CardSearchInfo searchInfo = new CardSearchInfo();
@@ -200,10 +208,8 @@ public class CardLoader implements ICardLoader {
         searchInfo.race = race;
         searchInfo.pscale = (int) pscale;
         searchInfo.setcode = setcode;
-        LimitList limitList = null;
-        if (!TextUtils.isEmpty(limitName)) {
-            limitList = mLimitManager.getLimit(limitName);
-            setLimitList(limitList);
+        LimitList limitList = mLimitManager.getLimit((int) limitlist);
+        if (limitlist > 0) {
             LimitType cardLimitType = LimitType.valueOf(limit);
             if (limitList != null) {
                 List<Integer> ids;
@@ -222,9 +228,8 @@ public class CardLoader implements ICardLoader {
                     searchInfo.inCards = ids;
                 }
             }
-        } else {
-            setLimitList(null);
         }
+        setLimitList((limitList == null ? mLimitList : limitList));
         loadData(searchInfo);
     }
 }

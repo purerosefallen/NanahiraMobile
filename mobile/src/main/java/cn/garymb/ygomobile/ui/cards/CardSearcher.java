@@ -18,7 +18,6 @@ import android.widget.TextView.OnEditorActionListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import cn.garymb.ygomobile.AppsSettings;
 import cn.garymb.ygomobile.lite.R;
@@ -27,7 +26,6 @@ import cn.garymb.ygomobile.ui.adapters.SimpleSpinnerAdapter;
 import cn.garymb.ygomobile.ui.adapters.SimpleSpinnerItem;
 import cn.garymb.ygomobile.ui.plus.DialogPlus;
 import ocgcore.LimitManager;
-import ocgcore.DataManager;
 import ocgcore.StringManager;
 import ocgcore.data.CardSet;
 import ocgcore.data.LimitList;
@@ -77,8 +75,8 @@ public class CardSearcher implements View.OnClickListener {
         this.mContext = view.getContext();
         this.dataLoader = dataLoader;
         this.mSettings = AppsSettings.get();
-        mStringManager = DataManager.get().getStringManager();
-        mLimitManager = DataManager.get().getLimitManager();
+        mStringManager = StringManager.get();
+        mLimitManager = LimitManager.get();
         prefixWord = findViewById(R.id.edt_word1);
         suffixWord = findViewById(R.id.edt_word2);
         otSpinner = findViewById(R.id.sp_ot);
@@ -170,10 +168,10 @@ public class CardSearcher implements View.OnClickListener {
                             String mLinkStr = BtnVals[8] + BtnVals[7] + BtnVals[6] + BtnVals[5] + "0"
                                     + BtnVals[3] + BtnVals[2] + BtnVals[1] + BtnVals[0];
                             lineKey = Integer.parseInt(mLinkStr, 2);
-                            if (viewDialog.isShowing()) {
+                            if(viewDialog.isShowing()) {
                                 viewDialog.dismiss();
                             }
-                        } else {
+                        }else {
                             if ("0".equals(BtnVals[index])) {
                                 btn.setBackgroundResource(enImgs[index]);
                                 BtnVals[index] = "1";
@@ -253,7 +251,7 @@ public class CardSearcher implements View.OnClickListener {
         initTypeSpinners(typeSpinner, new CardType[]{CardType.None, CardType.Monster, CardType.Spell, CardType.Trap});
         initTypeSpinners(typeMonsterSpinner, new CardType[]{CardType.None, CardType.Normal, CardType.Effect, CardType.Fusion, CardType.Ritual,
                 CardType.Synchro, CardType.Pendulum, CardType.Xyz, CardType.Link, CardType.Spirit, CardType.Union,
-                CardType.Dual, CardType.Tuner, CardType.Flip, CardType.Toon, CardType.Sp_Summon, CardType.Token
+                CardType.Dual, CardType.Tuner, CardType.Flip, CardType.Toon, CardType.Sp_Summon,CardType.Token
         });
         initTypeSpinners(typeMonsterSpinner2, new CardType[]{CardType.None, CardType.Pendulum, CardType.Tuner
         });
@@ -323,20 +321,24 @@ public class CardSearcher implements View.OnClickListener {
 
     private void initLimitListSpinners(Spinner spinner) {
         List<SimpleSpinnerItem> items = new ArrayList<>();
-        List<String> limits = mLimitManager.getLimitNames();
+        List<LimitList> limitLists = mLimitManager.getLimitLists();
         int index = -1;
         int count = mLimitManager.getCount();
         LimitList cur = null;
         if (dataLoader != null) {
             cur = dataLoader.getLimitList();
         }
-        items.add(new SimpleSpinnerItem(0, getString(R.string.label_limitlist)));
         for (int i = 0; i < count; i++) {
-            int j = i + 1;
-            String name = limits.get(i);
-            items.add(new SimpleSpinnerItem(j, name));
-            if (cur != null && TextUtils.equals(cur.getName(), name)) {
-                index = j;
+            LimitList list = limitLists.get(i);
+            if (i == 0) {
+                items.add(new SimpleSpinnerItem(i, getString(R.string.label_limitlist)));
+            } else {
+                items.add(new SimpleSpinnerItem(i, list.getName()));
+            }
+            if (cur != null) {
+                if (TextUtils.equals(cur.getName(), list.getName())) {
+                    index = i;
+                }
             }
         }
         SimpleSpinnerAdapter adapter = new SimpleSpinnerAdapter(mContext);
@@ -471,10 +473,6 @@ public class CardSearcher implements View.OnClickListener {
         return SimpleSpinnerAdapter.getSelect(spinner);
     }
 
-    private String getSelectText(Spinner spinner) {
-        return SimpleSpinnerAdapter.getSelectText(spinner);
-    }
-
     protected String text(EditText editText) {
         CharSequence charSequence = editText.getText();
         if (charSequence == null) {
@@ -495,7 +493,7 @@ public class CardSearcher implements View.OnClickListener {
     private void search() {
         if (dataLoader != null) {
             dataLoader.search(text(prefixWord), text(suffixWord), getSelect(attributeSpinner)
-                    , getSelect(levelSpinner), getSelect(raceSpinner), getSelectText(limitListSpinner), getSelect(limitSpinner),
+                    , getSelect(levelSpinner), getSelect(raceSpinner), getSelect(limitListSpinner), getSelect(limitSpinner),
                     text(atkText), text(defText),
                     getSelect(pScale),
                     getSelect(setcodeSpinner)

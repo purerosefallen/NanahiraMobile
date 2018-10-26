@@ -16,7 +16,6 @@ import cn.garymb.ygomobile.ui.cards.CardListProvider;
 import cn.garymb.ygomobile.ui.cards.deck.ImageTop;
 import cn.garymb.ygomobile.bean.events.CardInfoEvent;
 import cn.garymb.ygomobile.utils.CardUtils;
-import ocgcore.DataManager;
 import ocgcore.StringManager;
 import ocgcore.data.Card;
 import ocgcore.data.LimitList;
@@ -34,7 +33,7 @@ public class CardListAdapter extends BaseRecyclerAdapterPlus<Card, ViewHolder> i
     public CardListAdapter(Context context, ImageLoader imageLoader) {
         super(context);
         this.imageLoader = imageLoader;
-        mStringManager = DataManager.get().getStringManager();
+        mStringManager = StringManager.get();
     }
 
     @Override

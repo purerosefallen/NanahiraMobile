@@ -23,7 +23,6 @@ import cn.garymb.ygomobile.ui.activities.BaseActivity;
 import cn.garymb.ygomobile.ui.cards.deck2.DeckAdapter;
 import cn.garymb.ygomobile.ui.plus.DialogPlus;
 import cn.garymb.ygomobile.ui.plus.VUiKit;
-import ocgcore.DataManager;
 import ocgcore.LimitManager;
 import ocgcore.StringManager;
 import ocgcore.data.Card;
@@ -32,12 +31,13 @@ import ocgcore.data.LimitList;
 public class DeckManagerActivity3 extends BaseActivity implements OnItemDragListener, CardLoader.CallBack {
     private RecyclerView mRecyclerView;
     private DeckAdapter mDeckAdapter;
-    protected StringManager mStringManager = DataManager.get().getStringManager();
-    protected LimitManager mLimitManager = DataManager.get().getLimitManager();
+    protected StringManager mStringManager = StringManager.get();
+    protected LimitManager mLimitManager = LimitManager.get();
     protected CardLoader mCardLoader;
     private AppsSettings mSettings = AppsSettings.get();
     private String mPreLoad;
     private File mYdkFile;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,12 @@ public class DeckManagerActivity3 extends BaseActivity implements OnItemDragList
 
         DialogPlus dlg = DialogPlus.show(this, null, getString(R.string.loading));
         VUiKit.defer().when(() -> {
-            mCardLoader.setLimitList(mLimitManager.getTopLimit());
+            StringManager.get().load();//loadFile(stringfile.getAbsolutePath());
+            LimitManager.get().load();//loadFile(stringfile.getAbsolutePath());
+            if (mLimitManager.getCount() > 1) {
+                mCardLoader.setLimitList(mLimitManager.getLimit(1));
+            }
+            mCardLoader.openDb();
             File file = new File(mSettings.getResourcePath(), Constants.CORE_DECK_PATH + "/" + mSettings.getLastDeck() + Constants.YDK_FILE_EX);
             if (!TextUtils.isEmpty(mPreLoad)) {
                 file = new File(mPreLoad);

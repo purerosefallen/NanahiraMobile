@@ -26,8 +26,7 @@ import cn.garymb.ygomobile.utils.IOUtils;
 import cn.garymb.ygomobile.utils.SystemUtils;
 import libwindbot.windbot.WindBot;
 import ocgcore.ConfigManager;
-import ocgcore.CardManager;
-import ocgcore.DataManager;
+import ocgcore.handler.CardManager;
 
 import static cn.garymb.ygomobile.Constants.ASSETS_PATH;
 import static cn.garymb.ygomobile.Constants.CORE_BOT_CONF_PATH;
@@ -129,10 +128,7 @@ public class ResCheckTask extends AsyncTask<Void, Integer, Integer> {
              *        }
              *    }*/
             //设置字体
-            ConfigManager systemConf = DataManager.openConfig(mSettings.getSystemConfig());
-            systemConf.setFontSize(mSettings.getFontSize());
-            systemConf.close();
-
+            new ConfigManager(mSettings.getSystemConfig()).setFontSize(mSettings.getFontSize());
 //            copyCoreConfig(new File(mSettings.getResourcePath(), GameSettings.CORE_CONFIG_PATH).getAbsolutePath());
             if (needsUpdate) {
                 setMessage(mContext.getString(R.string.check_things, mContext.getString(R.string.tip_new_deck)));
@@ -180,7 +176,6 @@ public class ResCheckTask extends AsyncTask<Void, Integer, Integer> {
             //checkWindbot();
             han.sendEmptyMessage(0);
 
-            loadData();
         } catch (Exception e) {
             if (Constants.DEBUG)
                 Log.e(TAG, "check", e);
@@ -189,10 +184,6 @@ public class ResCheckTask extends AsyncTask<Void, Integer, Integer> {
         return ERROR_NONE;
     }
 
-    private void loadData(){
-        setMessage(mContext.getString(R.string.loading));
-        DataManager.get().load(false);
-    }
 
     void copyCdbFile(boolean needsUpdate) throws IOException {
         File dbFile = new File(mSettings.getDataBasePath(), DATABASE_NAME);

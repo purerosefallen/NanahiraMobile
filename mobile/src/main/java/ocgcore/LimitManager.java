@@ -1,77 +1,90 @@
 package ocgcore;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cn.garymb.ygomobile.AppsSettings;
-import cn.garymb.ygomobile.Constants;
 import cn.garymb.ygomobile.utils.IOUtils;
 import ocgcore.data.LimitList;
 
-public class LimitManager implements Closeable {
-    private final Map<String, LimitList> mLimitLists = new HashMap<>();
-    private final List<String> mLimitNames = new ArrayList<>();
+import static cn.garymb.ygomobile.Constants.CORE_CUSTOM_LIMIT_PATH;
+import static cn.garymb.ygomobile.Constants.CORE_LIMIT_PATH;
+
+public class LimitManager {
+    private static LimitManager sManager = new LimitManager();
+    private final List<LimitList> mLimitLists = new ArrayList<>();
+    private String lastMd5;
+    private String lastCustomMd5;	
     private int mCount;
 
-    LimitManager() {
+    private LimitManager() {
 
     }
 
-    @Override
-    public void close() {
-        mLimitNames.clear();
-        mLimitLists.clear();
+    public static LimitManager get() {
+        return sManager;
     }
 
     public int getCount() {
         return mCount;
     }
 
-    public Map<String, LimitList> getLimitLists() {
+    public List<LimitList> getLimitLists(){
         return mLimitLists;
     }
-
-    public List<String> getLimitNames() {
-        return mLimitNames;
-    }
-
-    public @NonNull LimitList getLimit(String name) {
-        return mLimitLists.get(name);
-    }
-
-    public LimitList getTopLimit() {
-        if (mLimitNames.size() == 0) {
-            return null;
+    public LimitList getLimit(int postion) {
+        if (postion >= 0 && postion <= getCount()) {
+            return mLimitLists.get(postion);
         }
-        return mLimitLists.get(mLimitNames.get(0));
+        return null;
     }
+	
+    public boolean load_custom() {
+        File stringfile = new File(AppsSettings.get().getResourcePath(), CORE_CUSTOM_LIMIT_PATH);
+		if (stringfile == null) {
+			return false;
+		}
+		/*
+        String md5 = MD5Util.getFileMD5(stringfile.getAbsolutePath());
+        if (TextUtils.equals(md5, lastCustomMd5)) {
+            return true;
+        }
+        lastCustomMd5 = md5;
+		*/
+        return loadFile(stringfile.getAbsolutePath(), false);
+    }	
 
     public boolean load() {
-        File stringFile = new File(AppsSettings.get().getResourcePath(), Constants.CORE_LIMIT_PATH);
-        boolean rs1 = loadFile(stringFile);
-        boolean rs2 = true;
-        if (AppsSettings.get().isReadExpansions()) {
-            File stringFile2 = new File(AppsSettings.get().getExpansionsPath(), Constants.CORE_CUSTOM_LIMIT_PATH);
-            rs2 = loadFile(stringFile2);
+		boolean custom_res = load_custom();
+        File stringfile = new File(AppsSettings.get().getResourcePath(), CORE_LIMIT_PATH);
+		/*
+        String md5 = MD5Util.getFileMD5(stringfile.getAbsolutePath());
+        if (TextUtils.equals(md5, lastMd5)) {
+            return true;
         }
-        return rs1 && rs2;
+        lastMd5 = md5;
+		*/
+        return loadFile(stringfile.getAbsolutePath(), custom_res);
     }
 
-    public boolean loadFile(File file) {
+    public boolean loadFile(String path, boolean leave) {
+        if (path == null || path.length() == 0) {
+            return false;
+        }
+        File file = new File(path);
         if (file.isDirectory() || !file.exists()) {
             return false;
         }
+		if (!leave) {
+			mLimitLists.clear();
+			mLimitLists.add(new LimitList(null));
+		}
         InputStreamReader in = null;
         FileInputStream inputStream = null;
         try {
@@ -87,9 +100,10 @@ public class LimitManager implements Closeable {
                 }
                 if (line.startsWith("!")) {
                     name = line.substring(1);
+                    if (tmp != null) {
+                        mLimitLists.add(tmp);
+                    }
                     tmp = new LimitList(name);
-                    mLimitLists.put(name, tmp);
-                    mLimitNames.add(name);
                 } else if (tmp != null) {
                     String[] words = line.trim().split("[\t| ]+");
                     if (words.length >= 2) {
@@ -109,6 +123,9 @@ public class LimitManager implements Closeable {
                     }
 
                 }
+            }
+            if (tmp != null) {
+                mLimitLists.add(tmp);
             }
         } catch (Exception e) {
             Log.e("kk", "limit", e);
