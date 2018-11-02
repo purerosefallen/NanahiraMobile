@@ -37,9 +37,10 @@ public class CardManager {
 
     @WorkerThread
     public void loadCards() {
+        cardDataHashMap.clear();
         int count = readAllCards(AppsSettings.get().getDataBaseFile(), cardDataHashMap);
         Log.i("Irrlicht", "load defualt cdb:" + count);
-/*        if (AppsSettings.get().isReadExpansions()) {
+        if (AppsSettings.get().isReadExpansions()) {
             File dir = new File(exDbPath);
             if (dir.exists()) {
                 File[] files = dir.listFiles(new FilenameFilter() {
@@ -57,7 +58,7 @@ public class CardManager {
                     }
                 }
             }
-        }*/
+        }
     }
 
     private static SQLiteDatabase openDatabase(String file) {

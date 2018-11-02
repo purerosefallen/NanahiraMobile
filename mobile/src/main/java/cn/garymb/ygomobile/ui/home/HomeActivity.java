@@ -111,7 +111,7 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         //trpay
         //TrPay.getInstance(HomeActivity.this).initPaySdk("1111", "YGOMobile");
         //autoupadte checking
-        checkPgyerUpdateSilent(getContext());
+        checkPgyerUpdateSilent(getContext(),false);
         //ServiceDuelAssistant
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             this.startForegroundService(new Intent(this, ServiceDuelAssistant.class));
@@ -401,7 +401,7 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         mMenuIds.put(mMenuIds.size(), menuId);
     }
 
-    public static void checkPgyerUpdateSilent(Context context) {
+    public static void checkPgyerUpdateSilent(Context context,boolean isToastNoUpdata) {
 /*
     final DialogPlus builder = new DialogPlus(context);;
         //蒲公英自动检查更新
@@ -412,7 +412,9 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
                 .setUpdateManagerListener(new UpdateManagerListener() {
                     @Override
                     public void onNoUpdateAvailable() {
-                        Toast.makeText(context, R.string.Already_Lastest, Toast.LENGTH_SHORT).show();
+                        if (isToastNoUpdata) {
+                            Toast.makeText(context, R.string.Already_Lastest, Toast.LENGTH_SHORT).show();
+                        }
                     }
                     @Override
                     public void onUpdateAvailable(AppBean appBean) {
