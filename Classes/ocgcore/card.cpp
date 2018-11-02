@@ -1226,7 +1226,8 @@ uint32 card::get_link_marker() {
 			if (!(effects3[i]->type & EFFECT_TYPE_FIELD) || !(ocard && ocard->get_status(STATUS_TO_LEAVE_FROMEX)))
 				link_marker = effects3[i]->get_value(this);
 		}
-	}
+	} else if(current.location == LOCATION_SZONE)
+		return 0;
 	filter_effect(EFFECT_ADD_LINK_MARKER_KOISHI, &effects, FALSE);
 	filter_effect(EFFECT_REMOVE_LINK_MARKER_KOISHI, &effects);
 	filter_effect(EFFECT_CHANGE_LINK_MARKER_KOISHI, &effects2);
