@@ -7,15 +7,9 @@ android {
     defaultConfig {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 16
-<<<<<<< HEAD
         targetSdkVersion 26
-        versionCode 330701025
-        versionName "3.3.7-Koishi"
-=======
-        targetSdkVersion 21
         versionCode 330701102
-        versionName "3.3.7"
->>>>>>> 91d708ecd918f6d1329868dcce399a49f7b9823e
+        versionName "3.3.7-Koishi"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
