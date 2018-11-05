@@ -185,10 +185,8 @@ public class SettingFragment extends PreferenceFragmentPlus {
                     .loadUrl("file:///android_asset/changelog.html", Color.TRANSPARENT)
                     .show();
         }
-        if (PREF_CHECK_UPDATE.equals(preference.getKey())) {
-/*
-            HomeActivity.checkPgyerUpdateSilent(getContext(),true);
-*/
+        if (PREF_CHECK_UPDATE.equals(key)) {
+           //HomeActivity.checkPgyerUpdateSilent(getActivity(),true,true,true);
         }
         if (PREF_PENDULUM_SCALE.equals(key)) {
             CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
