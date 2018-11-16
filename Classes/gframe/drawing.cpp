@@ -619,10 +619,18 @@ void Game::DrawMisc() {
 		DrawShadowText(numFont, dInfo.str_card_count[0], recti(600 * mainGame->xScale, 51 * mainGame->yScale, 625 * mainGame->xScale, 70 * mainGame->yScale), recti(0, 1 * mainGame->yScale, 2 * mainGame->xScale, 0), dInfo.card_count_color[0], 0xff000000, true, false, 0);
 		DrawShadowText(numFont, dInfo.str_card_count[1], recti(710 * mainGame->xScale, 51 * mainGame->yScale, 735 * mainGame->xScale, 70 * mainGame->yScale), recti(0, 1 * mainGame->yScale, 2 * mainGame->xScale, 0), dInfo.card_count_color[1], 0xff000000, true, false, 0);
 	}
+
+	DrawShadowText(numFont, dInfo.str_total_attack[0], recti(575 * mainGame->xScale, 80 * mainGame->yScale, 625 * mainGame->xScale, 99 * mainGame->yScale), recti(0, 1, 2, 0), dInfo.total_attack_color[0], 0xff000000, true, false, 0);
+	DrawShadowText(numFont, dInfo.str_total_attack[1], recti(719 * mainGame->xScale, 80 * mainGame->yScale, 769 * mainGame->xScale, 99 * mainGame->yScale), recti(0, 1, 2, 0), dInfo.total_attack_color[1], 0xff000000, true, false, 0);
+
+	driver->draw2DImage(imageManager.tAttack, recti(566 * mainGame->xScale, 81 * mainGame->yScale, 575 * mainGame->xScale, 99 * mainGame->yScale), recti(32, 0, 96, 128), 0, 0, true);
+	driver->draw2DImage(imageManager.tAttack, recti(710 * mainGame->xScale, 81 * mainGame->yScale, 719 * mainGame->xScale, 99 * mainGame->yScale), recti(32, 0, 96, 128), 0, 0, true);
+
 	numFont->draw(dInfo.strLP[0], recti(305 * mainGame->xScale, 49 * mainGame->yScale, 614 * mainGame->xScale, 68 * mainGame->yScale), 0xff000000, true, false, 0);
 	numFont->draw(dInfo.strLP[0], recti(305 * mainGame->xScale, 50 * mainGame->yScale, 616 * mainGame->xScale, 69 * mainGame->yScale), 0xffffff00, true, false, 0);
 	numFont->draw(dInfo.strLP[1], recti(711 * mainGame->xScale, 49 * mainGame->yScale, 1010 * mainGame->xScale, 68 * mainGame->yScale), 0xff000000, true, false, 0);
 	numFont->draw(dInfo.strLP[1], recti(711 * mainGame->xScale, 50 * mainGame->yScale, 1012 * mainGame->xScale, 69 * mainGame->yScale), 0xffffff00, true, false, 0);
+
 
 	if(!dInfo.isTag || !dInfo.tag_player[0])
 		textFont->draw(dInfo.hostname, recti(400 * mainGame->xScale, 18 * mainGame->yScale, 629 * mainGame->xScale, 37 * mainGame->yScale), 0xffffffff, false, false, 0);
