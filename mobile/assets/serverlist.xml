@@ -24,23 +24,37 @@
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
+        <name>YGOPRO Goat</name>
+        <ip>222.73.218.25</ip>
+        <port>2005</port>
+        <keep>true</keep>
+    </server>
+    <server>
+        <player-name>Komeiji Koishi</player-name>
+        <name>YGOPRO Doom Bots of Doom</name>
+        <ip>222.73.218.25</ip>
+        <port>573</port>
+        <keep>true</keep>
+    </server>
+    <server>
+        <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO Nanahira Server</name>
-        <ip>213.159.202.230</ip>
+        <ip>173.254.200.103</ip>
         <port>7210</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO 222DIY Backup</name>
-        <ip>213.159.202.230</ip>
+        <ip>173.254.200.103</ip>
         <port>222</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO THC</name>
-        <ip>222.73.218.25</ip>
-        <port>666</port>
+        <name>YGOPRO Goat Backup</name>
+        <ip>173.254.200.103</ip>
+        <port>2005</port>
         <keep>true</keep>
     </server>
     <server>
