@@ -980,34 +980,6 @@ void DeckBuilder::FilterCards() {
 				continue;
 		}
 		bool is_target = true;
-<<<<<<< HEAD
-		for (auto elements_iterator = query_elements.begin(); elements_iterator != query_elements.end(); elements_iterator++) {
-			const wchar_t* element_pointer = elements_iterator->c_str();
-			if (element_pointer[0] == L'$') {
-				if(!CardNameContains(text.name.c_str(), &element_pointer[1])){
-					is_target = false;
-					break;
-				}
-			}
-			else if (element_pointer[0] == L'@' && set_code_map[*elements_iterator]) {
-				if(!check_set_code(data, set_code_map[*elements_iterator])) {
-					is_target = false;
-					break;
-				}
-			} else {
-				int trycode = BufferIO::GetVal(elements_iterator->c_str());
-				bool tryresult = dataManager.GetData(trycode, 0);
-				if(!tryresult && !CardNameContains(text.name.c_str(), elements_iterator->c_str()) && text.text.find(elements_iterator->c_str()) == std::wstring::npos
-					&& (!set_code_map[*elements_iterator] || !check_set_code(data, set_code_map[*elements_iterator]))) {
-					is_target = false;
-					break;
-				}
-				if(tryresult && data.code != trycode
-					&& !(data.alias == trycode && (data.alias - data.code < CARD_ARTWORK_VERSIONS_OFFSET || data.code - data.alias < CARD_ARTWORK_VERSIONS_OFFSET))) {
-					is_target = false;
-					break;
-				}
-=======
 		for (auto elements_iterator = query_elements.begin(); elements_iterator != query_elements.end(); ++elements_iterator) {
 			bool match = false;
 			if (elements_iterator->type == element_t::type_t::name) {
@@ -1030,7 +1002,6 @@ void DeckBuilder::FilterCards() {
 			if(!match) {
 				is_target = false;
 				break;
->>>>>>> 1739e544cc37ec876b2fe4e978e64f512ef1acf3
 			}
 		}
 		if(is_target)
