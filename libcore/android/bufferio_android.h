@@ -12,9 +12,21 @@ public:
 		p += 4;
 		return ret;
 	}
+	inline static unsigned int ReadUInt32(char*& p) {
+		unsigned int ret;
+		memcpy(&ret, (void *)p, sizeof(unsigned int));
+		p += 4;
+		return ret;
+	}
 	inline static short ReadInt16(char*& p) {
 		short ret;
 		memcpy(&ret, (void *)p, sizeof(short));
+		p += 2;
+		return ret;
+	}
+	inline static unsigned short ReadUInt16(char*& p) {
+		unsigned short ret;
+		memcpy(&ret, (void *)p, sizeof(unsigned short));
 		p += 2;
 		return ret;
 	}
