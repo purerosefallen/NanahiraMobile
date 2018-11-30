@@ -1564,7 +1564,9 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		}
 		std::sort(mainGame->dField.selectable_cards.begin(), mainGame->dField.selectable_cards.end(), ClientCard::client_card_sort);
 		if(select_hint)
-			myswprintf(textBuffer, L"%ls(%d-%d)", dataManager.GetDesc(select_hint),
+			select_unselect_hint = select_hint;
+		if(select_unselect_hint)
+			myswprintf(textBuffer, L"%ls(%d-%d)", dataManager.GetDesc(select_unselect_hint),
 			           mainGame->dField.select_min, mainGame->dField.select_max);
 		else myswprintf(textBuffer, L"%ls(%d-%d)", dataManager.GetSysString(560), mainGame->dField.select_min, mainGame->dField.select_max);
 		select_hint = 0;
