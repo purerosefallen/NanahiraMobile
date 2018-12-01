@@ -44,11 +44,15 @@ before_install:
     7z x -y android-ndk-r15b-linux-x86_64.zip > /dev/null;
   fi
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro/archive/master.zip
-- 7z x -y ygopro-master.zip > /dev/null
-- cp -rf ygopro-master/cards.cdb mobile/assets/data
-- cp -rf ygopro-master/strings.conf mobile/assets/data/conf
-- cp -rf ygopro-master/lflist.conf mobile/assets/data/conf
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro-database/archive/master.zip
+- 7z x -y ygopro-database-master.zip > /dev/null
+- cp -rf ygopro-database-master/locales/zh-CN/cards.cdb mobile/assets/data
+- cp -rf ygopro-database-master/locales/en-US/cards.cdb mobile/assets_en/data
+- cp -rf ygopro-database-master/locales/zh-CN/strings.conf mobile/assets/data/conf
+- cp -rf ygopro-database-master/locales/en-US/strings.conf mobile/assets_en/data/conf
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro/raw/master/lflist.conf
+- cp -rf lflist.conf mobile/assets/data/conf
+- cp -rf lflist.conf mobile/assets_en/data/conf
 
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
 - 7z x -y ygopro222-images-master.zip > /dev/null
@@ -65,23 +69,30 @@ before_install:
 
 - 7z a -mx0 -xr!.git* mobile/assets/data/pics.zip pics > /dev/null
 - 7z a -mx0 -xr!.git* mobile/assets/data/scripts.zip script > /dev/null
+- cp -rf mobile/assets/data/pics.zip mobile/assets_en/data/
+- cp -rf mobile/assets/data/scripts.zip mobile/assets_en/data/
 - mkdir mobile/assets/data/deck
-- chmod 777 ./gradlew
+- mkdir mobile/assets_en/data/deck
+- chmod +x ./gradlew
 
 script:
 - cd libcore && ./../android-ndk-r15b/ndk-build -j8 && cd ..
-- ./gradlew :mobile:assembleCnRelease
+- ./gradlew :mobile:assembleCnRelease :mobile:assembleEnRelease
 
 before_deploy:
 - mv -f ./mobile/build/outputs/apk/cn/release/mobile-cn-release.apk ./NanahiraMobile-$TRAVIS_TAG.apk
+- mv -f ./mobile/build/outputs/apk/en/release/mobile-en-release.apk ./NanahiraMobile-en-US-$TRAVIS_TAG.apk
 - mv -f ./mobile/build/outputs/apk/cn/release/output.json ./output-$TRAVIS_TAG.json
+- mv -f ./mobile/build/outputs/apk/en/release/output.json ./output-en-US-$TRAVIS_TAG.json
 
 deploy:
   provider: releases
   api-key: $NANAHIRA
   file: 
   - NanahiraMobile-$TRAVIS_TAG.apk
+  - NanahiraMobile-en-US-$TRAVIS_TAG.apk
   - output-$TRAVIS_TAG.json
+  - output-en-US-$TRAVIS_TAG.json
   skip_cleanup: true
   on:
     tags: true
