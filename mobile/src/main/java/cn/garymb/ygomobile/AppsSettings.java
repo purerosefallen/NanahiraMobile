@@ -12,6 +12,7 @@ import org.json.JSONArray;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 
 import cn.garymb.ygomobile.ui.preference.PreferenceFragmentPlus;
+import cn.garymb.ygomobile.utils.FileLogUtil;
 import cn.garymb.ygomobile.utils.ScreenUtil;
 import cn.garymb.ygomobile.utils.SystemUtils;
 
@@ -116,22 +118,58 @@ public class AppsSettings {
         mDensity = context.getResources().getDisplayMetrics().density;
         mScreenHeight = context.getResources().getDisplayMetrics().heightPixels;
         mScreenWidth = context.getResources().getDisplayMetrics().widthPixels;
-        if (isImmerSiveMode() && context instanceof Activity) {
+
+        if (context instanceof Activity) {
+
             DisplayMetrics dm = SystemUtils.getHasVirtualDisplayMetrics((Activity) context);
             if (dm != null) {
                 int height = Math.max(dm.widthPixels, dm.heightPixels);
+                try {
+                    FileLogUtil.writeAndTime("原始长"+mScreenHeight);
+                    FileLogUtil.writeAndTime("原始宽"+mScreenWidth);
+                    FileLogUtil.writeAndTime("界面长"+dm.heightPixels);
+                    FileLogUtil.writeAndTime("界面宽"+dm.widthPixels);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if(isImmerSiveMode())
+                    return;
                 ScreenUtil.findNotchInformation(((Activity) context), new ScreenUtil.FindNotchInformation() {
                     @Override
                     public void onNotchInformation(boolean isNotch, int notchHeight, int phoneType) {
-                        if (isNotch)
-                            mScreenHeight-=notchHeight;
+                        int height = Math.max(dm.widthPixels, dm.heightPixels);
+                        try {
+                            FileLogUtil.writeAndTime("是否有刘海：  "+isNotch);
+                            FileLogUtil.writeAndTime("刘海高"+notchHeight);
+                            FileLogUtil.writeAndTime("height值：  "+height);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if (isNotch) {
+                            height-=notchHeight;
+                        }
+                        try {
+                            FileLogUtil.writeAndTime("处理后height值：  "+height);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (mScreenHeight> mScreenWidth) {
+                            mScreenHeight = height;
+                        } else {
+                            mScreenWidth = height;
+                        }
+                        try {
+                            FileLogUtil.writeAndTime("转换后长"+mScreenHeight);
+                            FileLogUtil.writeAndTime("转换后宽"+mScreenWidth);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 });
-                if (mScreenHeight == Math.max(mScreenHeight, mScreenWidth)) {
-                    mScreenHeight = height;
-                } else {
-                    mScreenWidth = height;
-                }
+
             }
         }
         Log.i("机屏幕高度", "" + mScreenHeight);
@@ -355,6 +393,13 @@ public class AppsSettings {
      */
     public String getCardImagePath() {
         return new File(getResourcePath(), Constants.CORE_IMAGE_PATH).getAbsolutePath();
+    }
+
+    /***
+     * log文件夹
+     */
+    public String getMobileLogPath() {
+        return new File(getResourcePath(), Constants.MOBILE_LOG).getAbsolutePath();
     }
 
     /***
