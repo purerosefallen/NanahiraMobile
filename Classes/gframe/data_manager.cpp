@@ -1,4 +1,5 @@
 #include "data_manager.h"
+#include "game.h"
 #include <stdio.h>
 
 namespace ygo {
@@ -321,25 +322,27 @@ int DataManager::CardReader(int code, void* pData) {
 	return 0;
 }
 byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
-	char exname[256] = "./specials";
-	strcat(exname, script_name + 8);//default script name: ./script/c%d.lua
-	byte* buffer = irr::android::android_script_reader(exname, slen);
-	if(!buffer) {
-		char exname[256] = "./expansions";
-		strcat(exname, script_name + 1);
-		buffer = irr::android::android_script_reader(exname, slen);
+	// default script name: ./script/c%d.lua
+	char first[256];
+	char second[256];
+	if(mainGame->gameConf.prefer_expansion_script) {
+		sprintf(first, "expansions/%s", script_name + 2);
+		sprintf(second, "%s", script_name + 2);
+	} else {
+		sprintf(first, "%s", script_name + 2);
+		sprintf(second, "expansions/%s", script_name + 2);
 	}
-	if(!buffer) {
-		char exname[256] = "./beta";
-		strcat(exname, script_name + 1);
-		buffer = irr::android::android_script_reader(exname, slen);
+	if(mainGame->gameConf.prefer_expansion_script) {
+		if(ScriptReader(first, slen))
+			return scriptBuffer;
+		if(ScriptReader(second, slen))
+			return scriptBuffer;
 	}
-	if(buffer)
-		return buffer;
+	if(ScriptReaderZip(first, slen))
+		return scriptBuffer;
 	else
-		return irr::android::android_script_reader(script_name, slen);
+		return ScriptReaderZip(second, slen);
 }
-
 byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 	FILE *fp;
 #ifdef _WIN32
@@ -356,6 +359,23 @@ byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 	if(len >= sizeof(scriptBuffer))
 		return 0;
 	*slen = len;
+	return scriptBuffer;
+}
+byte* DataManager::ScriptReaderZip(const char* script_name, int* slen) {
+	wchar_t fname[256];
+	BufferIO::DecodeUTF8(script_name, fname);
+	IFileSystem* fs = mainGame->device->getFileSystem();
+	IReadFile* reader = fs->createAndOpenFile(fname);
+	if(reader == NULL)
+		return 0;
+	size_t size = reader->getSize();
+	if(size > sizeof(scriptBuffer)) {
+		reader->drop();
+		return 0;
+	}
+	reader->read(scriptBuffer, size);
+	reader->drop();
+	*slen = size;
 	return scriptBuffer;
 }
 
