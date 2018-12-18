@@ -56,7 +56,9 @@ public class MainActivity extends HomeActivity{
         YGOStarter.onCreated(this);
         mImageUpdater = new ImageUpdater(this);
        //动态权限
-        ActivityCompat.requestPermissions(this, PERMISSIONS, 0);
+//        ActivityCompat.requestPermissions(this, PERMISSIONS, 0);
+        //资源复制
+        checkRes();
     }
 
     @SuppressLint({"StringFormatMatches", "StringFormatInvalid"})
@@ -69,8 +71,7 @@ public class MainActivity extends HomeActivity{
 //                break;
 //            }
 //        }
-        //资源复制
-        checkRes();
+
     }
 
     private void checkRes() {
@@ -126,6 +127,7 @@ public class MainActivity extends HomeActivity{
     protected void onDestroy() {
         YGOStarter.onDestroy(this);
         super.onDestroy();
+        if(mResCheckTask!=null)
         mResCheckTask.unregisterMReceiver();
     }
 

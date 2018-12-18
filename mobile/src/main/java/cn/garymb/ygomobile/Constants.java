@@ -39,6 +39,7 @@ public interface Constants {
     String PREF_CHANGE_LOG = "pref_key_change_log";
     String PREF_CHECK_UPDATE = "pref_key_about_check_update";
     String PREF_LAST_ROOM_LIST = "pref_key_lastroom_list";
+    String PERF_TEST_REPLACE_KERNEL = "pref_key_test_replace_kernel";
     int LAST_ROOM_MAX = 10;
     /***
      * 卡组编辑，长按删除对话框
@@ -98,6 +99,8 @@ public interface Constants {
     String PREF_FONT_SIZE = "pref_settings_font_size";
     int DEF_PREF_FONT_SIZE = 14;
 
+    String PREF_NOTCH_HEIGHT="pref_notch_height";
+    int DEF_PREF_NOTCH_HEIGHT=0;
 
     String PREF_ONLY_GAME = "pref_settings_only_game";
     boolean DEF_PREF_ONLY_GAME = false;

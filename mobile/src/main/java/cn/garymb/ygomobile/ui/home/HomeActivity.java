@@ -55,6 +55,8 @@ import cn.garymb.ygodata.YGOGameOptions;
 import cn.garymb.ygomobile.App;
 import cn.garymb.ygomobile.AppsSettings;
 import cn.garymb.ygomobile.Constants;
+import cn.garymb.ygomobile.GameApplication;
+import cn.garymb.ygomobile.YGOMobileActivity;
 import cn.garymb.ygomobile.YGOStarter;
 import cn.garymb.ygomobile.bean.ServerInfo;
 import cn.garymb.ygomobile.bean.events.ServerInfoEvent;
@@ -73,6 +75,7 @@ import cn.garymb.ygomobile.ui.plus.ServiceDuelAssistant;
 import cn.garymb.ygomobile.ui.preference.SettingsActivity;
 import cn.garymb.ygomobile.utils.AlipayPayUtils;
 import cn.garymb.ygomobile.utils.FileLogUtil;
+import cn.garymb.ygomobile.utils.PermissionUtil;
 import cn.garymb.ygomobile.utils.ScreenUtil;
 
 public abstract class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -127,6 +130,7 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         checkPgyerUpdateSilent(getContext(), false, false, false);
         //ServiceDuelAssistant
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (PermissionUtil.isNotificationPermission(this)==null)
             this.startForegroundService(new Intent(this, ServiceDuelAssistant.class));
         } else {
             startService(new Intent(this, ServiceDuelAssistant.class));
@@ -135,23 +139,21 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         //萌卡
         StartMycard();
         checkNotch();
-
     }
 
     //检查是否有刘海
     private void checkNotch() {
-        ScreenUtil.findNotchInformation(HomeActivity.this, new ScreenUtil.FindNotchInformation() {
-            @Override
-            public void onNotchInformation(boolean isNotch, int notchHeight, int phoneType) {
-                try {
-                    FileLogUtil.writeAndTime("检查刘海"+isNotch+"   "+notchHeight);
-                } catch (IOException e) {
-                    e.printStackTrace();
+            ScreenUtil.findNotchInformation(HomeActivity.this, new ScreenUtil.FindNotchInformation() {
+                @Override
+                public void onNotchInformation(boolean isNotch, int notchHeight, int phoneType) {
+                    try {
+                        FileLogUtil.writeAndTime("检查刘海"+isNotch+"   "+notchHeight);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    AppsSettings.get().setNotchHeight(notchHeight);
                 }
-//                AppsSettings.get().setNotchHeight(notchHeight);
-                AppsSettings.notchHeight=notchHeight;
-            }
-        });
+            });
     }
 
     @Override
