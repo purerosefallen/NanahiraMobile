@@ -69,3 +69,8 @@ Thumbs.db
 /android-ndk*
 /*.sh
 
+#vscode
+.project
+.settings
+.vscode
+.classpath
