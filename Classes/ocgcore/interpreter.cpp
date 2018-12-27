@@ -631,7 +631,7 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	set_duel_info(lua_state, pd);
 	//Initial
 	luaL_openlibs(lua_state);
-	/*
+#ifdef YGOPRO_LUA_SAVE
 	lua_pushnil(lua_state);
  	lua_setglobal(lua_state, "io");
  	lua_pushnil(lua_state);
@@ -642,7 +642,7 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	lua_pushnil(lua_state);
 	lua_setfield(lua_state, -2, "os");
 	lua_pop(lua_state, 1);
-	*/
+#endif
 	//add bit lib back
 	lua_getglobal(lua_state, "bit32");
 	lua_setglobal(lua_state, "bit");

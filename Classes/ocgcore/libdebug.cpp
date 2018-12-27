@@ -14,12 +14,14 @@
 #include "ocgapi.h"
 
 int32 scriptlib::debug_message(lua_State *L) {
+#ifndef YGOPRO_SERVER_MODE
 	duel* pduel = interpreter::get_duel_info(L);
 	lua_getglobal(L, "tostring");
 	lua_pushvalue(L, -2);
 	lua_pcall(L, 1, 1, 0);
 	interpreter::sprintf(pduel->strbuffer, "%s", lua_tostring(L, -1));
 	handle_message(pduel, 2);
+#endif
 	return 0;
 }
 int32 scriptlib::debug_add_card(lua_State *L) {
@@ -174,6 +176,7 @@ int32 scriptlib::debug_reload_field_end(lua_State *L) {
 	return 0;
 }
 int32 scriptlib::debug_set_ai_name(lua_State *L) {
+#ifndef YGOPRO_SERVER_MODE
 	check_param_count(L, 1);
 	check_param(L, PARAM_TYPE_STRING, 1);
 	duel* pduel = interpreter::get_duel_info(L);
@@ -187,9 +190,11 @@ int32 scriptlib::debug_set_ai_name(lua_State *L) {
 	pduel->bufferp += len;
 	pduel->bufferlen += len;
 	pduel->write_buffer8(0);
+#endif
 	return 0;
 }
 int32 scriptlib::debug_show_hint(lua_State *L) {
+#ifndef YGOPRO_SERVER_MODE
 	check_param_count(L, 1);
 	check_param(L, PARAM_TYPE_STRING, 1);
 	duel* pduel = interpreter::get_duel_info(L);
@@ -203,5 +208,6 @@ int32 scriptlib::debug_show_hint(lua_State *L) {
 	pduel->bufferp += len;
 	pduel->bufferlen += len;
 	pduel->write_buffer8(0);
+#endif
 	return 0;
 }
