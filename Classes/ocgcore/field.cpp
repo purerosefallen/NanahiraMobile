@@ -573,7 +573,17 @@ int32 field::get_useable_count_fromex(card* pcard, uint8 playerid, uint8 uplayer
 	if(core.duel_rule >= 4 && !is_player_affected_by_effect(playerid, EFFECT_EXTRA_TOMAIN_KOISHI) && !pcard->is_affected_by_effect(EFFECT_EXTRA_TOMAIN_KOISHI))
 		useable_count = get_useable_count_fromex_rule4(pcard, playerid, uplayer, zone, list);
 	else
+	{
 		useable_count = get_useable_count_other(pcard, playerid, LOCATION_MZONE, uplayer, LOCATION_REASON_TOFIELD, zone, list);
+		if(core.duel_rule >= 4) {
+			uint32 temp_list = 0;
+			get_useable_count_fromex_rule4(pcard, playerid, uplayer, zone, &temp_list);
+			if(~temp_list & ((1u << 5) | (1u << 6)))
+				useable_count++;
+			if(list)
+				*list &= temp_list;
+		}
+	}
 	if(use_temp_card)
 		pcard->current.location = 0;
 	return useable_count;
