@@ -55,9 +55,13 @@ libYGOMobile.so
 /mobile/assets_ko/data/pics.zip
 /mobile/assets_ko/data/deck
 /mobile/assets_en/data/*.cdb
+<<<<<<< HEAD
 /mobile/assets_en/data/scripts.zip
 /mobile/assets_en/data/pics.zip
 /mobile/assets_en/data/deck
+=======
+/mobile/libs/libWindbot.aar
+>>>>>>> b64b2b95b2b1167fc554d1d329087936690e09e4
 /*.zip
 /*.cdb
 *.orig
@@ -65,6 +69,7 @@ libYGOMobile.so
 /mobile/assets/data/textures/Thumbs.db
 /mobile/src/main/res/drawable-xhdpi/Thumbs.db
 Thumbs.db
+output.json
 
 /android-ndk*
 /*.sh

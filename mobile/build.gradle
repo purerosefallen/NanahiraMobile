@@ -8,8 +8,8 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 331001221
-        versionName "3.3.10-Koishi"
+        versionCode 331101230
+        versionName "3.3.11-Koishi"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -108,5 +108,9 @@ dependencies {
 
     implementation 'com.nightonke:boommenu:2.1.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //
+    implementation(name: 'paysdk-release-1.2.3', ext: 'aar')
+    implementation 'com.pgyersdk:sdk:3.0.2'
+
 
 }
