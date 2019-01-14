@@ -560,7 +560,7 @@ void Game::DrawMisc() {
 		driver->draw2DImage(imageManager.tLPBar, recti(930 * mainGame->xScale, 12 * mainGame->yScale, 930 * mainGame->xScale, 74 * mainGame->yScale), recti(0, 0, 60, 60), 0, 0, true);
 	else
 	if(dInfo.lp[1] >= dInfo.start_lp[1])
-		driver->draw2DImage(imageManager.tLPBar, recti(696 * mainGame->xScale, 12 * mainGame->yScale, 930 * mainGame->xScale, 74 * mainGame->yScale), recti(0, 0, 60, 60), 0, 0, true);
+		driver->draw2DImage(imageManager.tLPBar, recti(695 * mainGame->xScale, 12 * mainGame->yScale, 930 * mainGame->xScale, 74 * mainGame->yScale), recti(0, 0, 60, 60), 0, 0, true);
 	else driver->draw2DImage(imageManager.tLPBar, recti((930 - 235 * dInfo.lp[1] / dInfo.start_lp[1]) * mainGame->xScale, 12 * mainGame->yScale, 930 * mainGame->xScale, 74 * mainGame->yScale), recti(0, 0, 60, 60), 0, 0, true);
 	if(lpframe) {
 		dInfo.lp[lpplayer] -= lpd;
