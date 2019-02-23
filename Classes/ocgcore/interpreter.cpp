@@ -631,7 +631,7 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	set_duel_info(lua_state, pd);
 	//Initial
 	luaL_openlibs(lua_state);
-#ifdef YGOPRO_LUA_SAVE
+#ifdef YGOPRO_LUA_SAFE
 	lua_pushnil(lua_state);
  	lua_setglobal(lua_state, "io");
  	lua_pushnil(lua_state);

@@ -602,10 +602,20 @@ int32 field::get_spsummonable_count_fromex(card* pcard, uint8 playerid, uint8 up
 		pcard->current.location = LOCATION_EXTRA;
 	}
 	int32 spsummonable_count = 0;
-	if(core.duel_rule >= 4)
+	if(core.duel_rule >= 4 && !is_player_affected_by_effect(playerid, EFFECT_EXTRA_TOMAIN_KOISHI) && !pcard->is_affected_by_effect(EFFECT_EXTRA_TOMAIN_KOISHI))
 		spsummonable_count = get_spsummonable_count_fromex_rule4(pcard, playerid, uplayer, zone, list);
 	else
+	{
 		spsummonable_count = get_tofield_count(pcard, playerid, LOCATION_MZONE, uplayer, LOCATION_REASON_TOFIELD, zone, list);
+		if(core.duel_rule >= 4) {
+			uint32 temp_list = 0;
+			get_spsummonable_count_fromex_rule4(pcard, playerid, uplayer, zone, &temp_list);
+			if(~temp_list & ((1u << 5) | (1u << 6)))
+				spsummonable_count++;
+			if(list)
+				*list &= temp_list;
+		}
+	}
 	if(use_temp_card)
 		pcard->current.location = 0;
 	return spsummonable_count;
