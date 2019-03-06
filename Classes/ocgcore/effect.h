@@ -212,6 +212,7 @@ enum effect_flag2 : uint32 {
 //	EFFECT_FLAG2_NAGA				= 0x0001,
 	EFFECT_FLAG2_COF				= 0x0002,
 	EFFECT_FLAG2_SPOSITCH			= 0x0100, // flag2 from 0x0100 are koishipro use
+	EFFECT_FLAG2_AVAILABLE_BD		= 0x0101,
 };
 inline effect_flag operator|(effect_flag flag1, effect_flag flag2)
 {
