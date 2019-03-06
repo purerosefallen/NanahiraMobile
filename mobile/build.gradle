@@ -8,8 +8,8 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 331300219
-        versionName "3.3.13-Koishi"
+        versionCode 340000305
+        versionName "3.4.0-Koishi"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {

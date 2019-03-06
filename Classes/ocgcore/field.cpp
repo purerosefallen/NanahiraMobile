@@ -1250,8 +1250,11 @@ void field::remove_oath_effect(effect* reason_effect) {
 void field::reset_phase(uint32 phase) {
 	for(auto eit = effects.pheff.begin(); eit != effects.pheff.end();) {
 		auto rm = eit++;
-		if((*rm)->code == EFFECT_SET_CONTROL)
-			continue;
+		// work around: skip turn still raise reset_phase(PHASE_END)
+		// without this taking control only for one turn will be returned when skipping turn
+		// RESET_TURN_END should be introduced
+		//if((*rm)->code == EFFECT_SET_CONTROL)
+		//	continue;
 		if((*rm)->reset(phase, RESET_PHASE)) {
 			if((*rm)->is_flag(EFFECT_FLAG_FIELD_ONLY))
 				remove_effect((*rm));
@@ -3173,7 +3176,7 @@ int32 field::is_chain_negatable(uint8 chaincount) {
 		peffect = core.current_chain.back().triggering_effect;
 	else
 		peffect = core.current_chain[chaincount - 1].triggering_effect;
-	if(peffect->is_flag(EFFECT_FLAG_CANNOT_DISABLE))
+	if(peffect->is_flag(EFFECT_FLAG_CANNOT_INACTIVATE))
 		return FALSE;
 	filter_field_effect(EFFECT_CANNOT_INACTIVATE, &eset);
 	for(int32 i = 0; i < eset.size(); ++i) {

@@ -1,5 +1,6 @@
 package cn.garymb.ygomobile.ui.home;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,6 +49,7 @@ import java.util.List;
 import cn.garymb.ygodata.YGOGameOptions;
 import cn.garymb.ygomobile.AppsSettings;
 import cn.garymb.ygomobile.Constants;
+import cn.garymb.ygomobile.YGOMobileActivity;
 import cn.garymb.ygomobile.YGOStarter;
 import cn.garymb.ygomobile.bean.ServerInfo;
 import cn.garymb.ygomobile.bean.events.ServerInfoEvent;
@@ -64,7 +66,10 @@ import cn.garymb.ygomobile.ui.plus.DefaultOnBoomListener;
 import cn.garymb.ygomobile.ui.plus.DialogPlus;
 import cn.garymb.ygomobile.ui.plus.ServiceDuelAssistant;
 import cn.garymb.ygomobile.ui.preference.SettingsActivity;
+import cn.garymb.ygomobile.ui.widget.Shimmer;
+import cn.garymb.ygomobile.ui.widget.ShimmerTextView;
 import cn.garymb.ygomobile.utils.AlipayPayUtils;
+import cn.garymb.ygomobile.utils.ComponentUtils;
 import cn.garymb.ygomobile.utils.FileLogUtil;
 import cn.garymb.ygomobile.utils.PermissionUtil;
 import cn.garymb.ygomobile.utils.ScreenUtil;
@@ -72,6 +77,8 @@ import cn.garymb.ygomobile.utils.ScreenUtil;
 public abstract class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     protected SwipeMenuRecyclerView mServerList;
     long exitLasttime = 0;
+    ShimmerTextView tv;
+    Shimmer shimmer;
     private ServerListAdapter mServerListAdapter;
     private ServerListManager mServerListManager;
 
@@ -194,6 +201,8 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         EventBus.getDefault().register(this);
         initBoomMenuButton($(R.id.bmb));
         AnimationShake();
+        tv = (ShimmerTextView) findViewById(R.id.shimmer_tv);
+        toggleAnimation(tv);
 
         QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
             @Override
@@ -202,7 +211,7 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
                 if (arg0) {
                     //  Toast.makeText(getActivity(), "加载成功", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getActivity(), "部分资源因机型原因加载错误，不影响使用", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getActivity(), "部分资源因机型原因加载错误，不影响使用", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -231,6 +240,12 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         //萌卡
         StartMycard();
         checkNotch();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BacktoDuel();
     }
 
     //检查是否有刘海
@@ -553,6 +568,15 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         findViewById(R.id.cube).startAnimation(shake); //给组件播放动画效果
     }
 
+    public void toggleAnimation(View target) {
+        if (shimmer != null && shimmer.isAnimating()) {
+            shimmer.cancel();
+        } else {
+            shimmer = new Shimmer();
+            shimmer.start(tv);
+        }
+    }
+
     public void StartMycard() {
         ImageView iv_mc = $(R.id.btn_mycard);
         iv_mc.setOnClickListener((v) -> {
@@ -567,6 +591,17 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
                 return true;
             }
         });
+    }
+
+    public void BacktoDuel() {
+        tv.setOnClickListener((v) -> {
+            openGame();
+        });
+        if (ComponentUtils.isActivityRunning(this, new ComponentName(this, YGOMobileActivity.class))) {
+            tv.setVisibility(View.VISIBLE);
+        } else {
+            tv.setVisibility(View.GONE);
+        }
     }
 
     public boolean joinQQGroup(String key) {
