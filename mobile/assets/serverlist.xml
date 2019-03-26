@@ -4,35 +4,35 @@
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO Koishi Server</name>
-        <ip>222.73.218.25</ip>
+        <ip>koishi.moecube.com</ip>
         <port>7210</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO 222DIY</name>
-        <ip>222.73.218.25</ip>
+        <ip>koishi.moecube.com</ip>
         <port>222</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO Koishi Server TCG</name>
-        <ip>222.73.218.25</ip>
+        <ip>koishi.moecube.com</ip>
         <port>1311</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO Goat</name>
-        <ip>222.73.218.25</ip>
+        <ip>koishi.moecube.com</ip>
         <port>2005</port>
         <keep>true</keep>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
         <name>YGOPRO Doom Bots of Doom</name>
-        <ip>222.73.218.25</ip>
+        <ip>koishi.moecube.com</ip>
         <port>573</port>
         <keep>true</keep>
     </server>
