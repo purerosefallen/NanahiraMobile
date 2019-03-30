@@ -287,7 +287,19 @@ uint32 card::get_info_location() {
 		return c + (l << 8) + (s << 16) + (ss << 24);
 	}
 }
-// get the current code
+// mapping of double-name cards
+uint32 card::second_code(uint32 code){
+	switch(code){
+		case CARD_MARINE_DOLPHIN:
+			return 17955766u;
+		case CARD_TWINKLE_MOSS:
+			return 17732278u;
+		default:
+			return 0;
+	}
+}
+// return: the current card name
+// for double-name card, it returns printed name
 uint32 card::get_code() {
 	if(assume_type == ASSUME_CODE)
 		return assume_value;
@@ -306,21 +318,24 @@ uint32 card::get_code() {
 	} else {
 		card_data dat;
 		read_card(code, &dat);
-		if (dat.alias)
+		if (dat.alias && !second_code(code))
 			code = dat.alias;
 	}
 	return code;
 }
-// get the current second-code
+// return: the current second card name
+// for double-name cards, it returns the name in description
 uint32 card::get_another_code() {
-	if(is_affected_by_effect(EFFECT_CHANGE_CODE))
-		return 0;
+	uint32 code = get_code();
+	if(code != data.code){
+		return second_code(code);
+	}
 	effect_set eset;
 	filter_effect(EFFECT_ADD_CODE, &eset);
 	if(!eset.size())
 		return 0;
 	uint32 otcode = eset.get_last()->get_value(this);
-	if(get_code() != otcode)
+	if(code != otcode)
 		return otcode;
 	return 0;
 }
@@ -3781,6 +3796,8 @@ int32 card::is_can_be_ritual_material(card* scard) {
 				return TRUE;
 		return FALSE;
 	}
+	if(current.location == LOCATION_EXTRA && is_affected_by_effect(EFFECT_MAP_OF_HEAVEN) && scard && scard->get_level() < 7)
+		return FALSE;
 	return TRUE;
 }
 int32 card::is_can_be_xyz_material(card* scard) {

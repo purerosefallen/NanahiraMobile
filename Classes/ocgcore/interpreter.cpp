@@ -109,6 +109,7 @@ static const struct luaL_Reg cardlib[] = {
 	{ "GetTurnID", scriptlib::card_get_turnid },
 	{ "GetFieldID", scriptlib::card_get_fieldid },
 	{ "GetRealFieldID", scriptlib::card_get_fieldidr },
+	{ "IsOriginalCodeRule", scriptlib::card_is_origin_code_rule },
 	{ "IsCode", scriptlib::card_is_code },
 	{ "IsType", scriptlib::card_is_type },
 	{ "IsFusionType", scriptlib::card_is_fusion_type },
@@ -731,6 +732,8 @@ interpreter::interpreter(duel* pd): coroutines(256) {
 	lua_setglobal(lua_state, "EFFECT_LINK_SPELL_KOISHI");
 	lua_pushinteger(lua_state, EFFECT_SEA_PULSE);
 	lua_setglobal(lua_state, "EFFECT_SEA_PULSE");
+	lua_pushinteger(lua_state, EFFECT_MAP_OF_HEAVEN);
+	lua_setglobal(lua_state, "EFFECT_MAP_OF_HEAVEN");
 
 	//music hints
 	lua_pushinteger(lua_state, HINT_MUSIC);

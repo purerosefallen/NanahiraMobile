@@ -1814,6 +1814,9 @@ void field::get_ritual_material(uint8 playerid, effect* peffect, card_set* mater
 	for(auto& pcard : player[playerid].list_grave)
 		if((pcard->data.type & TYPE_MONSTER) && pcard->is_affected_by_effect(EFFECT_EXTRA_RITUAL_MATERIAL) && pcard->is_removeable(playerid))
 			material->insert(pcard);
+	for(auto& pcard : player[playerid].list_extra)
+		if(pcard && (pcard->get_level() || pcard->is_affected_by_effect(EFFECT_MINIATURE_GARDEN_GIRL)) && (pcard->data.type & TYPE_MONSTER) && pcard->is_affected_by_effect(EFFECT_MAP_OF_HEAVEN) && pcard->is_capable_send_to_grave(playerid))
+			material->insert(pcard);
 }
 void field::get_fusion_material(uint8 playerid, card_set* material) {
 	for(auto& pcard : player[playerid].list_mzone) {
@@ -1831,13 +1834,17 @@ void field::get_fusion_material(uint8 playerid, card_set* material) {
 void field::ritual_release(card_set* material) {
 	card_set rel;
 	card_set rem;
+	card_set tg;
 	for(auto& pcard : *material) {
 		if(pcard->current.location == LOCATION_GRAVE)
 			rem.insert(pcard);
+		else if (pcard->current.location == LOCATION_EXTRA && pcard->is_affected_by_effect(EFFECT_MAP_OF_HEAVEN))
+			tg.insert(pcard);
 		else
 			rel.insert(pcard);
 	}
 	release(&rel, core.reason_effect, REASON_RITUAL + REASON_EFFECT + REASON_MATERIAL, core.reason_player);
+	send_to(&tg, core.reason_effect, REASON_RITUAL + REASON_EFFECT + REASON_MATERIAL, core.reason_player, PLAYER_NONE, LOCATION_GRAVE, 0, POS_FACEUP);
 	send_to(&rem, core.reason_effect, REASON_RITUAL + REASON_EFFECT + REASON_MATERIAL, core.reason_player, PLAYER_NONE, LOCATION_REMOVED, 0, POS_FACEUP);
 }
 void field::get_xyz_material(card* scard, int32 findex, uint32 lv, int32 maxc, group* mg) {
