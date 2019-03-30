@@ -1581,10 +1581,10 @@ void ClientField::RefreshCardCountDisplay() {
 	}
 	if(mainGame->dInfo.total_attack[0] > mainGame->dInfo.total_attack[1]) {
 		mainGame->dInfo.total_attack_color[0] = 0xffffff00;
-		mainGame->dInfo.total_attack_color[1] = 0xffff0000;
+		mainGame->dInfo.total_attack_color[1] = 0xffff2a00;
 	} else if(mainGame->dInfo.total_attack[1] > mainGame->dInfo.total_attack[0]) {
 		mainGame->dInfo.total_attack_color[1] = 0xffffff00;
-		mainGame->dInfo.total_attack_color[0] = 0xffff0000;
+		mainGame->dInfo.total_attack_color[0] = 0xffff2a00;
 	} else {
 		mainGame->dInfo.total_attack_color[0] = 0xffffffff;
 		mainGame->dInfo.total_attack_color[1] = 0xffffffff;
