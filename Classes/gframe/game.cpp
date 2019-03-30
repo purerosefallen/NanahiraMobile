@@ -1667,6 +1667,8 @@ void Game::ErrorLog(const char* msg) {
 void Game::ClearTextures() {
 	matManager.mCard.setTexture(0, 0);
 	imgCard->setImage(imageManager.tCover[0]);
+	scrCardText->setVisible(false);
+	imgCard->setScaleImage(true);
 	btnPSAU->setImage();
 	btnPSDU->setImage();
 	for(int i=0; i<=4; ++i) {
