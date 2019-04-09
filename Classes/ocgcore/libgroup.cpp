@@ -303,24 +303,6 @@ int32 scriptlib::group_random_select(lua_State *L) {
 	group* pgroup = *(group**) lua_touserdata(L, 1);
 	int32 playerid = lua_tointeger(L, 2);
 	int32 count = lua_tointeger(L, 3);
-	int32 no_hint = lua_toboolean(L, 4);
-	if(no_hint) {
-		duel* pduel = interpreter::get_duel_info(L);
-		group* newgroup = pduel->new_group();		
-		if(count == pgroup->container.size())
-			newgroup->container = pgroup->container;
-		else {
-			while(newgroup->container.size() < count) {
-				int32 i = pduel->get_next_integer(0, pgroup->container.size() - 1);
-				auto cit = pgroup->container.begin();
-				std::advance(cit, i);
-				newgroup->container.insert(*cit);
-			}
-		}
-		interpreter::group2value(L, newgroup);
-		return 1;
-		
-	}
 	pgroup->pduel->game_field->add_process(PROCESSOR_RANDOM_SELECT_S, 0, 0, pgroup, playerid, count);
 	return lua_yield(L, 0);
 }

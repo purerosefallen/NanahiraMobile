@@ -4,4 +4,4 @@ project "ocgcore"
     files { "**.cc", "**.cpp", "**.c", "**.h" }
     includedirs { "../lua" }
     configuration "not vs*"
-        buildoptions { "-std=c++1y" }
+        buildoptions { "-std=c++14" }

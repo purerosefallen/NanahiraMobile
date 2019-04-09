@@ -129,7 +129,7 @@ int32 effect::is_available() {
 				return FALSE;
 			if(powner == phandler && !is_flag(EFFECT_FLAG_CANNOT_DISABLE) && phandler->get_status(STATUS_DISABLED))
 				return FALSE;
-			if(phandler->is_status(STATUS_BATTLE_DESTROYED) && !is_flag(EFFECT_FLAG2_AVAILABLE_BD))
+			if(phandler->is_status(STATUS_BATTLE_DESTROYED))
 				return FALSE;
 		}
 	}
@@ -229,9 +229,6 @@ int32 effect::is_activateable(uint8 playerid, const tevent& e, int32 neglect_con
 					else
 						return FALSE;
 				}
-				else if((handler->data.type & TYPE_PENDULUM) && pduel->game_field->infos.turn_player != playerid && is_flag(EFFECT_FLAG2_SPOSITCH)) {
-					ecode = EFFECT_QP_ACT_IN_NTPHAND;
-				}
 			} else if(handler->current.location == LOCATION_SZONE) {
 				if((handler->data.type & TYPE_TRAP) && handler->get_status(STATUS_SET_TURN))
 					ecode = EFFECT_TRAP_ACT_IN_SET_TURN;
@@ -285,7 +282,7 @@ int32 effect::is_activateable(uint8 playerid, const tevent& e, int32 neglect_con
 				return FALSE;
 		} else {
 			card* phandler = get_handler();
-			if(!is_flag(EFFECT_FLAG2_AVAILABLE_BD) && (type & EFFECT_TYPE_FIELD) && phandler->is_status(STATUS_BATTLE_DESTROYED))
+			if((type & EFFECT_TYPE_FIELD) && phandler->is_status(STATUS_BATTLE_DESTROYED))
 				return FALSE;
 			if(((type & EFFECT_TYPE_FIELD) || ((type & EFFECT_TYPE_SINGLE) && is_flag(EFFECT_FLAG_SINGLE_RANGE))) && (phandler->current.location & LOCATION_ONFIELD)
 			        && (!phandler->is_position(POS_FACEUP) || !phandler->is_status(STATUS_EFFECT_ENABLED)))
@@ -769,20 +766,13 @@ void effect::set_active_type() {
 	active_type = phandler->get_type();
 	if(active_type & TYPE_TRAPMONSTER)
 		active_type &= ~TYPE_TRAP;
-	if((type & EFFECT_TYPE_ACTIVATE) && is_flag(EFFECT_FLAG2_SPOSITCH))
-		active_type |= TYPE_QUICKPLAY;
 }
 uint32 effect::get_active_type() {
 	if(type & 0x7f0) {
 		if(active_type)
 			return active_type;
 		else if((type & EFFECT_TYPE_ACTIVATE) && (get_handler()->data.type & TYPE_PENDULUM))
-		{
-			if(is_flag(EFFECT_FLAG2_SPOSITCH))
-				return TYPE_PENDULUM + TYPE_SPELL + TYPE_QUICKPLAY;
-			else
-				return TYPE_PENDULUM + TYPE_SPELL;
-		}
+			return TYPE_PENDULUM + TYPE_SPELL;
 		else
 			return get_handler()->get_type();
 	} else

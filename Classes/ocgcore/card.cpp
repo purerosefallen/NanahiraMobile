@@ -14,51 +14,6 @@
 #include "ocgapi.h"
 #include <algorithm>
 
-//millux
-uint32 card::get_ritual_type() {
-	if(current.location == LOCATION_SZONE && (data.type & TYPE_MONSTER))
-		return data.type;
-	return get_type();
-}
-uint32 card::set_entity_code(uint32 entity_code, bool remove_alias) {
-	card_data dat;
-	::read_card(entity_code, &dat);
-	uint32 code = dat.code;
-	if (!code)
-		return 0;
-	if (remove_alias && dat.alias)
-		dat.alias = 0;
-	data = dat;
-	pduel->write_buffer8(MSG_MOVE);
-	pduel->write_buffer32(data.code);
-	pduel->write_buffer32(get_info_location());
-	pduel->write_buffer32(get_info_location());
-	pduel->write_buffer32(0);
-	return code;
-}
-uint32 card::get_summon_info() {
-	effect_set effects;
-	effect_set effects2;
-	uint32 res = summon_info;
-	filter_effect(EFFECT_ADD_SUMMON_TYPE_KOISHI, &effects, FALSE);
-	filter_effect(EFFECT_REMOVE_SUMMON_TYPE_KOISHI, &effects);
-	filter_effect(EFFECT_CHANGE_SUMMON_TYPE_KOISHI, &effects2, FALSE);
-	filter_effect(EFFECT_CHANGE_SUMMON_LOCATION_KOISHI, &effects2);
-	for (int32 i = 0; i < effects.size(); ++i) {
-		if (effects[i]->code == EFFECT_ADD_SUMMON_TYPE_KOISHI)
-			res |= (effects[i]->get_value(this) & 0xff00ffff);
-		else
-			res &= ~(effects[i]->get_value(this) & 0xff00ffff);
-	}
-	for (int32 i = 0; i < effects2.size(); ++i) {
-		if (effects2[i]->code == EFFECT_CHANGE_SUMMON_TYPE_KOISHI)
-			res = (res & 0xff0000) | (effects2[i]->get_value(this) & 0xff00ffff);
-		else
-			res = ((effects2[i]->get_value(this) & 0xff) << 16) | (res & 0xff00ffff);
-	}
-	return res;
-}
-
 bool card_sort::operator()(void* const & p1, void* const & p2) const {
 	card* c1 = (card*)p1;
 	card* c2 = (card*)p2;
@@ -269,7 +224,11 @@ uint32 card::get_infos(byte* buf, int32 query_flag, int32 use_cache) {
 		}
 	}
 	*(uint32*)buf = (byte*)p - buf;
+#ifdef _IRR_ANDROID_PLATFORM_
+	memcpy(buf + 4, &query_flag, sizeof(uint32));
+#else
 	*(uint32*)(buf + 4) = query_flag;
+#endif
 	return (uint32)((byte*)p - buf);
 }
 uint32 card::get_info_location() {
@@ -972,8 +931,8 @@ uint32 card::get_rank() {
 		return 0;
 	if(assume_type == ASSUME_RANK)
 		return assume_value;
-	//if(!(current.location & LOCATION_MZONE))
-	//	return data.level;
+	if(!(current.location & LOCATION_MZONE))
+		return data.level;
 	if (temp.level != 0xffffffff)
 		return temp.level;
 	effect_set effects;
@@ -1016,17 +975,7 @@ uint32 card::get_link() {
 }
 uint32 card::get_synchro_level(card* pcard) {
 	if((data.type & (TYPE_XYZ | TYPE_LINK)) || (status & STATUS_NO_LEVEL))
-	{
-		uint32 lev;
-		effect_set eset;
-		filter_effect(EFFECT_ALLOW_SYNCHRO_KOISHI, &eset);
-		if(eset.size())
-			lev = eset[0]->get_value(pcard);
-		else
-			lev = 0;
-		return lev;
-	}
-		//return 0;
+		return 0;
 	uint32 lev;
 	effect_set eset;
 	filter_effect(EFFECT_SYNCHRO_LEVEL, &eset);
@@ -1037,14 +986,6 @@ uint32 card::get_synchro_level(card* pcard) {
 	return lev;
 }
 uint32 card::get_ritual_level(card* pcard) {
-	effect_set eset_g;
-	filter_effect(EFFECT_MINIATURE_GARDEN_GIRL, &eset_g);
-	for(int32 i = 0; i < eset_g.size(); ++i) {
-		pduel->lua->add_param(eset_g[i], PARAM_TYPE_EFFECT);
-		pduel->lua->add_param(pcard, PARAM_TYPE_CARD);
-		if(pduel->lua->check_condition(eset_g[i]->target, 2))
-			return pcard->get_level();
-	}
 	if((data.type & (TYPE_XYZ | TYPE_LINK)) || (status & STATUS_NO_LEVEL))
 		return 0;
 	uint32 lev;
@@ -1059,10 +1000,6 @@ uint32 card::get_ritual_level(card* pcard) {
 uint32 card::check_xyz_level(card* pcard, uint32 lv) {
 	if(status & STATUS_NO_LEVEL)
 		return 0;
-	card* rcard = pduel->game_field->rose_card;
-	uint32 rlv = pduel->game_field->rose_level;
-	if(rcard == this && rlv == lv)
-		return rlv;
 	uint32 lev;
 	effect_set eset;
 	filter_effect(EFFECT_XYZ_LEVEL, &eset);
@@ -1226,56 +1163,18 @@ uint32 card::get_rscale() {
 	return rscale;
 }
 uint32 card::get_link_marker() {
-	effect_set effects;
-	effect_set effects2;
-	uint32 link_marker = data.link_marker;
-	if(!(data.type & TYPE_LINK)) {
-		effect_set effects3;
-		filter_effect(EFFECT_LINK_SPELL_KOISHI, &effects3);
-		if(!effects3.size())
-			return 0;
-		for (int32 i = 0; i < effects3.size(); ++i) {
-			card* ocard = effects3[i]->get_handler();
-			if (!(effects3[i]->type & EFFECT_TYPE_FIELD) || !(ocard && ocard->get_status(STATUS_TO_LEAVE_FROMEX)))
-				link_marker = effects3[i]->get_value(this);
-		}
-	} else if(current.location == LOCATION_SZONE)
+	if(!(data.type & TYPE_LINK))
 		return 0;
-	filter_effect(EFFECT_ADD_LINK_MARKER_KOISHI, &effects, FALSE);
-	filter_effect(EFFECT_REMOVE_LINK_MARKER_KOISHI, &effects);
-	filter_effect(EFFECT_CHANGE_LINK_MARKER_KOISHI, &effects2);
-	for (int32 i = 0; i < effects.size(); ++i) {
-		card* ocard = effects[i]->get_handler();
-		if (effects[i]->code == EFFECT_ADD_LINK_MARKER_KOISHI && (!(effects[i]->type & EFFECT_TYPE_FIELD) || !(ocard && ocard->get_status(STATUS_TO_LEAVE_FROMEX))))
-			link_marker |= effects[i]->get_value(this);
-		else if (effects[i]->code == EFFECT_REMOVE_LINK_MARKER_KOISHI && (!(effects[i]->type & EFFECT_TYPE_FIELD) || !(ocard && ocard->get_status(STATUS_TO_LEAVE_FROMEX))))
-			link_marker &= ~(effects[i]->get_value(this));
-	}
-	for (int32 i = 0; i < effects2.size(); ++i) {
-		card* ocard = effects2[i]->get_handler();
-		if (!(effects2[i]->type & EFFECT_TYPE_FIELD) || !(ocard && ocard->get_status(STATUS_TO_LEAVE_FROMEX)))
-			link_marker = effects2[i]->get_value(this);
-	}
-	return link_marker;
+	return data.link_marker;
 }
 int32 card::is_link_marker(uint32 dir) {
 	return (int32)(get_link_marker() & dir);
 }
 uint32 card::get_linked_zone() {
-	if((!(data.type & TYPE_LINK) || current.location != LOCATION_MZONE) && (!is_affected_by_effect(EFFECT_LINK_SPELL_KOISHI) || current.location != LOCATION_SZONE))
+	if(!(data.type & TYPE_LINK) || current.location != LOCATION_MZONE)
 		return 0;
 	int32 zones = 0;
 	int32 s = current.sequence;
-	if(current.location == LOCATION_SZONE) {
-		if(s > 4)
-			return 0;
-		if(is_link_marker(LINK_MARKER_TOP_LEFT) && s != 0)
-			zones |= 1u << (s - 1);
-		if(is_link_marker(LINK_MARKER_TOP) && s != 0)
-			zones |= 1u << s;
-		if(is_link_marker(LINK_MARKER_TOP_RIGHT) && s != 4)
-			zones |= 1u << (s + 1);
-	}
 	if(s > 0 && s <= 4 && is_link_marker(LINK_MARKER_LEFT))
 		zones |= 1u << (s - 1);
 	if(s <= 3 && is_link_marker(LINK_MARKER_RIGHT))
@@ -1320,7 +1219,7 @@ uint32 card::get_linked_zone() {
 }
 void card::get_linked_cards(card_set* cset) {
 	cset->clear();
-	if((!(data.type & TYPE_LINK) || current.location != LOCATION_MZONE) && (!is_affected_by_effect(EFFECT_LINK_SPELL_KOISHI) || current.location != LOCATION_SZONE))
+	if(!(data.type & TYPE_LINK) || current.location != LOCATION_MZONE)
 		return;
 	int32 p = current.controler;
 	uint32 linked_zone = get_linked_zone();
@@ -2074,7 +1973,6 @@ void card::reset(uint32 id, uint32 reset_type) {
 			attack_announce_count = 0;
 			announce_count = 0;
 			attacked_count = 0;
-			removed_overlay_count = 0;
 			attack_all_target = TRUE;
 		}
 		if(id & 0xdfe0000) {
@@ -3308,11 +3206,8 @@ int32 card::is_setable_mzone(uint8 playerid, uint8 ignore_count, effect* peffect
 	pduel->game_field->restore_lp_cost();
 	return TRUE;
 }
-int32 card::is_setable_szone(uint8 playerid, uint8 ignore_fd, uint8 toplayer, uint32 zone) {
-	uint32 tp = current.controler;
-	if(toplayer < 2)
-		tp = toplayer;
-	if(!(data.type & TYPE_FIELD) && !ignore_fd && pduel->game_field->get_useable_count(this, tp, LOCATION_SZONE, tp, LOCATION_REASON_TOFIELD, zone) <= 0)
+int32 card::is_setable_szone(uint8 playerid, uint8 ignore_fd) {
+	if(!(data.type & TYPE_FIELD) && !ignore_fd && pduel->game_field->get_useable_count(this, current.controler, LOCATION_SZONE, current.controler, LOCATION_REASON_TOFIELD) <= 0)
 		return FALSE;
 	if(data.type & TYPE_MONSTER && !is_affected_by_effect(EFFECT_MONSTER_SSET))
 		return FALSE;
@@ -3437,28 +3332,6 @@ int32 card::is_removeable_as_cost(uint8 playerid) {
 	if(redirect) dest = redirect;
 	sendto_param = op_param;
 	if(dest != LOCATION_REMOVED)
-		return FALSE;
-	return TRUE;
-}
-int32 card::is_attack_decreasable_as_cost(uint8 playerid, int32 val) {
-	if(!(data.type & TYPE_MONSTER) && !(get_type() & TYPE_MONSTER))
-		return FALSE;
-	if(!(current.location & LOCATION_MZONE) || is_position(POS_FACEDOWN))
-		return FALSE;
-	if(is_affected_by_effect(EFFECT_SET_ATTACK_FINAL) || is_affected_by_effect(EFFECT_REVERSE_UPDATE))
-		return FALSE;
-	if(val && get_attack() < val)
-		return FALSE;
-	return TRUE;
-}
-int32 card::is_defense_decreasable_as_cost(uint8 playerid, int32 val) {
-	if(!(data.type & TYPE_MONSTER) && !(get_type() & TYPE_MONSTER))
-		return FALSE;
-	if(!(current.location & LOCATION_MZONE) || is_position(POS_FACEDOWN) || (data.type & TYPE_LINK))
-		return FALSE;
-	if(is_affected_by_effect(EFFECT_SET_DEFENSE_FINAL) || is_affected_by_effect(EFFECT_REVERSE_UPDATE))
-		return FALSE;
-	if(val && get_defense() < val)
 		return FALSE;
 	return TRUE;
 }
@@ -3764,8 +3637,7 @@ int32 card::is_can_be_fusion_material(card* fcard) {
 	return TRUE;
 }
 int32 card::is_can_be_synchro_material(card* scard, card* tuner) {
-	//support urara
-	if(data.type & (TYPE_XYZ | TYPE_LINK) && !is_affected_by_effect(EFFECT_ALLOW_SYNCHRO_KOISHI))
+	if(data.type & (TYPE_XYZ | TYPE_LINK))
 		return FALSE;
 	if(!(get_synchro_type() & TYPE_MONSTER))
 		return FALSE;
@@ -3796,8 +3668,6 @@ int32 card::is_can_be_ritual_material(card* scard) {
 				return TRUE;
 		return FALSE;
 	}
-	if(current.location == LOCATION_EXTRA && is_affected_by_effect(EFFECT_MAP_OF_HEAVEN) && scard && scard->get_level() < 7)
-		return FALSE;
 	return TRUE;
 }
 int32 card::is_can_be_xyz_material(card* scard) {
