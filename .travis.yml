@@ -48,8 +48,8 @@ before_install:
 - 7z x -y ygopro-database-master.zip > /dev/null
 - cp -rf ygopro-database-master/locales/zh-CN/cards.cdb mobile/assets/data
 - cp -rf ygopro-database-master/locales/en-US/cards.cdb mobile/assets_en/data
-- cp -rf ygopro-database-master/locales/zh-CN/strings.conf mobile/assets/data/conf
-- cp -rf ygopro-database-master/locales/en-US/strings.conf mobile/assets_en/data/conf
+#- cp -rf ygopro-database-master/locales/zh-CN/strings.conf mobile/assets/data/conf
+#- cp -rf ygopro-database-master/locales/en-US/strings.conf mobile/assets_en/data/conf
 - curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro/raw/master/lflist.conf
 - cp -rf lflist.conf mobile/assets/data/conf
 - cp -rf lflist.conf mobile/assets_en/data/conf
