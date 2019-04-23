@@ -408,7 +408,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 		else if(conti_selecting)
 			mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardSelect[i], selectable_cards[i]->chain_code));
 		else
-			mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler]);
+			mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler + 2]);
 		mainGame->btnCardSelect[i]->setRelativePosition(rect<s32>((startpos + i * 125) * mainGame->xScale, 55 * mainGame->yScale, (startpos + 120 + i * 125) * mainGame->xScale, 225 * mainGame->yScale));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
@@ -605,18 +605,23 @@ void ClientField::ShowSelectOption(int select_hint) {
 	selected_option = 0;
 	wchar_t textBuffer[256];
 	int count = select_options.size();
-	bool quickmode = (count <= 5);
+	bool quickmode = true;
 	mainGame->gMutex.Lock();
-	for(int i = 0; (i < count) && quickmode; i++) {
-		const wchar_t* option = dataManager.GetDesc(select_options[i]);
-		irr::core::dimension2d<unsigned int> dtxt = mainGame->guiFont->getDimension(option);
-		if(dtxt.Width > 310 * mainGame->xScale) {
+	for(auto option : select_options) {
+		if(mainGame->guiFont->getDimension(dataManager.GetDesc(option)).Width > 310 * mainGame->xScale) {
 			quickmode = false;
 			break;
 		}
+	}
+	for(int i = 0; (i < count) && (i < 5) && quickmode; i++) {
+		const wchar_t* option = dataManager.GetDesc(select_options[i]);
 		mainGame->btnOption[i]->setText(option);
 	}
 	if(quickmode) {
+		bool scrollbar = count > 5;
+		mainGame->scrOption->setVisible(scrollbar);
+		mainGame->scrOption->setPos(0);
+		mainGame->scrOption->setMax(scrollbar ? (count - 5) : 1);
 		mainGame->stOptions->setVisible(false);
 		mainGame->btnOptionp->setVisible(false);
 		mainGame->btnOptionn->setVisible(false);
@@ -624,13 +629,14 @@ void ClientField::ShowSelectOption(int select_hint) {
 		for(int i = 0; i < 5; i++)
 			mainGame->btnOption[i]->setVisible(i < count);
 		recti pos = mainGame->wOptions->getRelativePosition();
-		int newheight = (30 + 60 * count) * mainGame->yScale;
+		int newheight = 30 + 70 * (scrollbar ? 5 : count) * mainGame->yScale;
 		int oldheight = pos.LowerRightCorner.Y - pos.UpperLeftCorner.Y;
 		pos.UpperLeftCorner.Y = pos.UpperLeftCorner.Y + (oldheight - newheight) / 2;
+		pos.LowerRightCorner.X = pos.UpperLeftCorner.X + (scrollbar ? 405 : 390) * mainGame->xScale;
 		pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + newheight;
 		mainGame->wOptions->setRelativePosition(pos);
 	} else {
-		mainGame->SetStaticText(mainGame->stOptions, 310 * mainGame->xScale, mainGame->guiFont,
+		mainGame->SetStaticText(mainGame->stOptions, 370  * mainGame->xScale, mainGame->guiFont,
 			(wchar_t*)dataManager.GetDesc(select_options[0]));
 		mainGame->stOptions->setVisible(true);
 		mainGame->btnOptionp->setVisible(false);
@@ -639,7 +645,7 @@ void ClientField::ShowSelectOption(int select_hint) {
 		for(int i = 0; i < 5; i++)
 			mainGame->btnOption[i]->setVisible(false);
 		recti pos = mainGame->wOptions->getRelativePosition();
-		pos.LowerRightCorner.Y = ((pos.UpperLeftCorner.Y / mainGame->yScale) + 180) * mainGame->yScale;
+		pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 180 * mainGame->yScale;
 		mainGame->wOptions->setRelativePosition(pos);
 	}
 	if(select_hint)

@@ -6,9 +6,24 @@ import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import com.file.zip.ZipEntry;
+import com.file.zip.ZipFile;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.ZipInputStream;
+
+
+import cn.garymb.ygomobile.App;
 import cn.garymb.ygomobile.AppsSettings;
 import cn.garymb.ygomobile.utils.IOUtils;
 import ocgcore.data.Card;
@@ -17,6 +32,7 @@ import ocgcore.data.Card;
 public class CardManager {
     private String dbDir, exDbPath;
     private final SparseArray<Card> cardDataHashMap = new SparseArray<>();
+    private static int cdbNum=0;
 
     public CardManager(String dbDir, String exPath) {
         this.dbDir = dbDir;
@@ -47,13 +63,24 @@ public class CardManager {
                     @Override
                     public boolean accept(File dir, String name) {
                         File file = new File(dir, name);
-                        return file.isFile() && name.endsWith(".cdb");
+                        return file.isFile() && (name.endsWith(".cdb")||name.endsWith(".zip"));
                     }
                 });
                 //读取全部卡片
                 if (files != null) {
                     for (File file : files) {
-                        count = readAllCards(file, cardDataHashMap);
+                        if (file.getName().endsWith(".cdb")){
+                            count = readAllCards(file, cardDataHashMap);
+                        }else if(file.getName().endsWith(".zip")){
+                            Log.e("CardManager","读取压缩包");
+                            try {
+                                for(File file1:readZipCdb(file.getAbsolutePath())){
+                                    count = readAllCards(file1, cardDataHashMap);
+                                }
+                            } catch (IOException e) {
+                                Log.e("CardManager","读取压缩包错误"+e);
+                            }
+                        }
                         Log.i("Irrlicht", "load " + count + " cdb:" + file);
                     }
                 }
@@ -94,6 +121,40 @@ public class CardManager {
         }
         IOUtils.close(db);
         return rs;
+    }
+
+    public static List<File> readZipCdb(String zipPath) throws IOException {
+        String savePath= App.get().getExternalCacheDir().getAbsolutePath();
+        List<File> fileList=new ArrayList<>();
+
+        ZipFile zf = new ZipFile(zipPath,"GBK");
+        InputStream in = new BufferedInputStream(new FileInputStream(zipPath));
+        ZipInputStream zin = new ZipInputStream(in);
+        ZipEntry ze;
+        Enumeration<ZipEntry> entris = zf.getEntries();
+        while (entris.hasMoreElements()) {
+            ze=entris.nextElement();
+            if (ze.isDirectory()) {
+                //Do nothing
+            } else {
+                if (ze.getName().endsWith(".cdb")) {
+                    File file=new File(savePath,"cards"+cdbNum+".cdb");
+                    InputStream inputStream = zf.getInputStream(ze);
+                    OutputStream os = new FileOutputStream(file);
+                    int bytesRead = 0;
+                    byte[] buffer = new byte[8192];
+                    while ((bytesRead = inputStream.read(buffer, 0, 8192)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                    os.close();
+                    inputStream.close();
+                    fileList.add(file);
+                    cdbNum++;
+                }
+            }
+        }
+        zin.closeEntry();
+        return fileList;
     }
 
     @WorkerThread

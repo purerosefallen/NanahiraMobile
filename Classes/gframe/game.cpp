@@ -8,11 +8,8 @@
 #include "duelclient.h"
 #include "netserver.h"
 #include "single_mode.h"
+#include "myfilesystem.h"
 
-#ifndef _WIN32
-#include <sys/types.h>
-#include <dirent.h>
-#endif
 #ifdef _IRR_ANDROID_PLATFORM_
 #include <android/AndroidSoundEffectPlayer.h>
 #include <android/CAndroidGUIEditBox.h>
@@ -559,7 +556,7 @@ bool Game::Initialize() {
 	stQMessage->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	btnYes = env->addButton(rect<s32>(80 * xScale, 115 * yScale, 170 * xScale, 165 * yScale), wQuery, BUTTON_YES, dataManager.GetSysString(1213));
 	btnNo = env->addButton(rect<s32>(200 * xScale, 115 * yScale, 290 * xScale, 165 * yScale), wQuery, BUTTON_NO, dataManager.GetSysString(1214));
-	//options (310)
+	//options (370)
 	wOptions = env->addWindow(rect<s32>(470 * xScale, 180 * yScale, 860 * xScale, 360 * yScale), false, L"");
 	wOptions->getCloseButton()->setVisible(false);
 	wOptions->setVisible(false);
@@ -571,6 +568,10 @@ bool Game::Initialize() {
     for(int i = 0; i < 5; ++i) {
 		btnOption[i] = env->addButton(rect<s32>(10 * xScale, (30 + 60 * i) * yScale, 380 * xScale, (80 + 60 * i) * yScale), wOptions, BUTTON_OPTION_0 + i, L"");
 	}
+	scrOption = env->addScrollBar(false, rect<s32>(350 * xScale, 30 * yScale, 365 * xScale, 220 * yScale), wOptions, SCROLL_OPTION_SELECT);
+	scrOption->setLargeStep(1);
+	scrOption->setSmallStep(1);
+	scrOption->setMin(0);
 #endif
 	//pos selectimgCard->setScaleImage(true);
 	wPosSelect = env->addWindow(rect<s32>(340 * xScale, 200 * yScale, 935 * xScale, 410 * yScale), false, dataManager.GetSysString(561));
@@ -723,7 +724,7 @@ bool Game::Initialize() {
 	wRenameDeck = env->addWindow(rect<s32>(490 * xScale, 180 * yScale, 840 * xScale, 340 * yScale), false, dataManager.GetSysString(1367));
 	wRenameDeck->getCloseButton()->setVisible(false);
 	wRenameDeck->setVisible(false);
-	env->addStaticText(dataManager.GetSysString(1499), rect<s32>(20 * xScale, 25 * yScale, 290 * xScale, 45 * yScale), false, false, wRenameDeck);
+	env->addStaticText(dataManager.GetSysString(1280), rect<s32>(20 * xScale, 25 * yScale, 290 * xScale, 45 * yScale), false, false, wRenameDeck);
 	ebREName = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(20 * xScale, 50 * yScale, 330 * xScale, 90 * yScale), wRenameDeck, -1);
 	ebREName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	btnREYes = env->addButton(rect<s32>(70 * xScale, 100 * yScale, 160 * xScale, 150 * yScale), wRenameDeck, BUTTON_RENAME_DECK_SAVE, dataManager.GetSysString(1341));
@@ -1316,37 +1317,15 @@ void Game::LoadExpansions() {
 }
 void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 	cbDeck->clear();
-#ifdef _WIN32
-	WIN32_FIND_DATAW fdataw;
-	HANDLE fh = FindFirstFileW(L"./deck/*.ydk", &fdataw);
-	if(fh == INVALID_HANDLE_VALUE)
-		return;
-	do {
-		if(!(fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			wchar_t* pf = fdataw.cFileName;
-			while(*pf) pf++;
-			while(*pf != L'.') pf--;
-			*pf = 0;
-			cbDeck->addItem(fdataw.cFileName);
+	FileSystem::TraversalDir(L"./deck", [cbDeck](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && !wcsncasecmp(wcsrchr(name, '.'), L".ydk", 4)) {
+			size_t len = wcslen(name);
+			wchar_t deckname[256];
+			wcsncpy(deckname, name, len - 4);
+			deckname[len - 4] = 0;
+			cbDeck->addItem(deckname);
 		}
-	} while(FindNextFileW(fh, &fdataw));
-	FindClose(fh);
-#else
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./deck/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".ydk") != 0)
-			continue;
-		dirp->d_name[len - 4] = 0;
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		cbDeck->addItem(wname);
-	}
-	closedir(dir);
-#endif
+	});
 	for(size_t i = 0; i < cbDeck->getItemCount(); ++i) {
 		if(!wcscmp(cbDeck->getItem(i), gameConf.lastdeck)) {
 			cbDeck->setSelected(i);
@@ -1356,37 +1335,18 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 }
 void Game::RefreshReplay() {
 	lstReplayList->clear();
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./replay/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".yrp") != 0)
-			continue;
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		if(Replay::CheckReplay(wname))
-			lstReplayList->addItem(wname);
-	}
-	closedir(dir);
+	FileSystem::TraversalDir(L"./replay", [this](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && !wcsncasecmp(wcsrchr(name, '.'), L".yrp", 4) && Replay::CheckReplay(name))
+			lstReplayList->addItem(name);
+	});
 }
 void Game::RefreshSingleplay() {
 	lstSinglePlayList->clear();
 	stSinglePlayInfo->setText(L"");
-	DIR * dir;
-	struct dirent * dirp;
-	if((dir = opendir("./single/")) == NULL)
-		return;
-	while((dirp = readdir(dir)) != NULL) {
-		size_t len = strlen(dirp->d_name);
-		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".lua") != 0)
-			continue;
-		wchar_t wname[256];
-		BufferIO::DecodeUTF8(dirp->d_name, wname);
-		lstSinglePlayList->addItem(wname);
-	}
-	closedir(dir);
+	FileSystem::TraversalDir(L"./single", [this](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && !wcsncasecmp(wcsrchr(name, '.'), L".lua", 4))
+			lstSinglePlayList->addItem(name);
+	});
 }
 void Game::RefreshBot() {
 	if(!gameConf.enable_bot_mode)
