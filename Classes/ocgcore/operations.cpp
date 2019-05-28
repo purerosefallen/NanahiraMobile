@@ -683,7 +683,7 @@ int32 field::remove_counter(uint16 step, uint32 reason, card* pcard, uint8 rplay
 		if(core.select_options.size() == 1)
 			returns.ivalue[0] = 0;
 		else if(core.select_effects[0] == 0 && core.select_effects.size() == 2)
-			add_process(PROCESSOR_SELECT_EFFECTYN, 0, 0, (group*)core.select_effects[1]->handler, rplayer, 219);
+			add_process(PROCESSOR_SELECT_EFFECTYN, 0, 0, (group*)core.select_effects[1]->handler, rplayer, 220);
 		else
 			add_process(PROCESSOR_SELECT_OPTION, 0, 0, 0, rplayer, 0);
 		return FALSE;
@@ -759,7 +759,7 @@ int32 field::remove_overlay_card(uint16 step, uint32 reason, card* pcard, uint8 
 		if(core.select_options.size() == 1)
 			returns.ivalue[0] = 0;
 		else if(core.select_effects[0] == 0 && core.select_effects.size() == 2)
-			add_process(PROCESSOR_SELECT_EFFECTYN, 0, 0, (group*)core.select_effects[1]->handler, rplayer, 220);
+			add_process(PROCESSOR_SELECT_EFFECTYN, 0, 0, (group*)core.select_effects[1]->handler, rplayer, 219);
 		else
 			add_process(PROCESSOR_SELECT_OPTION, 0, 0, 0, rplayer, 0);
 		return FALSE;
@@ -2276,7 +2276,7 @@ int32 field::mset(uint16 step, uint8 setplayer, card* target, effect* proc, uint
 	}
 	return TRUE;
 }
-int32 field::sset(uint16 step, uint8 setplayer, uint8 toplayer, card * target) {
+int32 field::sset(uint16 step, uint8 setplayer, uint8 toplayer, card * target, effect* reason_effect) {
 	switch(step) {
 	case 0: {
 		if(!(target->data.type & TYPE_FIELD) && get_useable_count(target, toplayer, LOCATION_SZONE, setplayer, LOCATION_REASON_TOFIELD) <= 0)
@@ -2322,7 +2322,7 @@ int32 field::sset(uint16 step, uint8 setplayer, uint8 toplayer, card * target) {
 		pduel->write_buffer32(target->data.code);
 		pduel->write_buffer32(target->get_info_location());
 		adjust_instant();
-		raise_event(target, EVENT_SSET, 0, 0, setplayer, setplayer, 0);
+		raise_event(target, EVENT_SSET, reason_effect, 0, setplayer, setplayer, 0);
 		process_instant_event();
 		if(core.current_chain.size() == 0) {
 			adjust_all();
@@ -2333,7 +2333,7 @@ int32 field::sset(uint16 step, uint8 setplayer, uint8 toplayer, card * target) {
 	}
 	return TRUE;
 }
-int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget, uint8 confirm) {
+int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget, uint8 confirm, effect* reason_effect) {
 	switch(step) {
 	case 0: {
 		card_set* set_cards = new card_set;
@@ -2490,7 +2490,7 @@ int32 field::sset_g(uint16 step, uint8 setplayer, uint8 toplayer, group* ptarget
 	case 7: {
 		returns.ivalue[0] = core.operated_set.size();
 		adjust_instant();
-		raise_event(&core.operated_set, EVENT_SSET, 0, 0, setplayer, setplayer, 0);
+		raise_event(&core.operated_set, EVENT_SSET, reason_effect, 0, setplayer, setplayer, 0);
 		process_instant_event();
 		if(core.current_chain.size() == 0) {
 			adjust_all();
@@ -4257,6 +4257,10 @@ int32 field::move_to_field(uint16 step, card* target, uint32 enable, uint32 ret,
 					}
 				}
 			}
+			if(ret == 2) {
+				returns.bvalue[2] = target->previous.sequence;
+				return FALSE;
+			}
 			if(move_player == playerid) {
 				if(location == LOCATION_SZONE)
 					flag = ((flag & 0xff) << 8) | 0xffff00ff;
@@ -5940,16 +5944,19 @@ int32 field::toss_coin(uint16 step, effect * reason_effect, uint8 reason_player,
 		effect* peffect = 0;
 		tevent e;
 		e.event_cards = 0;
-		e.reason_effect = core.reason_effect;
-		e.reason_player = core.reason_player;
 		e.event_player = playerid;
 		e.event_value = count;
+		e.reason = 0;
+		e.reason_effect = reason_effect;
+		e.reason_player = reason_player;
 		for(uint8 i = 0; i < 5; ++i)
 			core.coin_result[i] = 0;
-		filter_field_effect(EFFECT_TOSS_COIN_REPLACE, &eset);
-		for(int32 i = eset.size() - 1; i >= 0; --i) {
-			if(eset[i]->is_activateable(eset[i]->get_handler_player(), e)) {
-				peffect = eset[i];
+		auto pr = effects.continuous_effect.equal_range(EFFECT_TOSS_COIN_REPLACE);
+		for(auto eit = pr.first; eit != pr.second;) {
+			effect* pe = eit->second;
+			++eit;
+			if(pe->is_activateable(pe->get_handler_player(), e)) {
+				peffect = pe;
 				break;
 			}
 		}
@@ -5963,15 +5970,20 @@ int32 field::toss_coin(uint16 step, effect * reason_effect, uint8 reason_player,
 			}
 			raise_event((card*)0, EVENT_TOSS_COIN_NEGATE, reason_effect, 0, reason_player, playerid, count);
 			process_instant_event();
-			return FALSE;
 		} else {
 			solve_continuous(peffect->get_handler_player(), peffect, e);
-			return TRUE;
+			core.units.begin()->step = 1;
 		}
+		return FALSE;
 	}
 	case 1: {
 		raise_event((card*)0, EVENT_TOSS_COIN, reason_effect, 0, reason_player, playerid, count);
 		process_instant_event();
+		return TRUE;
+	}
+	case 2: {
+		for(uint8 i = 0; i < 5; ++i)
+			core.coin_result[i] = (returns.ivalue[0] >> (i * 4)) & 0xf;
 		return TRUE;
 	}
 	}
@@ -5984,16 +5996,19 @@ int32 field::toss_dice(uint16 step, effect * reason_effect, uint8 reason_player,
 		effect* peffect = 0;
 		tevent e;
 		e.event_cards = 0;
-		e.reason_effect = core.reason_effect;
-		e.reason_player = core.reason_player;
 		e.event_player = playerid;
 		e.event_value = count1 + (count2 << 16);
+		e.reason = 0;
+		e.reason_effect = reason_effect;
+		e.reason_player = reason_player;
 		for(int32 i = 0; i < 5; ++i)
 			core.dice_result[i] = 0;
-		filter_field_effect(EFFECT_TOSS_DICE_REPLACE, &eset);
-		for(int32 i = eset.size() - 1; i >= 0; --i) {
-			if(eset[i]->is_activateable(eset[i]->get_handler_player(), e)) {
-				peffect = eset[i];
+		auto pr = effects.continuous_effect.equal_range(EFFECT_TOSS_DICE_REPLACE);
+		for(auto eit = pr.first; eit != pr.second;) {
+			effect* pe = eit->second;
+			++eit;
+			if(pe->is_activateable(pe->get_handler_player(), e)) {
+				peffect = pe;
 				break;
 			}
 		}
@@ -6016,15 +6031,20 @@ int32 field::toss_dice(uint16 step, effect * reason_effect, uint8 reason_player,
 			}
 			raise_event((card*)0, EVENT_TOSS_DICE_NEGATE, reason_effect, 0, reason_player, playerid, count1 + (count2 << 16));
 			process_instant_event();
-			return FALSE;
 		} else {
 			solve_continuous(peffect->get_handler_player(), peffect, e);
-			return TRUE;
+			core.units.begin()->step = 1;
 		}
+		return FALSE;
 	}
 	case 1: {
 		raise_event((card*)0, EVENT_TOSS_DICE, reason_effect, 0, reason_player, playerid, count1 + (count2 << 16));
 		process_instant_event();
+		return TRUE;
+	}
+	case 2: {
+		for(uint8 i = 0; i < 5; ++i)
+			core.dice_result[i] = (returns.ivalue[0] >> (i * 4)) & 0xf;
 		return TRUE;
 	}
 	}
