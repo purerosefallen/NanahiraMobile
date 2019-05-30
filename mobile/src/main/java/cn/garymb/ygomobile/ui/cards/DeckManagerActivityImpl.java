@@ -7,7 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Keep;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.RecyclerView;
@@ -37,7 +37,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,9 +58,11 @@ import cn.garymb.ygomobile.ui.cards.deck.DeckItem;
 import cn.garymb.ygomobile.ui.cards.deck.DeckItemTouchHelper;
 import cn.garymb.ygomobile.ui.cards.deck.DeckItemType;
 import cn.garymb.ygomobile.ui.cards.deck.DeckLayoutManager;
+import cn.garymb.ygomobile.ui.mycard.mcchat.util.Util;
 import cn.garymb.ygomobile.ui.plus.AOnGestureListener;
 import cn.garymb.ygomobile.ui.plus.DefaultOnBoomListener;
 import cn.garymb.ygomobile.ui.plus.DialogPlus;
+import cn.garymb.ygomobile.ui.plus.ServiceDuelAssistant;
 import cn.garymb.ygomobile.ui.plus.VUiKit;
 import cn.garymb.ygomobile.utils.BitmapUtil;
 import cn.garymb.ygomobile.utils.FileUtils;
@@ -88,6 +89,7 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
     private AppCompatSpinner mLimitSpinner;
     private CardDetail mCardDetail;
     private DialogPlus mDialog;
+    private DialogPlus builderShareLoading;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -174,15 +176,15 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
             if (deckItem == null || deckItem.getCardInfo() == null) {
                 return;
             }
-            DialogPlus dialogPlus = new DialogPlus(this);
-            dialogPlus.setTitle(R.string.question);
-            dialogPlus.setMessage(getString(R.string.delete_card, deckItem.getCardInfo().Name));
-            dialogPlus.setMessageGravity(Gravity.CENTER_HORIZONTAL);
-            dialogPlus.setLeftButtonListener((dlg, v) -> {
-                dlg.dismiss();
+//            DialogPlus dialogPlus = new DialogPlus(this);
+//            dialogPlus.setTitle(R.string.question);
+//            dialogPlus.setMessage(getString(R.string.delete_card, deckItem.getCardInfo().Name));
+//            dialogPlus.setMessageGravity(Gravity.CENTER_HORIZONTAL);
+//            dialogPlus.setLeftButtonListener((dlg, v) -> {
+//                dlg.dismiss();
                 mDeckItemTouchHelper.remove(pos);
-            });
-            dialogPlus.show();
+//            });
+//            dialogPlus.show();
         } else {
             mDeckAdapater.showHeadView();
         }
@@ -682,8 +684,43 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
         return files == null || files.size() == 0 ? null : files.get(0);
     }
 
-    private void shareDeck() {
-//        开启绘图缓存
+    private void shareDeck(){
+    builderShareLoading = new DialogPlus(this);
+        builderShareLoading.showProgressBar();
+        builderShareLoading.hideTitleBar();
+        builderShareLoading.setMessage(R.string.Pre_share);
+        builderShareLoading.show();
+
+        //先排序
+        mDeckAdapater.sort();
+        //保存
+        if (mPreLoadFile != null && mPreLoadFile == mDeckAdapater.getYdkFile()) {
+            //需要保存到deck文件夹
+            inputDeckName(mPreLoadFile, true);
+        } else {
+            if (mDeckAdapater.getYdkFile() == null) {
+                inputDeckName(null, true);
+            } else {
+                save(mDeckAdapater.getYdkFile());
+            }
+        }
+        //保存成功后重新加载卡组
+        File file = getSelectDeck(mDeckSpinner);
+        if (file != null) {
+            loadDeckFromFile(file);
+        }
+        //延时一秒，等排好序再分享
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                shareDeck1();
+            }
+        },1000);
+    }
+
+    private void shareDeck1() {
+
+        //开启绘图缓存
         mRecyclerView.setDrawingCacheEnabled(true);
         //这个方法可调可不调，因为在getDrawingCache()里会自动判断有没有缓存有没有准备好，
         //如果没有，会自动调用buildDrawingCache()
@@ -706,8 +743,13 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
         String savePath = new File(AppsSettings.get().getDeckSharePath(), deckName + ".jpg").getAbsolutePath();
         BitmapUtil.saveBitmap(bitmap, savePath, 50);
         ShareUtil.shareImage(DeckManagerActivityImpl.this, "卡组分享", savePath, null);
-
-
+        //复制前关闭决斗助手
+        stopService(new Intent(this, ServiceDuelAssistant.class));
+        Util.fzMessage(this,mDeckAdapater.getDeckInfo().toDeck().toAppUri().toString());
+        showToast(getString(R.string.deck_text_copyed));
+        //复制完毕开启决斗助手
+        Util.startDuelService(this);
+        builderShareLoading.dismiss();
 //        String label = TextUtils.isEmpty(deck.getName()) ? getString(R.string.share_deck) : deck.getName();
 //        final String uriString = deck.toAppUri().toString();
 //        final String httpUri = deck.toHttpUri().toString();
@@ -938,7 +980,7 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
     private void initBoomMenuButton(BoomMenuButton menu) {
         final SparseArray<Integer> mMenuIds = new SparseArray<>();
         // addMenuButton(mMenuIds, menu, R.id.action_card_search, R.string.deck_list, R.drawable.listicon);
-        addMenuButton(mMenuIds, menu, R.id.action_share_deck, R.string.share_deck, R.drawable.listicon);
+        addMenuButton(mMenuIds, menu, R.id.action_share_deck, R.string.share_deck, R.drawable.shareicon);
         addMenuButton(mMenuIds, menu, R.id.action_save, R.string.save_deck, R.drawable.save);
         addMenuButton(mMenuIds, menu, R.id.action_clear_deck, R.string.clear_deck, R.drawable.clear_deck);
 

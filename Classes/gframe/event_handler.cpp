@@ -26,6 +26,8 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 #endif
 	switch(event.EventType) {
 	case irr::EET_GUI_EVENT: {
+	    if(mainGame->fadingList.size())
+    			break;
 		s32 id = event.GUIEvent.Caller->getID();
 		switch(event.GUIEvent.EventType) {
 		case irr::gui::EGET_BUTTON_CLICKED: {
@@ -153,8 +155,19 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					if(exit_on_return)
 						mainGame->device->closeDevice();
 				} else {
-					DuelClient::SendPacketToServer(CTOS_SURRENDER);
+					mainGame->PopupElement(mainGame->wSurrender);
 				}
+				break;
+			}
+			case BUTTON_SURRENDER_YES: {
+			    mainGame->soundEffectPlayer->doPressButton();
+				DuelClient::SendPacketToServer(CTOS_SURRENDER);
+				mainGame->HideElement(mainGame->wSurrender);
+				break;
+			}
+			case BUTTON_SURRENDER_NO: {
+				mainGame->soundEffectPlayer->doPressButton();
+				mainGame->HideElement(mainGame->wSurrender);
 				break;
 			}
 			case BUTTON_CHAIN_IGNORE: {
@@ -182,6 +195,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_CANCEL_OR_FINISH: {
+			    mainGame->soundEffectPlayer->doPressButton();
 				CancelOrFinish();
 				break;
 			}
@@ -964,7 +978,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 		case irr::gui::EGET_EDITBOX_CHANGED: {
 			switch(id) {
 			case EDITBOX_ANCARD: {
-				UpdateDeclarableCode(false);
+				UpdateDeclarableCode();
 				break;
 			}
 			}
@@ -973,7 +987,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 		case irr::gui::EGET_EDITBOX_ENTER: {
 			switch(id) {
 			case EDITBOX_ANCARD: {
-				UpdateDeclarableCode(true);
+				UpdateDeclarableCode();
 				break;
 			}
 			}
@@ -1041,6 +1055,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			irr::core::position2di pos(x, y);
 			if (x < (200 * mainGame->xScale) && y < (270 * mainGame->yScale)) {
 				mainGame->textFont->setTransparency(true);
+				mainGame->ClearChatMsg();
 				break;
 			 }//touch the pic of detail to refresh textfonts
 			if(x < 300 * mainGame->xScale)

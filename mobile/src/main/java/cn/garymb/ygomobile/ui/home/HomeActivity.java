@@ -74,6 +74,8 @@ import cn.garymb.ygomobile.utils.FileLogUtil;
 import cn.garymb.ygomobile.utils.PermissionUtil;
 import cn.garymb.ygomobile.utils.ScreenUtil;
 
+import static cn.garymb.ygomobile.ui.mycard.mcchat.util.Util.startDuelService;
+
 public abstract class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     protected SwipeMenuRecyclerView mServerList;
     long exitLasttime = 0;
@@ -221,21 +223,12 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         };
         //x5内核初始化接口
         QbSdk.initX5Environment(this, cb);
-
         //trpay
         //TrPay.getInstance(HomeActivity.this).initPaySdk("1111", "YGOMobile");
         //autoupadte checking
         checkPgyerUpdateSilent(getContext(), false, false, false);
         //ServiceDuelAssistant
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            DialogPlus dialogPlus = PermissionUtil.isNotificationPermission(this);
-            if (dialogPlus == null)
-                this.startForegroundService(new Intent(this, ServiceDuelAssistant.class));
-            else
-                dialogPlus.show();
-        } else {
-            startService(new Intent(this, ServiceDuelAssistant.class));
-        }
+        startDuelService(this);
 
         //萌卡
         StartMycard();
@@ -393,6 +386,7 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
             case R.id.action_help: {
                 final DialogPlus dialog = new DialogPlus(getContext());
                 dialog.setContentView(R.layout.dialog_help);
+                dialog.setTitle(R.string.question);
                 dialog.show();
                 View viewDialog = dialog.getContentView();
                 Button btnMasterRule = viewDialog.findViewById(R.id.masterrule);
