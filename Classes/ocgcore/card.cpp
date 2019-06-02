@@ -224,7 +224,11 @@ uint32 card::get_infos(byte* buf, int32 query_flag, int32 use_cache) {
 		}
 	}
 	*(uint32*)buf = (byte*)p - buf;
+#ifdef _IRR_ANDROID_PLATFORM_
+	memcpy(buf + 4, &query_flag, sizeof(uint32));
+#else
 	*(uint32*)(buf + 4) = query_flag;
+#endif
 	return (uint32)((byte*)p - buf);
 }
 uint32 card::get_info_location() {
