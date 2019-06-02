@@ -192,6 +192,7 @@ struct card_sort {
 #define STATUS_OPPO_BATTLE			0x10000000
 #define STATUS_FLIP_SUMMON_TURN		0x20000000
 #define STATUS_SPSUMMON_TURN		0x40000000
+#define STATUS_TO_LEAVE_FROMEX		0x80000000
 
 //Query list
 #define QUERY_CODE			0x1
@@ -336,6 +337,10 @@ struct card_sort {
 #define HINT_CODE				8
 #define HINT_NUMBER				9
 #define HINT_CARD				10
+//custom hints in KoishiPro for custom sound
+#define HINT_MUSIC				11
+#define HINT_SOUND				12
+#define HINT_MUSIC_OGG			13
 //
 #define CHINT_TURN				1
 #define CHINT_CARD				2
@@ -390,5 +395,19 @@ struct card_sort {
 #define DUEL_PSEUDO_SHUFFLE		0x10
 #define DUEL_TAG_MODE			0x20
 #define DUEL_SIMPLE_AI			0x40
+
+//card datas for Duel.ReadCard / Card.SetCardData, arranged by database format
+#define CARDDATA_CODE			1
+#define CARDDATA_ALIAS			2
+#define CARDDATA_SETCODE		3
+#define CARDDATA_TYPE			4
+#define CARDDATA_LEVEL			5
+#define CARDDATA_ATTRIBUTE		6
+#define CARDDATA_RACE			7
+#define CARDDATA_ATTACK			8
+#define CARDDATA_DEFENSE		9
+#define CARDDATA_LSCALE			10
+#define CARDDATA_RSCALE			11
+#define CARDDATA_LINK_MARKER	12
 
 #endif /* COMMON_H_ */

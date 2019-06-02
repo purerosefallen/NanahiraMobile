@@ -16,7 +16,27 @@ public:
 	static int32 check_param(lua_State* L, int32 param_type, int32 index, BOOL retfalse = FALSE);
 	static int32 check_param_count(lua_State* L, int32 count);
 	static int32 check_action_permission(lua_State* L);
-
+	//millux
+	static int32 card_is_ritual_type(lua_State *L);
+	static int32 card_set_entity_code(lua_State *L);
+	static int32 card_set_card_data(lua_State *L);
+	static int32 card_get_link_marker(lua_State *L);
+	static int32 card_get_origin_link_marker(lua_State *L);
+	static int32 card_is_xyz_summonable_by_rose(lua_State *L);
+	static int32 card_get_removed_overlay_count(lua_State *L);
+	static int32 effect_set_owner(lua_State *L);
+	static int32 effect_get_range(lua_State *L);
+	static int32 effect_get_count_limit(lua_State *L);
+	static int32 duel_select_field(lua_State *L);
+	static int32 duel_get_master_rule(lua_State *L);
+	static int32 duel_read_card(lua_State *L);
+	static int32 duel_exile(lua_State *L);
+	static int32 duel_disable_action_check(lua_State *L);
+	static int32 duel_setmetatable(lua_State *L);
+	static int32 duel_move_turn_count(lua_State *L);
+	static int32 duel_get_cards_in_zone(lua_State *L);
+	static int32 duel_xyz_summon_by_rose(lua_State *L);
+	static int32 duel_load_script(lua_State *L);
 	//card lib
 	static int32 card_get_code(lua_State *L);
 	static int32 card_get_origin_code(lua_State *L);
@@ -208,6 +228,8 @@ public:
 	static int32 card_is_able_to_extra_as_cost(lua_State *L);
 	static int32 card_is_able_to_deck_or_extra_as_cost(lua_State *L);
 	static int32 card_is_able_to_remove_as_cost(lua_State *L);
+	static int32 card_is_able_to_decrease_attack_as_cost(lua_State *L);
+	static int32 card_is_able_to_decrease_defense_as_cost(lua_State *L);
 	static int32 card_is_releasable(lua_State *L);
 	static int32 card_is_releasable_by_effect(lua_State *L);
 	static int32 card_is_discardable(lua_State *L);
@@ -519,6 +541,7 @@ public:
 	static int32 duel_get_overlay_count(lua_State *L);
 	static int32 duel_check_remove_overlay_card(lua_State *L);
 	static int32 duel_remove_overlay_card(lua_State *L);
+	static int32 duel_get_disable_field(lua_State *L);
 
 	static int32 duel_hint(lua_State *L);
 	static int32 duel_hint_selection(lua_State *L);
@@ -574,7 +597,7 @@ public:
 	static int32 duel_venom_swamp_check(lua_State *L);
 	static int32 duel_swap_deck_and_grave(lua_State *L);
 	static int32 duel_majestic_copy(lua_State *L);
-
+	
 	//group metamethods
 	//__len is in the group lib, which is same as group_get_count
 	static int32 group_meta_add(lua_State *L);

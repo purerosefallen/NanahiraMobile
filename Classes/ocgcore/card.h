@@ -106,6 +106,13 @@ public:
 		void addcard(card* pcard);
 		uint32 findcard(card* pcard);
 	};
+
+	//millux
+
+	uint32 get_ritual_type();
+	uint32 set_entity_code(uint32 entity_code, bool remove_alias = false);
+	uint32 get_summon_info();
+
 	struct sendto_param_t {
 		void set(uint8 p, uint8 pos, uint8 loc, uint8 seq = 0) {
 			playerid = p;
@@ -145,6 +152,7 @@ public:
 	uint8 direct_attackable;
 	uint8 announce_count;
 	uint8 attacked_count;
+	uint8 removed_overlay_count;
 	uint8 attack_all_target;
 	uint8 attack_controler;
 	uint16 cardid;
@@ -314,7 +322,7 @@ public:
 	int32 is_special_summonable(uint8 playerid, uint32 summon_type);
 	int32 is_can_be_special_summoned(effect* reason_effect, uint32 sumtype, uint8 sumpos, uint8 sumplayer, uint8 toplayer, uint8 nocheck, uint8 nolimit, uint32 zone);
 	int32 is_setable_mzone(uint8 playerid, uint8 ignore_count, effect* peffect, uint8 min_tribute, uint32 zone = 0x1f);
-	int32 is_setable_szone(uint8 playerid, uint8 ignore_fd = 0);
+	int32 is_setable_szone(uint8 playerid, uint8 ignore_fd = 0, uint8 toplayer = 2, uint32 zone = 0xff);
 	int32 is_affect_by_effect(effect* peffect);
 	int32 is_destructable();
 	int32 is_destructable_by_battle(card* pcard);
@@ -322,6 +330,8 @@ public:
 	int32 is_destructable_by_effect(effect* peffect, uint8 playerid);
 	int32 is_removeable(uint8 playerid);
 	int32 is_removeable_as_cost(uint8 playerid);
+	int32 is_attack_decreasable_as_cost(uint8 playerid, int32 val);
+	int32 is_defense_decreasable_as_cost(uint8 playerid, int32 val);
 	int32 is_releasable_by_summon(uint8 playerid, card* pcard);
 	int32 is_releasable_by_nonsummon(uint8 playerid);
 	int32 is_releasable_by_effect(uint8 playerid, effect* peffect);
