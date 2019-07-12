@@ -10,10 +10,16 @@
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO 222DIY</name>
-        <ip>ayane.mycard.moe</ip>
-        <port>222</port>
+        <name>YGOPRO Koishi Server Backup</name>
+        <ip>koishi.momobako.com</ip>
+        <port>7210</port>
         <keep>true</keep>
+    </server>
+    <server>
+        <player-name>Komeiji Koishi</player-name>
+        <name>YGOPRO 233 Server</name>
+        <ip>s1.ygo233.com</ip>
+        <port>233</port>
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
@@ -38,36 +44,9 @@
     </server>
     <server>
         <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO Nanahira Server</name>
-        <ip>173.254.200.103</ip>
-        <port>7210</port>
-        <keep>true</keep>
-    </server>
-    <server>
-        <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO 222DIY Backup</name>
-        <ip>173.254.200.103</ip>
-        <port>222</port>
-        <keep>true</keep>
-    </server>
-    <server>
-        <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO Goat Backup</name>
-        <ip>173.254.200.103</ip>
-        <port>2005</port>
-        <keep>true</keep>
-    </server>
-    <server>
-        <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO 233 Server</name>
-        <ip>s1.ygo233.com</ip>
-        <port>233</port>
-    </server>
-    <server>
-        <player-name>Komeiji Koishi</player-name>
-        <name>YGOPRO 23333 Server</name>
-        <ip>s1.ygo233.com</ip>
-        <port>23333</port>
+        <name>YGOPRO Speed Duel</name>
+        <ip>koishi.moecube.com</ip>
+        <port>7373</port>
         <keep>true</keep>
     </server>
     <server>
