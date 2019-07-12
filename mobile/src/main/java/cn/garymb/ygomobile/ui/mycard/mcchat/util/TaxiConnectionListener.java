@@ -39,27 +39,6 @@ public class TaxiConnectionListener implements ConnectionListener {
     }
 
     @Override
-    public void reconnectionSuccessful() {
-        //重新连接成功
-        Log.e("TaxiConnectionListener", "重连成功");
-        // TODO: Implement this method
-    }
-
-    @Override
-    public void reconnectingIn(int p1) {
-        //正在重连
-        Log.e("TaxiConnectionListener", "正在重连" + p1);
-        // TODO: Implement this method
-    }
-
-    @Override
-    public void reconnectionFailed(Exception p1) {
-        //重新连接失败
-        Log.e("重连失败", "失败" + p1);
-        // TODO: Implement this method
-    }
-
-    @Override
     public void connectionClosed() {
         //正常关闭连接
         Log.e("TaxiConnectionListener", "连接关闭");
@@ -85,12 +64,12 @@ public class TaxiConnectionListener implements ConnectionListener {
             username = UserManagement.getUserName();
             password = UserManagement.getUserPassword();
             if (username != null && password != null) {
-                sm.setreLogin(false);
+                sm.setReLogin(false);
                 Log.e("TaxiConnectionListener", "尝试登录");
                 // 连接服务器
                 try {
                     if (sm.login(username, password)) {
-                        sm.setreLogin(true);
+                        sm.setReLogin(true);
                         Log.e("TaxiConnectionListener", "登录成功");
                         tExit.schedule(new timeJoin(), logintime);
                     } else {
@@ -107,11 +86,11 @@ public class TaxiConnectionListener implements ConnectionListener {
         class timeJoin extends TimerTask {
             @Override
             public void run() {
-                sm.setreJoin(false);
+                sm.setReJoin(false);
                 Log.e("TaxiConnectionListener", "尝试加入房间");
                 try {
                     sm.joinChat();
-                    sm.setreJoin(true);
+                    sm.setReJoin(true);
                     Log.e("TaxiConnectionListener", "加入房间成功");
                 } catch (Exception e) {
                     Log.e("TaxiConnectionListener", "重新加入房间");

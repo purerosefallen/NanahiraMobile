@@ -564,7 +564,7 @@ static const struct luaL_Reg duellib[] = {
 	{ "AnnounceAttribute", scriptlib::duel_announce_attribute },
 	{ "AnnounceLevel", scriptlib::duel_announce_level },
 	{ "AnnounceCard", scriptlib::duel_announce_card },
-	{ "AnnounceCardFilter", scriptlib::duel_announce_card_filter },
+	{ "AnnounceCardFilter", scriptlib::duel_announce_card }, // For compat
 	{ "AnnounceType", scriptlib::duel_announce_type },
 	{ "AnnounceNumber", scriptlib::duel_announce_number },
 	{ "AnnounceCoin", scriptlib::duel_announce_coin },
