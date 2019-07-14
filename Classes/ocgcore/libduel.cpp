@@ -3688,12 +3688,12 @@ int32 scriptlib::duel_select_disable_field(lua_State * L) {
 	int32 allow_exzone = lua_toboolean(L, 6);
 	if (allow_exzone && pduel->game_field->core.duel_rule >= 4) {
 		if(pduel->game_field->is_location_useable(playerid, LOCATION_MZONE, 5)) {
-			ct1 = ct1 + 1;
-			flag = flag - (flag & 0x20);
+			++ct1;
+			flag &= ~0x20;
 		}
 		if(pduel->game_field->is_location_useable(playerid, LOCATION_MZONE, 6)) {
-			ct1 = ct1 + 1;
-			flag = flag - (flag & 0x40);
+			++ct1;
+			flag &= ~0x40;
 		}
 	}
 	if(count > ct1 + ct2 + ct3 + ct4)
