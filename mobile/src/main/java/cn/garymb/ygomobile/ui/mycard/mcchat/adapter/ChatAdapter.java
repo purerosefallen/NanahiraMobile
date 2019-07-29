@@ -2,7 +2,6 @@ package cn.garymb.ygomobile.ui.mycard.mcchat.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -11,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -65,7 +66,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         vh.ic_name.setText(cm.getName());
         //vh.ic_time.setText(cm.getTime());
         vh.ic_message.setText(cm.getMessage());
-        ImageUtil.tuxian(context, cm.getAvatar(), vh.ic_avatar);
+        ImageUtil.setAvatar(context, cm.getAvatar(), vh.ic_avatar);
         if (position != 0) {
             if (cm.getName().equals(data.get(position - 1).getName())) {
                 vh.ic_name.setVisibility(View.GONE);

@@ -2367,7 +2367,7 @@ int32 field::get_attack_target(card* pcard, card_vector* v, uint8 chain_attack, 
 					continue;
 				if(atype >= 2 && atarget->is_affected_by_effect(EFFECT_IGNORE_BATTLE_TARGET))
 					continue;
-				if(select_target && atype == 4) {
+				if(select_target && (atype == 2 || atype == 4)) {
 					if(atarget->is_affected_by_effect(EFFECT_CANNOT_BE_BATTLE_TARGET, pcard))
 						continue;
 					if(pcard->is_affected_by_effect(EFFECT_CANNOT_SELECT_BATTLE_TARGET, atarget))
@@ -2388,7 +2388,7 @@ int32 field::get_attack_target(card* pcard, card_vector* v, uint8 chain_attack, 
 		mcount++;
 		if(chain_attack && core.chain_attack_target && atarget != core.chain_attack_target)
 			continue;
-		if(select_target && atype == 4) {
+		if(select_target && (atype == 2 || atype == 4)) {
 			if(atarget->is_affected_by_effect(EFFECT_CANNOT_BE_BATTLE_TARGET, pcard))
 				continue;
 			if(pcard->is_affected_by_effect(EFFECT_CANNOT_SELECT_BATTLE_TARGET, atarget))
@@ -3172,7 +3172,8 @@ int32 field::is_player_can_send_to_hand(uint8 playerid, card * pcard) {
 		pduel->lua->add_param(eset[i], PARAM_TYPE_EFFECT);
 		pduel->lua->add_param(pcard, PARAM_TYPE_CARD);
 		pduel->lua->add_param(playerid, PARAM_TYPE_INT);
-		if (pduel->lua->check_condition(eset[i]->target, 3))
+		pduel->lua->add_param(core.reason_effect, PARAM_TYPE_EFFECT);
+		if (pduel->lua->check_condition(eset[i]->target, 4))
 			return FALSE;
 	}
 	if(pcard->is_extra_deck_monster() && !is_player_can_send_to_deck(playerid, pcard))

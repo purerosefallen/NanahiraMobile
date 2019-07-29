@@ -9,10 +9,11 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
@@ -227,6 +228,9 @@ public class MainActivity extends HomeActivity {
                         AppsSettings.get().getResourcePath(), true);
 
                 IOUtils.copyFilesFromAssets(this, getDatapath(Constants.CORE_STRING_PATH),
+                        AppsSettings.get().getResourcePath(), true);
+
+                IOUtils.copyFilesFromAssets(this, getDatapath(Constants.WINDBOT_PATH),
                         AppsSettings.get().getResourcePath(), true);
 
                 IOUtils.copyFilesFromAssets(this, getDatapath(Constants.CORE_SKIN_PATH),

@@ -6,14 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.AppCompatSpinner;
-import android.support.v7.widget.FastScrollLinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerViewItemListener;
-import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -26,6 +18,15 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.appcompat.widget.RecyclerViewItemListener;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.FastScrollLinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
@@ -188,7 +189,7 @@ class DeckManagerActivityImpl2 extends BaseActivity implements CardLoader.CallBa
             if (mLimitManager.getCount() > 0) {
                 mCardLoader.setLimitList(mLimitManager.getTopLimit());
             }
-            File file = new File(mSettings.getResourcePath(), Constants.CORE_DECK_PATH + "/" + mSettings.getLastDeck() + YDK_FILE_EX);
+            File file = new File(mSettings.getLastDeckPath());
             if (!TextUtils.isEmpty(mPreLoad)) {
                 file = new File(mPreLoad);
                 mPreLoad = null;
@@ -361,7 +362,7 @@ class DeckManagerActivityImpl2 extends BaseActivity implements CardLoader.CallBa
             String name = IOUtils.tirmName(file.getName(), YDK_FILE_EX);
             setActionBarSubTitle(name);
             if (!noSaveLast) {
-                mSettings.setLastDeck(name);
+                mSettings.setLastDeckPath(file.getAbsolutePath());
             }
         } else {
             setActionBarSubTitle(getString(R.string.noname));

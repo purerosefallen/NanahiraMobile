@@ -6,12 +6,14 @@ import cn.garymb.ygomobile.lite.BuildConfig;
 
 public interface Constants {
     String ORIGIN_APP_ID = "cn.garymb.ygomobile";
-    String ORIGIN_VER_NAME = "3.4.6";
+    String ORIGIN_VER_NAME = "3.4.7";
 
     boolean DEBUG = BuildConfig.DEBUG;
     String PREF_START = "game_pref_";
     String PREF_LAST_YDK = "pref_last_ydk";
     String PREF_DEF_LAST_YDK = "new";
+    String PREF_LAST_CATEGORY = "pre_last_category";
+    String PREF_DEF_LAST_CATEGORY = "newcate";
     String PREF_GAME_PATH = "pref_key_game_res_path";
     String PREF_DEF_GAME_DIR = "ygocore-koishi";
 
@@ -68,6 +70,7 @@ public interface Constants {
     String CORE_SKIN_PATH = "textures";
     String CORE_SKIN_PENDULUM_PATH = CORE_SKIN_PATH + "/extra";
     String CORE_DECK_PATH = "deck";
+    String CORE_PACK_PATH = "pack";
     String CORE_EXPANSIONS = "expansions";
     String CORE_SINGLE_PATH = "single";
     String CORE_IMAGE_PATH = "pics";

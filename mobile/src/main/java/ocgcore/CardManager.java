@@ -2,9 +2,10 @@ package ocgcore;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
+
+import androidx.annotation.WorkerThread;
 
 import com.file.zip.ZipEntry;
 import com.file.zip.ZipFile;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipInputStream;
-
 
 import cn.garymb.ygomobile.App;
 import cn.garymb.ygomobile.AppsSettings;

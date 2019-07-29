@@ -3,12 +3,13 @@ package cn.garymb.ygomobile.ui.cards;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.OnItemDragListener;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.OnItemDragListener;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.util.List;
@@ -70,7 +71,7 @@ public class DeckManagerActivity3 extends BaseActivity implements OnItemDragList
         DialogPlus dlg = DialogPlus.show(this, null, getString(R.string.loading));
         VUiKit.defer().when(() -> {
             mCardLoader.setLimitList(mLimitManager.getTopLimit());
-            File file = new File(mSettings.getResourcePath(), Constants.CORE_DECK_PATH + "/" + mSettings.getLastDeck() + Constants.YDK_FILE_EX);
+            File file = new File( mSettings.getLastDeckPath());
             if (!TextUtils.isEmpty(mPreLoad)) {
                 file = new File(mPreLoad);
                 mPreLoad = null;
