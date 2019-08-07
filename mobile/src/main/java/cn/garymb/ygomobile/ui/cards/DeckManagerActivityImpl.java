@@ -73,6 +73,7 @@ import cn.garymb.ygomobile.ui.plus.DialogPlus;
 import cn.garymb.ygomobile.ui.plus.ServiceDuelAssistant;
 import cn.garymb.ygomobile.ui.plus.VUiKit;
 import cn.garymb.ygomobile.utils.BitmapUtil;
+import cn.garymb.ygomobile.utils.DeckUtil;
 import cn.garymb.ygomobile.utils.FileUtils;
 import cn.garymb.ygomobile.utils.IOUtils;
 import cn.garymb.ygomobile.utils.ShareUtil;
@@ -295,6 +296,7 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
 //            if (inDeckDir(file)) {
             //记住最后打开的卡组
             mSettings.setLastDeckPath(file.getAbsolutePath());
+            mSettings.setLastCategory(DeckUtil.getDeckTypeName(file.getAbsolutePath()));
             tv_deck.setText(name);
 //            }
         } else {
@@ -602,6 +604,10 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
                 showResult(true);
                 break;
             case R.id.action_share_deck:
+                if (mDeckAdapater.getYdkFile() == null) {
+                    Toast.makeText(this, R.string.unable_to_edit_empty_deck, Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 shareDeck();
                 break;
             case R.id.action_save:
@@ -620,18 +626,15 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
                     }
                 }
                 break;
-//            case R.id.action_save_as:
-//                if (mYdkFile == null) {
-//                    inputDeckName(null);
-//                } else {
-//                    inputDeckName(mYdkFile.getName());
-//                }
-//                break;
             case R.id.action_rename:
+                if (mDeckAdapater.getYdkFile() == null) {
+                    Toast.makeText(this, R.string.unable_to_edit_empty_deck, Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 if (mDeckAdapater.getYdkFile().getParent().equals(mSettings.getAiDeckDir())) {
                     Toast.makeText(this, R.string.donot_editor_bot_Deck, Toast.LENGTH_SHORT).show();
                 } else {
-                    inputDeckName(mDeckAdapater.getYdkFile(), null, false);
+                    inputDeckName(mDeckAdapater.getYdkFile(), mDeckAdapater.getYdkFile().getParent(), false);
                 }
                 break;
             case R.id.action_deck_new:
@@ -652,6 +655,10 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
             }
             break;
             case R.id.action_delete_deck: {
+                if (mDeckAdapater.getYdkFile() == null) {
+                    Toast.makeText(this, R.string.unable_to_edit_empty_deck, Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 if (mDeckAdapater.getYdkFile().getParent().equals(mSettings.getAiDeckDir())) {
                     Toast.makeText(this, R.string.donot_editor_bot_Deck, Toast.LENGTH_SHORT).show();
                 } else {
@@ -660,15 +667,16 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
                     builder.setMessage(R.string.question_delete_deck);
                     builder.setMessageGravity(Gravity.CENTER_HORIZONTAL);
                     builder.setLeftButtonListener((dlg, rs) -> {
-                        File ydk = mDeckAdapater.getYdkFile();
-                        if (ydk == null) {
+
+                        if (mDeckAdapater.getYdkFile() != null) {
+                            FileUtils.deleteFile(mDeckAdapater.getYdkFile());
+                            dlg.dismiss();
+                            File file = getFirstYdk();
+                            initDecksListSpinners(mDeckSpinner, file);
+                            loadDeckFromFile(file);
+                        } else {
                             return;
                         }
-                        FileUtils.deleteFile(ydk);
-                        dlg.dismiss();
-                        File file = getFirstYdk();
-                        initDecksListSpinners(mDeckSpinner, file);
-                        loadDeckFromFile(file);
                     });
                     builder.show();
                 }
@@ -681,9 +689,6 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
             case R.id.action_sort:
                 mDeckAdapater.sort();
                 break;
-//            case R.id.action_share_deck:
-//                shareDeck();
-//                break;
             default:
                 return false;
         }
@@ -804,7 +809,7 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
             @Override
             public void onClick(View v) {
                 du.dis();
-                ShareUtil.shareImage(DeckManagerActivityImpl.this, "卡组分享", savePath, null);
+                ShareUtil.shareImage(DeckManagerActivityImpl.this, getContext().getString(R.string.screenshoot), savePath, null);
 
             }
         });
@@ -1092,7 +1097,10 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
 
     @Override
     public void onDeckDel(List<DeckFile> deckFileList) {
-        String currentDeckPath = mDeckAdapater.getYdkFile().getAbsolutePath();
+        File deck = mDeckAdapater.getYdkFile();
+        if (deck == null)
+            return;
+        String currentDeckPath = deck.getAbsolutePath();
         for (DeckFile deckFile : deckFileList) {
             if (deckFile.getPath().equals(currentDeckPath)) {
                 List<File> files = getYdkFiles();

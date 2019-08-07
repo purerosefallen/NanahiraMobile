@@ -159,6 +159,7 @@
     <string name="label_pendulum">Pendulum scale</string>
     <string name="all">All</string>
     <string name="refresh">Refresh</string>
+    <string name="select_deck">Click here to select Deck</string>
     <string name="quit_deck_tip">Quit deck editor?</string>
     <string name="deck_delete_text">Drag here to delete</string>
     <string name="question_keep_cur_deck">keep current cards?</string>
@@ -269,4 +270,6 @@
     <string name="donot_editor_bot_Deck">Pls Donot edit/remove AI Deck, if you do\nAI mode wont work properly</string>
     <string name="code_share">Code Share</string>
     <string name="screenshoot">Screenshoot</string>
+    <string name="unable_to_edit_empty_deck">unable to edit empty deck</string>
+    <string name="create_new_failed">Create Failed</string>
 </resources>
