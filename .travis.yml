@@ -69,8 +69,8 @@ before_install:
 - 7z a -mx0 -xr!.git* mobile/assets/data/scripts.zip script > /dev/null
 - cp -rf mobile/assets/data/pics.zip mobile/assets_en/data/
 - cp -rf mobile/assets/data/scripts.zip mobile/assets_en/data/
-- mkdir mobile/assets/data/deck
-- mkdir mobile/assets_en/data/deck
+# - mkdir mobile/assets/data/deck
+# - mkdir mobile/assets_en/data/deck
 - chmod +x ./gradlew
 
 script:
