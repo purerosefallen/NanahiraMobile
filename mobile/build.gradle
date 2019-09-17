@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "cn.garymb.ygomobile.koishi"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 28
-        versionCode 340800811
-        versionName "Outsider"
+        versionCode 350000916
+        versionName "Scarlet"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -117,6 +117,10 @@ dependencies {
     implementation(name: 'dialogutils2-release', ext: 'aar')
     //recyclerview的adapter库
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.30'
-    api 'androidx.appcompat:appcompat:1.0.2'
-    api 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    //图片选择
+    implementation 'com.yuyh.imgsel:library:2.0.6'
+    //跨进程SharedPreferencesPlus工具
+    implementation 'com.github.zhangliangming:PreferencesProvider:v1.3'
 }

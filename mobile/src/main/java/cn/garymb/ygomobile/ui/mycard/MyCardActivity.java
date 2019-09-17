@@ -1,5 +1,6 @@
 package cn.garymb.ygomobile.ui.mycard;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ClipData;
@@ -7,6 +8,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -43,12 +46,30 @@ import static cn.garymb.ygomobile.Constants.ORIGIN_VER_NAME;
 public class MyCardActivity extends BaseActivity implements MyCard.MyCardListener, NavigationView.OnNavigationItemSelectedListener {
 
     private static final int FILECHOOSER_RESULTCODE = 10;
+    private static final int TYPE_MC_LOGIN = 0;
+
     protected DrawerLayout mDrawerlayout;
     private MyCardWebView mWebViewPlus;
     private MyCard mMyCard;
     private ImageView mHeadView;
     private TextView mNameView, mStatusView;
-
+    @SuppressLint("HandlerLeak")
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case TYPE_MC_LOGIN:
+                    String[] ss = (String[]) msg.obj;
+                    if (!TextUtils.isEmpty(ss[1])) {
+                        Glide.with(MyCardActivity.this).load(Uri.parse(ss[1])).into(mHeadView);
+                    }
+                    mNameView.setText(ss[0]);
+                    mStatusView.setText(ss[2]);
+                    break;
+            }
+        }
+    };
     private ProgressBar mProgressBar;
     private ValueCallback<Uri> uploadMessage;
     private ValueCallback<Uri[]> mUploadCallbackAboveL;
@@ -74,9 +95,9 @@ public class MyCardActivity extends BaseActivity implements MyCard.MyCardListene
         NavigationView navigationView = $(R.id.nav_main);
         navigationView.setNavigationItemSelectedListener(this);
         View navHead = navigationView.getHeaderView(0);
-        mHeadView = (ImageView) navHead.findViewById(R.id.img_head);
-        mNameView = (TextView) navHead.findViewById(R.id.tv_name);
-        mStatusView = (TextView) navHead.findViewById(R.id.tv_dp);
+        mHeadView = navHead.findViewById(R.id.img_head);
+        mNameView = navHead.findViewById(R.id.tv_name);
+        mStatusView = navHead.findViewById(R.id.tv_dp);
         //mWebViewPlus.enableHtml5();
 
         WebSettings settings = mWebViewPlus.getSettings();
@@ -200,34 +221,6 @@ public class MyCardActivity extends BaseActivity implements MyCard.MyCardListene
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void onActivityResultAboveL(int requestCode, int resultCode, Intent data) {
-        if (requestCode != FILECHOOSER_RESULTCODE
-                || mUploadCallbackAboveL == null) {
-            return;
-        }
-        Uri[] results = null;
-        if (resultCode == Activity.RESULT_OK) {
-            if (data == null) {
-            } else {
-                String dataString = data.getDataString();
-                ClipData clipData = data.getClipData();
-                if (clipData != null) {
-                    results = new Uri[clipData.getItemCount()];
-                    for (int i = 0; i < clipData.getItemCount(); i++) {
-                        ClipData.Item item = clipData.getItemAt(i);
-                        results[i] = item.getUri();
-                    }
-                }
-                if (dataString != null)
-                    results = new Uri[]{Uri.parse(dataString)};
-            }
-        }
-        mUploadCallbackAboveL.onReceiveValue(results);
-        mUploadCallbackAboveL = null;
-        return;
-    }
-
 
     /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -243,6 +236,32 @@ public class MyCardActivity extends BaseActivity implements MyCard.MyCardListene
             mWebViewPlus.onNewIntent(intent);
         }
     }*/
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void onActivityResultAboveL(int requestCode, int resultCode, Intent data) {
+        if (requestCode != FILECHOOSER_RESULTCODE
+                || mUploadCallbackAboveL == null) {
+            return;
+        }
+        Uri[] results = null;
+        if (resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                String dataString = data.getDataString();
+                ClipData clipData = data.getClipData();
+                if (clipData != null) {
+                    results = new Uri[clipData.getItemCount()];
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        ClipData.Item item = clipData.getItemAt(i);
+                        results[i] = item.getUri();
+                    }
+                }
+                if (dataString != null)
+                    results = new Uri[]{Uri.parse(dataString)};
+            }
+        }
+        mUploadCallbackAboveL.onReceiveValue(results);
+        mUploadCallbackAboveL = null;
+    }
 
     @Override
     public void onBackPressed() {
@@ -305,11 +324,10 @@ public class MyCardActivity extends BaseActivity implements MyCard.MyCardListene
     @Override
     public void onLogin(String name, String icon, String statu) {
 
-        if (!TextUtils.isEmpty(icon)) {
-            Glide.with(this).load(Uri.parse(icon)).into(mHeadView);
-        }
-        mNameView.setText(name);
-        mStatusView.setText(statu);
+        Message message = new Message();
+        message.obj = new String[]{name, icon, statu};
+        message.what = TYPE_MC_LOGIN;
+        handler.sendMessage(message);
     }
 
     @Override
@@ -359,13 +377,6 @@ public class MyCardActivity extends BaseActivity implements MyCard.MyCardListene
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (doMenu(item.getItemId())) {
-            return true;
-        }
-        return false;
-    }
-
-    public void ProgressBar() {
-
+        return doMenu(item.getItemId());
     }
 }
