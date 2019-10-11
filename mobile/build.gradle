@@ -8,8 +8,8 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 350000916
-        versionName "Scarlet"
+        versionCode 351001011
+        versionName "Nemesis"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -43,6 +43,7 @@ android {
     }
     buildTypes {
         debug {
+            applicationIdSuffix ".debug"
             shrinkResources false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

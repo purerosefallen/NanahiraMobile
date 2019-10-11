@@ -15,6 +15,7 @@
 #include <android/CAndroidGUIEditBox.h>
 #include <android/CAndroidGUIComboBox.h>
 #include <android/CAndroidGUISkin.h>
+#include <Android/CIrrDeviceAndroid.h>
 #include <COGLES2ExtensionHandler.h>
 #include <COGLESExtensionHandler.h>
 #include <COGLES2Driver.h>
@@ -25,7 +26,18 @@ const unsigned short PRO_VERSION = 0x134B;
 
 namespace ygo {
 
-Game* mainGame;
+Game *mainGame;
+
+void Game::process(irr::SEvent &event) {
+	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
+		s32 x = event.MouseInput.X;
+		s32 y = event.MouseInput.Y;
+		event.MouseInput.X = optX(x);
+		event.MouseInput.Y = optY(y);
+//			__android_log_print(ANDROID_LOG_DEBUG, "ygo", "Android comman process %d,%d -> %d,%d", x, y,
+//								event.MouseInput.X, event.MouseInput.Y);
+	}
+}
 
 #ifdef _IRR_ANDROID_PLATFORM_
 bool Game::Initialize(ANDROID_APP app) {
@@ -35,6 +47,7 @@ bool Game::Initialize() {
 #endif
 	srand(time(0));
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
+
 #ifdef _IRR_ANDROID_PLATFORM_
 	android::InitOptions *options = android::getInitOptions(app);
 	glversion = options->getOpenglVersion();
@@ -55,14 +68,19 @@ bool Game::Initialize() {
 		params.DriverType = irr::video::EDT_OPENGL;
 	params.WindowSize = irr::core::dimension2d<u32>(1280, 720);
 #endif
+
 	device = irr::createDeviceEx(params);
 	if(!device)
 		return false;
 #ifdef _IRR_ANDROID_PLATFORM_
+
 	if (!android::perfromTrick(app)) {
 		return false;
 	}
-	android::initJavaBridge(app, device);
+	core::position2di appPosition = android::initJavaBridge(app, device);
+	setPositionFix(appPosition);
+	device->setProcessReceiver(this);
+
 	soundEffectPlayer = new AndroidSoundEffectPlayer(app);
 	soundEffectPlayer->setSEEnabled(options->isSoundEffectEnabled());
 	app->onInputEvent = android::handleInput;
@@ -70,12 +88,10 @@ bool Game::Initialize() {
 //	logger->setLogLevel(ELL_WARNING);
 	isPSEnabled = options->isPendulumScaleEnabled();
 	dataManager.FileSystem = device->getFileSystem();
-	xScale = android::getScreenHeight(app) / 1024.0;
-	yScale = android::getScreenWidth(app) / 640.0;
-/*	if (xScale < yScale) {
-*		xScale = android::getScreenWidth(app) / 1024.0;
-*		yScale = android::getScreenHeight(app) / 640.0;
-*	}//start ygocore when mobile is in landscape mode, or using Android tablets or TV.*/
+
+	xScale = android::getXScale(app);
+	yScale = android::getYScale(app);
+
 	char log_scale[256] = {0};
 	sprintf(log_scale, "xScale = %f, yScale = %f", xScale, yScale);
 	Printer::log(log_scale);
@@ -332,10 +348,12 @@ bool Game::Initialize() {
 	btnHostPrepCancel = env->addButton(rect<s32>(400 * xScale, 380 * yScale, 510 * xScale, 420 * yScale), wHostPrepare, BUTTON_HP_CANCEL, dataManager.GetSysString(1210));
 #endif
 	//img
-	wCardImg = env->addStaticText(L"", rect<s32>(1 * xScale, 1 * yScale, ( 1 + CARD_IMG_WIDTH + 20) * xScale, (1 + CARD_IMG_HEIGHT + 18) * yScale), true, false, 0, -1, true);
+	float imgScale=xScale;
+	if (imgScale > yScale) imgScale=yScale;
+	wCardImg = env->addStaticText(L"", rect<s32>(1 * imgScale, 1 * imgScale, ( 1 + CARD_IMG_WIDTH + 20) * imgScale, (1 + CARD_IMG_HEIGHT + 18) * imgScale), true, false, 0, -1, true);
 	wCardImg->setBackgroundColor(0x6011113d);
 	wCardImg->setVisible(false);
-	imgCard = env->addImage(rect<s32>(10 * xScale, 9 * yScale, (10 + CARD_IMG_WIDTH) * xScale, (9 + CARD_IMG_HEIGHT) * yScale), wCardImg);
+	imgCard = env->addImage(rect<s32>(10 * imgScale, 9 * imgScale, (10 + CARD_IMG_WIDTH) * imgScale, (9 + CARD_IMG_HEIGHT) * imgScale), wCardImg);
 	imgCard->setImage(imageManager.tCover[0]);
 	imgCard->setScaleImage(true);
 	imgCard->setUseAlphaChannel(true);
@@ -925,7 +943,7 @@ bool Game::Initialize() {
 	btnCancelOrFinish->setVisible(false);
 #endif
 	//leave/surrender/exit
-	btnLeaveGame = env->addButton(rect<s32>(205 * xScale, 1 * yScale, 305 * xScale, 80 * yScale), 0, BUTTON_LEAVE_GAME, L"");
+	btnLeaveGame = env->addButton(rect<s32>(205 * xScale, 10 * yScale, 305 * xScale, 80 * yScale), 0, BUTTON_LEAVE_GAME, L"");
 	btnLeaveGame->setVisible(false);
 	//tip
 	stTip = env->addStaticText(L"", rect<s32>(0, 0, 150 * xScale, 150 * yScale), false, true, 0, -1, true);
