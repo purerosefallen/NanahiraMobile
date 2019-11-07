@@ -9,7 +9,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 352001107
-        versionName "Scarlet"
+        versionName "Sakura"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
