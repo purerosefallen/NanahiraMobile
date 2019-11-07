@@ -6,7 +6,7 @@ import cn.garymb.ygomobile.lite.BuildConfig;
 
 public interface Constants {
     String ORIGIN_APP_ID = "cn.garymb.ygomobile";
-    String ORIGIN_VER_NAME = "3.5.0";
+    String ORIGIN_VER_NAME = "3.5.2";
 
     String ACTION_WINDBOT = "RUN_WINDBOT";
     boolean DEBUG = BuildConfig.DEBUG;
