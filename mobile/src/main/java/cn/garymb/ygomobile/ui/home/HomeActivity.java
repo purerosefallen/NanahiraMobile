@@ -61,7 +61,7 @@ import cn.garymb.ygomobile.ui.adapters.ServerListAdapter;
 import cn.garymb.ygomobile.ui.adapters.SimpleListAdapter;
 import cn.garymb.ygomobile.ui.cards.CardSearchAcitivity;
 import cn.garymb.ygomobile.ui.cards.DeckManagerActivity;
-import cn.garymb.ygomobile.ui.mycard.MyCardActivity;
+import cn.garymb.ygomobile.mycard.MyCardActivity;
 import cn.garymb.ygomobile.ui.plus.DefaultOnBoomListener;
 import cn.garymb.ygomobile.ui.plus.DialogPlus;
 import cn.garymb.ygomobile.ui.preference.SettingsActivity;
@@ -71,8 +71,7 @@ import cn.garymb.ygomobile.utils.AlipayPayUtils;
 import cn.garymb.ygomobile.utils.ComponentUtils;
 import cn.garymb.ygomobile.utils.FileLogUtil;
 import cn.garymb.ygomobile.utils.ScreenUtil;
-
-import static cn.garymb.ygomobile.ui.mycard.mcchat.util.Util.startDuelService;
+import cn.garymb.ygomobile.utils.YGOUtil;
 
 public abstract class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     protected SwipeMenuRecyclerView mServerList;
@@ -225,8 +224,8 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         //TrPay.getInstance(HomeActivity.this).initPaySdk("1111", "YGOMobile");
         //autoupadte checking
         checkPgyerUpdateSilent(getContext(), false, false, false);
-        //ServiceDuelAssistant
-        startDuelService(this);
+        //DuelAssistantService
+        YGOUtil.startDuelService(this);
 
         //萌卡
         StartMycard();
@@ -334,15 +333,11 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
                     //               startActivity(intent);
                 });
                 btnwechat.setOnClickListener((v) -> {
-                    Uri uri = Uri.parse("https://afdian.net/@koishi");
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
+                    WebActivity.open(this, getString(R.string.donation), Constants.AFDIAN_URL);
                     dialog.dismiss();
                 });
                 btnpaypal.setOnClickListener((v) -> {
-                    Uri uri = Uri.parse("https://www.paypal.me/sekkananahira");
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
+                    WebActivity.open(this, getString(R.string.donation), Constants.PAYPAL_URL);
                     dialog.dismiss();
                 });
             }
@@ -488,7 +483,11 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
                 AppsSettings.get().setLastRoomList(items);
                 simpleListAdapter.notifyDataSetChanged();
             }
-            joinGame(serverInfo, name);
+            if (ComponentUtils.isActivityRunning(this, new ComponentName(this, YGOMobileActivity.class))){
+                openGame();
+            } else {
+                joinGame(serverInfo, name);
+            }
         });
         builder.setOnCloseLinster((dlg) -> {
             dlg.dismiss();
@@ -506,8 +505,6 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         options.mRoomName = name;
         YGOStarter.startGame(this, options);
     }
-
-    protected abstract void checkResourceDownload(ResCheckTask.ResCheckListener listener);
 
     protected abstract void openGame();
 

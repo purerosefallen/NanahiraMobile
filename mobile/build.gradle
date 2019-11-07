@@ -8,8 +8,8 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 351001011
-        versionName "Nemesis"
+        versionCode 352001107
+        versionName "Scarlet"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -122,6 +122,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     //图片选择
     implementation 'com.yuyh.imgsel:library:2.0.6'
-    //跨进程SharedPreferencesPlus工具
-    implementation 'com.github.zhangliangming:PreferencesProvider:v1.3'
+    implementation 'com.daimajia.numberprogressbar:library:1.4@aar'
 }

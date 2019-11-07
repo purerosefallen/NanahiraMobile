@@ -217,8 +217,8 @@
         \n之后快捷加房时就会加入置顶的服务器
         \n使用此功能须开启本软件悬浮窗
         \n并确保本软件后台运行中</string>
-    <string name="EXPAND_STATUS_BAR">需要开启通知权限\n开启通知权限才能正常使用功能</string>
-    <string name="SYSTEM_ALERT_WINDOW">需要开启悬浮窗权限\n开启悬浮窗权限才能正常使用功能</string>
+    <string name="EXPAND_STATUS_BAR">需要开启通知权限\n开启权限才能正常使用决斗助手功能</string>
+    <string name="SYSTEM_ALERT_WINDOW">需要开启悬浮窗权限\n开启权限才能正常使用决斗助手功能</string>
     <string name="OpenTIP">快捷加房使用方法</string>
     <string name="Open_Alert_Window">去打开悬浮窗</string>
     <string name="Function_Menu">功能菜单</string>
@@ -236,6 +236,7 @@
     <string name="Update_Found">发现新版本</string>
     <string name="OK">确定</string>
     <string name="Cancel">取消</string>
+    <string name="Feedback">反馈</string>
     <string name="Checking_Update">检查更新中，请稍候</string>
     <string name="Checking_Update_Failed">检查更新失败</string>
     <string name="Ask_to_Change_Other_Way">，是否跳转到备用下载方式？</string>
@@ -270,4 +271,15 @@
     <string name="unable_to_edit_empty_deck">不可操作空卡组</string>
     <string name="create_new_failed">创建失败</string>
     <string name="about_pref_settings_keep_scale">开启原始比例的游戏画面</string>
+    <string name="about_pref_key_hw_hide_notouch">隐藏HW刘海区域</string>
+    <string name="about_pref_key_hw_hide_notouch_desc">如果你游戏点击不准，请启用这个功能</string>
+    <string name="tip_load_ok">加载完成</string>
+    <string name="lb_android">安卓版本：</string>
+    <string name="lb_rom_version">ROM版本：</string>
+    <string name="lb_nav_bar">开启虚拟键</string>
+    <string name="lb_rom">ROM版本：</string>
+    <string name="lb_version">版本：</string>
+    <string name="lb_model">手机型号</string>
+    <string name="lb_cut_screen">有无刘海/高度</string>
+    <string name="user_notice">遇到认为BUG的情景请即时截图。等决斗结束后，重新点击此[问题反馈]并点击[确定]显示系统信息后截图并点击[反馈]打开反馈网页，在撰写评论中具体描述BUG内容，并在添加照片中将包含这两张的截图上传</string>
 </resources>

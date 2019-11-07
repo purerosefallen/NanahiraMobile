@@ -7,6 +7,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.DisplayCutout;
 import android.view.View;
+import android.view.WindowInsets;
 
 import androidx.annotation.RequiresApi;
 
@@ -34,10 +35,8 @@ public class ScreenUtil {
         void onNotchInformation(boolean isNotch, int notchHeight, int phoneType);
     }
 
-
     //是否是刘海屏
     public static void findNotchInformation(Activity activity, FindNotchInformation findNotchInformation) {
-
         if (isNotchVivo(activity)) {
             findNotchInformation.onNotchInformation(true, getNotchHeightVivo(activity), NOTCH_TYPE_PHONE_VIVO);
         } else if (isNotchOPPO(activity)) {
@@ -77,14 +76,14 @@ public class ScreenUtil {
                     List<Rect> rects = cutout.getBoundingRects();
                     if (rects == null || rects.size() == 0) {
                         try {
-                            FileLogUtil.writeAndTime("Android P刘海：  rects:"+(rects==null));
+                            FileLogUtil.writeAndTime("Android P刘海：  rects:" + (rects == null));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         findNotchPInformation.onNotchInformation(false, 0, NOTCH_TYPE_PHONE_ANDROID_P);
                     } else {
                         try {
-                            FileLogUtil.writeAndTime("Android P刘海：  刘海存在，个数为"+rects.size());
+                            FileLogUtil.writeAndTime("Android P刘海：  刘海存在，个数为" + rects.size());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -283,4 +282,40 @@ public class ScreenUtil {
     }
 
 
+    public static int getCurrentNavigationBarHeight(Activity activity) {
+        if (isNavigationBarShown(activity)) {
+            return getNavigationBarHeight(activity);
+        } else {
+            return 0;
+        }
+    }
+
+    public static boolean hasNavigationBar(Activity activity) {
+        //虚拟键的view,为空或者不可见时是隐藏状态
+        View view = activity.findViewById(android.R.id.navigationBarBackground);
+        return view != null;
+    }
+
+    /**
+     * 非全面屏下 虚拟按键是否打开
+     */
+    public static boolean isNavigationBarShown(Activity activity) {
+        //虚拟键的view,为空或者不可见时是隐藏状态
+        View view = activity.findViewById(android.R.id.navigationBarBackground);
+        return view != null && view.getVisibility() == View.VISIBLE;
+    }
+
+    /**
+     * 非全面屏下 虚拟键高度(无论是否隐藏)
+     *
+     * @param context
+     */
+    public static int getNavigationBarHeight(Context context) {
+        int result = 0;
+        int resourceId = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId != 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
 }

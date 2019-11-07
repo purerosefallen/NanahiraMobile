@@ -86,7 +86,11 @@
         <activity
             android:name="cn.garymb.ygomobile.YGOMobileActivity"
             android:theme="@style/AppTheme.Game"
-            tools:replace="android:theme" />
+            tools:replace="android:theme">
+            <meta-data
+                android:name="android.notch_support"
+                android:value="true"/>
+        </activity>
         <activity
             android:name="cn.garymb.ygomobile.ui.activities.AboutActivity"
             android:configChanges="orientation|keyboardHidden|navigation|screenSize"
@@ -154,16 +158,16 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name="cn.garymb.ygomobile.ui.mycard.MyCardActivity"
+            android:name="cn.garymb.ygomobile.mycard.MyCardActivity"
             android:configChanges="orientation|keyboardHidden|navigation|screenSize"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Mycard"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
         <activity
-            android:name="cn.garymb.ygomobile.ui.mycard.mcchat.McchatActivity"
+            android:name="cn.garymb.ygomobile.mycard.mcchat.ui.activity.McChatActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden|adjustResize" />
-        <activity android:name="cn.garymb.ygomobile.ui.mycard.mcchat.SplashActivity" />
+        <activity android:name="cn.garymb.ygomobile.mycard.mcchat.ui.activity.ChatSplashActivity" />
         <activity android:name="cn.garymb.ygomobile.ui.activities.FileLogActivity" />
         <activity android:name="cn.garymb.ygomobile.ui.activities.PermissionsActivity" />
 
@@ -190,14 +194,8 @@
         <!-- 为防止Service被系统回收，可以尝试通过提高服务的优先级解决，1000是最高优先级，数字越小，优先级越低 -->
         <!--android:priority="1000"-->
         <service
-            android:name="cn.garymb.ygomobile.ui.plus.ServiceDuelAssistant"
+            android:name="cn.garymb.ygomobile.ourygo.service.DuelAssistantService"
             android:priority="1000" />
-
-        <provider
-            android:authorities="cn.garymb.ygomobile.ui.preference.YGOPreferencesProvider"
-            android:name="cn.garymb.ygomobile.ui.preference.YGOPreferencesProvider"
-            android:exported="false"/>
-
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

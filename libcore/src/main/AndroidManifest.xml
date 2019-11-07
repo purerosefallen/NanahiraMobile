@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.GET_TASKS"/>
 
     <application>
         <activity
@@ -23,15 +25,13 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="YGOMobile"/>
-            <meta-data
-                android:name="android.notch_support"
-                android:value="true"/>
         </activity>
-        <receiver android:name="cn.garymb.ygomobile.GameReceiver"
-                  android:process=":game" >
+        <receiver
+            android:name="cn.garymb.ygomobile.AutoQuitReceiver"
+            android:exported="false">
             <intent-filter>
-                <action android:name="cn.garymb.ygomobile.game.start"/>
-                <action android:name="cn.garymb.ygomobile.game.stop"/>
+                <action android:name="ygocore.action.game_start" />
+                <action android:name="ygocore.action.game_end" />
             </intent-filter>
         </receiver>
     </application>

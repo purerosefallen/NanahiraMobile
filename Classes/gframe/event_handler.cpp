@@ -1056,7 +1056,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			hovered_location = 0;
 			irr::core::position2di pos(x, y);
 			if (x < (200 * mainGame->xScale) && y < (270 * mainGame->yScale)) {
-				mainGame->textFont->setTransparency(true);
+				mainGame->refreshTexture();
 				mainGame->ClearChatMsg();
 				break;
 			 }//touch the pic of detail to refresh textfonts
@@ -1803,6 +1803,12 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case BUTTON_REPORT:{
+#ifdef _IRR_ANDROID_PLATFORM_
+				mainGame->onReportProblem();
+#endif
+				break;
+			}
 			}
 			break;
 		}
@@ -1842,6 +1848,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+
  			case CHECKBOX_DRAW_FIELD_SPELL: {
  			    mainGame->gameConf.draw_field_spell = mainGame->chkDrawFieldSpell->isChecked() ? 1 : 0;
 				return true;
@@ -1930,14 +1937,14 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 		case irr::KEY_KEY_R: {
 			if(mainGame->gameConf.control_mode == 0
 				&& !event.KeyInput.PressedDown && !mainGame->HasFocus(EGUIET_EDIT_BOX))
-				mainGame->textFont->setTransparency(true);
+				mainGame->refreshTexture();
 			return true;
 			break;
 		}
 		case irr::KEY_F9: {
 			if(mainGame->gameConf.control_mode == 1
 				&& !event.KeyInput.PressedDown && !mainGame->HasFocus(EGUIET_EDIT_BOX))
-				mainGame->textFont->setTransparency(true);
+				mainGame->refreshTexture();
 			return true;
 			break;
 		}
@@ -2012,7 +2019,7 @@ void ClientField::GetHoverField(int x, int y) {
 			if(x >= ofRect.UpperLeftCorner.X + (cardSize + cardSpace) * 5 * mainGame->xScale)
 				hovered_sequence = 0;
 			else
-				hovered_sequence = hc - 1 - (x - ofRect.UpperLeftCorner.X) * (hc - 1) / ((cardSize + cardSpace) * 5 * mainGame->xScale);
+				hovered_sequence = hc - 1 - (x - ofRect.UpperLeftCorner.X) * (hc - 1) / (int)((cardSize + cardSpace) * 5 * mainGame->xScale);
 		}
 	} else {
 		double screenx = x / (GAME_WIDTH * mainGame->xScale) * 1.35  - 0.90;

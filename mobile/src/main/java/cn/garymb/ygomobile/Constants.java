@@ -8,6 +8,7 @@ public interface Constants {
     String ORIGIN_APP_ID = "cn.garymb.ygomobile";
     String ORIGIN_VER_NAME = "3.5.0";
 
+    String ACTION_WINDBOT = "RUN_WINDBOT";
     boolean DEBUG = BuildConfig.DEBUG;
     String PREF_START = "game_pref_";
     String PREF_LAST_DECK_PATH = "pref_last_deck_path";
@@ -34,17 +35,19 @@ public interface Constants {
     String PREF_SOUND_EFFECT = "pref_key_game_sound_effect";
     boolean PREF_DEF_SOUND_EFFECT = true;
     String PREF_START_SERVICEDUELASSISTANT = "pref_key_start_serviceduelassistant";
-    boolean PREF_DEF_START_SERVICEDUELASSISTANT = true;
+    boolean PREF_DEF_START_SERVICEDUELASSISTANT = false;
     String PREF_LOCK_SCREEN = "pref_key_game_screen_orientation";
     boolean PREF_DEF_LOCK_SCREEN = false;
     String PREF_IMMERSIVE_MODE = "pref_key_immersive_mode";
-    boolean PREF_DEF_IMMERSIVE_MODE = false;
+    boolean PREF_DEF_IMMERSIVE_MODE = true;
     String PREF_SENSOR_REFRESH = "pref_key_sensor_refresh";
     boolean PREF_DEF_SENSOR_REFRESH = true;
     String PREF_CHANGE_LOG = "pref_key_change_log";
     String PREF_CHECK_UPDATE = "pref_key_about_check_update";
     String PREF_LAST_ROOM_LIST = "pref_key_lastroom_list";
     String PERF_TEST_REPLACE_KERNEL = "pref_key_test_replace_kernel";
+    String PREF_HW_HIDE_HOTTOUCH = "pref_key_hw_hide_notouch";
+    boolean PREF_DEF_PREF_HW_HIDE_HOTTOUCH = false;
     int LAST_ROOM_MAX = 10;
     /***
      * 卡组编辑，长按删除对话框
@@ -56,13 +59,14 @@ public interface Constants {
     String SETTINGS_AVATAR = "settings_game_avatar";
     String SETTINGS_CARD_BG = "settings_game_diy_card_bg";
     String ASSETS_PATH = "data/";
-    String ASSET_SERVER_LIST = "serverlist.xml";
-    String ASSET_LIMIT_PNG = ASSETS_PATH + "textures/lim.png";
     String DEFAULT_FONT_NAME = "ygo.ttf";
     String DATABASE_NAME = "cards.cdb";
     String BOT_CONF = "bot.conf";
     String WINDBOT_PATH = "windbot";
     String WINDBOT_DECK_PATH = "Decks";
+    String LIB_WINDBOT_PATH = WINDBOT_PATH + "/";
+    String LIB_WINDBOT_DECK_PATH = "windbot/" + WINDBOT_DECK_PATH;
+    String LIB_WINDBOT_DIALOG_PATH = "windbot/Dialogs";
     String FONT_DIRECTORY = "fonts";
     String CORE_STRING_PATH = "strings.conf";
     String CORE_LIMIT_PATH = "lflist.conf";
@@ -76,8 +80,8 @@ public interface Constants {
     String CORE_EXPANSIONS = "expansions";
     String CORE_SINGLE_PATH = "single";
     String CORE_IMAGE_PATH = "pics";
-    String MOBILE_LOG="log";
-    String MOBILE_DECK_SHARE="deckShare";
+    String MOBILE_LOG = "log";
+    String MOBILE_DECK_SHARE = "deckShare";
     String CORE_EXPANSIONS_IMAGE_PATH = "expansions/pics";
     String CORE_IMAGE_FIELD_PATH = "field";
     String CORE_SCRIPT_PATH = "script";
@@ -93,6 +97,25 @@ public interface Constants {
     String CORE_SKIN_AVATAR_OPPONENT = "opponent.jpg";
     String UNKNOWN_IMAGE = "unknown.jpg";
     String YDK_FILE_EX = ".ydk";
+    String WINDBOT_ACTION = "RUN_WINDBOT";
+    String CORE_CONF_PATH = "conf";
+
+    String ASSET_SERVER_LIST = "serverlist.xml";
+    String ASSET_LIMIT_PNG = ASSETS_PATH + "textures/lim.png";
+    String ASSET_CARDS_CDB_FILE_PATH = ASSETS_PATH + DATABASE_NAME;
+    String ASSET_DECK_DIR_PATH = ASSETS_PATH + CORE_DECK_PATH;
+    String ASSET_PACK_DIR_PATH = ASSETS_PATH + CORE_PACK_PATH;
+    String ASSET_SINGLE_DIR_PATH = ASSETS_PATH + CORE_SINGLE_PATH;
+    String ASSET_SKIN_DIR_PATH = ASSETS_PATH + CORE_SKIN_PATH;
+    String ASSET_FONTS_DIR_PATH = ASSETS_PATH + FONT_DIRECTORY;
+    String ASSET_SCRIPTS_FILE_PATH = ASSETS_PATH + CORE_SCRIPTS_ZIP;
+    String ASSET_PICS_FILE_PATH = ASSETS_PATH + CORE_PICS_ZIP;
+    String ASSET_WINDBOT_DECK_DIR_PATH = ASSETS_PATH + LIB_WINDBOT_PATH + LIB_WINDBOT_DECK_PATH;
+    String ASSET_WINDBOT_DIALOG_DIR_PATH = ASSETS_PATH + LIB_WINDBOT_PATH + LIB_WINDBOT_DIALOG_PATH;
+    String ASSET_CONF_PATH = ASSETS_PATH + CORE_CONF_PATH;
+    String ASSET_STRING_CONF_FILE_PATH = ASSETS_PATH + CORE_CONF_PATH + "/" + CORE_STRING_PATH;
+    String ASSET_SKIN_PENDULUM_DIR_PATH = ASSETS_PATH + CORE_SKIN_PENDULUM_PATH;
+
     int[] CORE_SKIN_BG_SIZE = new int[]{1280, 720};
     int[] CORE_SKIN_CARD_COVER_SIZE = new int[]{177, 254};
     int[] CORE_SKIN_AVATAR_SIZE = new int[]{128, 128};
@@ -107,8 +130,8 @@ public interface Constants {
     String PREF_FONT_SIZE = "pref_settings_font_size";
     int DEF_PREF_FONT_SIZE = 14;
 
-    String PREF_NOTCH_HEIGHT="pref_notch_height";
-    int DEF_PREF_NOTCH_HEIGHT=0;
+    String PREF_NOTCH_HEIGHT = "pref_notch_height";
+    int DEF_PREF_NOTCH_HEIGHT = 0;
 
     String PREF_ONLY_GAME = "pref_settings_only_game";
     boolean DEF_PREF_ONLY_GAME = false;
@@ -147,9 +170,12 @@ public interface Constants {
     int DECK_EXTRA_COUNT = (DECK_SIDE_MAX / DECK_WIDTH_COUNT * DECK_WIDTH_COUNT < DECK_SIDE_MAX) ? DECK_WIDTH_COUNT * 2 : DECK_WIDTH_COUNT;
     int DECK_SIDE_COUNT = DECK_EXTRA_COUNT;
     String ALIPAY_URL = "https://qr.alipay.com/tsx0946394abztqx9ez9jfb";
+    String PAYPAL_URL = "https://www.paypal.me/sekkananahira";
+    String AFDIAN_URL = "https://afdian.net/@koishi";
     String URL_HELP = "http://note.youdao.com/noteshare?id=8ae2dc824b7dc04a95a4665a938e2251";
     String URL_MASTERRULE_CN = "https://ocg-rule.readthedocs.io/zh_CN/master/";
     String WIKI_SEARCH_URL = "https://www.ourocg.cn/S.aspx?key=";
+    String URL_FEEDBACK = "https://ygo233.com/bugs/ygomobile";
 
     String SERVER_FILE = "server_list.xml";
     String SHARE_FILE = ".share_deck.png";
@@ -163,7 +189,7 @@ public interface Constants {
     /***
      * 长按删除
      */
-    long LONG_PRESS_DRAG = 900;
+    long LONG_PRESS_DRAG = 600;
     /***
      * adb shell am start -n cn.garymb.ygomobile/cn.garymb.ygomobile.ui.home.MainActivity -a ygomobile.intent.action.DECK --es android.intent.extra.TEXT 青眼白龙.ydk
      * <p>
