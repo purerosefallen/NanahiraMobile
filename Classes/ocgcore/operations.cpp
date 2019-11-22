@@ -2894,8 +2894,11 @@ int32 field::special_summon_rule(uint16 step, uint8 sumplayer, card* target, uin
 		pcard->current.reason_effect = peffect;
 		pcard->current.reason_player = sumplayer;
 		pcard->summon_player = sumplayer;
-		pcard->summon_info = (peffect->get_value(pcard) & 0xff00ffff) | SUMMON_TYPE_SPECIAL | ((uint32)pcard->current.location << 16);
-		uint32 zone = 0xff;
+		std::vector<int32> retval;
+		peffect->get_value(pcard, 0, &retval);
+		pcard->summon_info = retval.size() > 0 ? retval[0] : 0;
+		uint32 zone = retval.size() > 1 ? retval[1] : 0xff;
+		pcard->summon_info = (pcard->summon_info & 0xff00ffff) | SUMMON_TYPE_SPECIAL | ((uint32)pcard->current.location << 16);
 		uint32 flag1, flag2;
 		int32 ct1 = get_tofield_count(pcard, sumplayer, LOCATION_MZONE, sumplayer, LOCATION_REASON_TOFIELD, zone, &flag1);
 		int32 ct2 = get_spsummonable_count_fromex(pcard, sumplayer, sumplayer, zone, &flag2);
