@@ -253,11 +253,14 @@ public class YGOMobileActivity extends NativeActivity implements
     }
 
     private void fullscreen() {
-        if (mGameConfig.isImmerSiveMode()) {
-            //沉浸模式
-            getWindow().getDecorView().setSystemUiVisibility(windowsFlags);
-        } else {
-            getWindow().getDecorView().setSystemUiVisibility(windowsFlags2);
+
+        //如果是沉浸模式
+        if (app().isImmerSiveMode()) {
+            mFullScreenUtils.fullscreen();
+            app().attachGame(this);
+            if (USE_SURFACE) {
+                changeGameSize();
+            }
         }
         int[] size = getGameSize();
         setGameSize(size[0], size[1]);
@@ -306,23 +309,21 @@ public class YGOMobileActivity extends NativeActivity implements
 //        mLayout.setFitsSystemWindows(true);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(w, h);
         lp.gravity = Gravity.CENTER;
-        mLayout.addView(mSurfaceView, lp);
-        mLayout.addView(view, lp);
-        super.setContentView(mLayout);
-        mClickView = view;
-        getWindow().takeSurface(null);
-        replaced = true;
-        mSurfaceView.getHolder().addCallback(this);
-        if (!USE_INPUT_QUEEN) {
-            getWindow().takeInputQueue(null);
-            mClickView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return mCore.sendTouchEvent(event.getAction(), (int) event.getX(), (int) event.getY(), event.getPointerId(0));
-                }
-            });
-        } else if (RESIZE_WINDOW_LAYOUT) {
-            getWindow().setLayout(w, h);
+        if (USE_SURFACE) {
+            mLayout.addView(mSurfaceView, lp);
+            mLayout.addView(view, lp);
+            super.setContentView(mLayout);
+            app().attachGame(this);
+            changeGameSize();
+            getWindow().takeSurface(null);
+            replaced = true;
+            mSurfaceView.getHolder().addCallback(this);
+            mSurfaceView.requestFocus();
+            getWindow().setGravity(Gravity.CENTER);
+        } else {
+            mLayout.addView(view, lp);
+            getWindow().setGravity(Gravity.CENTER);
+            super.setContentView(mLayout);
         }
         mSurfaceView.requestFocus();
         mInitView = true;
@@ -337,8 +338,9 @@ public class YGOMobileActivity extends NativeActivity implements
             mSurfaceView.setLayoutParams(lp);
             mSurfaceView.getHolder().setFixedSize(w, h);
         }
-        if (RESIZE_WINDOW_LAYOUT) {
-            getWindow().setLayout(w, h);
+        if (update) {
+//            Log.i("ygo", "Android command setInputFix2:posX=" + spX + ",posY=" + spY);
+            IrrlichtBridge.setInputFix(mPositionX, mPositionY);
         }
     }
 

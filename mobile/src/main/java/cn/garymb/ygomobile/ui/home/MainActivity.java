@@ -70,6 +70,79 @@ public class MainActivity extends HomeActivity implements OnDuelClipBoardListene
 
     }
 
+    private void checkRes() {
+        checkResourceDownload((error, isNew) -> {
+            if (error < 0) {
+                enableStart = false;
+            } else {
+                enableStart = true;
+            }
+            if (isNew) {
+                if (!getGameUriManager().doIntent(getIntent())) {
+                    final DialogPlus dialog = new DialogPlus(this);
+                    dialog.showTitleBar();
+                    dialog.setTitle(getString(R.string.settings_about_change_log));
+                    dialog.loadUrl("file:///android_asset/changelog.html", Color.TRANSPARENT);
+                    dialog.setLeftButtonText(R.string.help);
+                    dialog.setLeftButtonListener((dlg, i) -> {
+                        dialog.setContentView(R.layout.dialog_help);
+                        dialog.setTitle(R.string.question);
+                        dialog.hideButton();
+                        dialog.show();
+                        View viewDialog = dialog.getContentView();
+                        Button btnMasterRule = viewDialog.findViewById(R.id.masterrule);
+                        Button btnTutorial = viewDialog.findViewById(R.id.tutorial);
+
+                        btnMasterRule.setOnClickListener((v) -> {
+                            WebActivity.open(this, getString(R.string.masterrule), Constants.URL_MASTERRULE_CN);
+                            dialog.dismiss();
+                        });
+                        btnTutorial.setOnClickListener((v) -> {
+                            WebActivity.open(this, getString(R.string.help), Constants.URL_HELP);
+                            dialog.dismiss();
+                        });
+                    });
+                    dialog.setRightButtonText(R.string.OK);
+                    dialog.setRightButtonListener((dlg, i) -> {
+                        dlg.dismiss();
+                        //mImageUpdater
+                        if (NETWORK_IMAGE && NetUtils.isConnected(getContext())) {
+                            if (!mImageUpdater.isRunning()) {
+                                mImageUpdater.start();
+                            }
+                        }
+                    });
+                    /*DialogPlus dialog = new DialogPlus(this)
+                            .setTitleText(getString(R.string.settings_about_change_log))
+                            .loadUrl("file:///android_asset/changelog.html", Color.TRANSPARENT)
+                            .hideButton()
+                            .setOnCloseLinster((dlg) -> {
+                                dlg.dismiss();
+                                //mImageUpdater
+                                if (NETWORK_IMAGE && NetUtils.isConnected(getContext())) {
+                                    if (!mImageUpdater.isRunning()) {
+                                        mImageUpdater.start();
+                                    }
+                                }
+                            });*/
+                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            if (AppsSettings.get().isServiceDuelAssistant())
+                                PermissionUtil.isServicePermission(MainActivity.this, true);
+                        }
+                    });
+                    dialog.show();
+                }
+            } else {
+                if (AppsSettings.get().isServiceDuelAssistant())
+                    PermissionUtil.isServicePermission(MainActivity.this, true);
+                getGameUriManager().doIntent(getIntent());
+            }
+
+        });
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
