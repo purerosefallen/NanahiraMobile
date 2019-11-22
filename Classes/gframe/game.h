@@ -111,7 +111,7 @@ struct FadingUnit {
 	irr::core::vector2di fadingDiff;
 };
 
-class Game {
+class Game :IProcessEventReceiver{
 
 public:
 #ifdef _IRR_ANDROID_PLATFORM_
@@ -533,7 +533,8 @@ public:
 	//cancel or finish
 	irr::gui::IGUIButton* btnCancelOrFinish;
 	float xScale;
-	float yScale;
+    float yScale;
+
 	IYGOSoundEffectPlayer* soundEffectPlayer;
 #ifdef _IRR_ANDROID_PLATFORM_
 	ANDROID_APP appMain;
@@ -546,10 +547,30 @@ public:
 	irr::android::CustomShaderConstantSetCallBack customShadersCallback;
 	Signal externalSignal;
 #endif
+	void setPositionFix(core::position2di fix){
+		InputFix = fix;
+	}
+	float optX(float x) {
+		float x2 = x - InputFix.X;
+		if (x2 < 0) {
+			return 0;
+		}
+		return x2;
+	}
 
-};
+	float optY(float y) {
+		float y2 = y - InputFix.Y;
+		if (y2 < 0) {
+			return 0;
+		}
+		return y2;
+	}
+    void process(irr::SEvent &event);
+private:
+	core::position2di InputFix;
+    };
 
-extern Game* mainGame;
+    extern Game *mainGame;
 
 }
 
@@ -739,6 +760,14 @@ extern Game* mainGame;
 #define DEFAULT_DUEL_RULE			4
 
 #define CARD_ARTWORK_VERSIONS_OFFSET	10
+
+#ifdef _IRR_ANDROID_PLATFORM_
+#define GAME_WIDTH 1024
+#define GAME_HEIGHT 640
+#else
+#define GAME_WIDTH 1280
+#define GAME_HEIGHT 720
+#endif
 
 #ifdef _IRR_ANDROID_PLATFORM_
 #define GUI_INFO_FPS 1000

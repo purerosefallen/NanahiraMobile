@@ -48,11 +48,11 @@ before_install:
 - cp -rf ygopro-database-master/locales/en-US/cards.cdb mobile/assets_en/data
 #- cp -rf ygopro-database-master/locales/zh-CN/strings.conf mobile/assets/data/conf
 #- cp -rf ygopro-database-master/locales/en-US/strings.conf mobile/assets_en/data/conf
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro/raw/master/lflist.conf
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/Smile-DK/ygopro/raw/master/lflist.conf
 - cp -rf lflist.conf mobile/assets/data/conf
 - cp -rf lflist.conf mobile/assets_en/data/conf
 
-- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/HuangYuNan/ygopro222-images/archive/master.zip
+- curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/purerosefallen/ygopro222-images/archive/master.zip
 - 7z x -y ygopro222-images-master.zip > /dev/null
 - mv -f ygopro222-images-master pics
 

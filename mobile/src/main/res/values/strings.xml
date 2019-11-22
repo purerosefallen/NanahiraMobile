@@ -218,8 +218,8 @@
         \nthen join helper will acquiescently start in it
         \npls click to APP permission to find me and open the "Pop-ups"
         \nand keep the soft run in the background</string>
-    <string name="EXPAND_STATUS_BAR">Apply expand status bar\n then soft will work normally</string>
-    <string name="SYSTEM_ALERT_WINDOW">Apply Display over other APPs\n then soft will work normally</string>
+    <string name="EXPAND_STATUS_BAR">Apply expand status bar\n then DuelAssiatant will work normally</string>
+    <string name="SYSTEM_ALERT_WINDOW">Apply Display over other APPs\n then DuelAssiatant will work normally</string>
     <string name="OpenTIP">about Quick Join in Game</string>
     <string name="Open_Alert_Window">To Open Pop-ups</string>
     <string name="Function_Menu">MENU</string>
@@ -231,7 +231,7 @@
     <string name="ClickLinkArrows">click link arrows</string>
     <string name="Already_Lastest">Already be the Lastest Version</string>
     <string name="tip_no_permission" formatted="false">the permission %s is denied.</string>
-    <string name="about_immersive_mode">switch it to optimize the screen resolution which isnot 16:9</string>
+    <string name="about_immersive_mode">it will hide virtual-key</string>
     <string name="Download">Download</string>
     <string name="Downloading">Now Downloading</string>
     <string name="Update_Found">Found New Version</string>
@@ -272,4 +272,5 @@
     <string name="screenshoot">Screenshoot</string>
     <string name="unable_to_edit_empty_deck">unable to edit empty deck</string>
     <string name="create_new_failed">Create Failed</string>
+    <string name="about_pref_settings_keep_scale">Original Resolution Scale Display</string>
 </resources>

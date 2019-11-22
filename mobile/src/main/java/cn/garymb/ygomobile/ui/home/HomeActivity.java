@@ -340,9 +340,7 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
                     dialog.dismiss();
                 });
                 btnpaypal.setOnClickListener((v) -> {
-                    Uri uri = Uri.parse("https://www.paypal.me/sekkananahira");
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
+                    WebActivity.open(this, getString(R.string.donation), Constants.PAYPAL_URL);
                     dialog.dismiss();
                 });
             }

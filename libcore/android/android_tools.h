@@ -115,7 +115,7 @@ extern void toggleGlobalIME(ANDROID_APP app, bool pShow);
 extern void toggleIME(ANDROID_APP app, bool pShow, const char* hint);
 
 //Init Java Irrlicht world.
-extern void initJavaBridge(ANDROID_APP app, void* handle);
+extern core::position2di initJavaBridge(ANDROID_APP app, void* handle);
 
 //Cause a haptic feedback.
 extern void perfromHapticFeedback(ANDROID_APP app);
@@ -140,6 +140,10 @@ extern int getCardQuality(ANDROID_APP app);
 
 //Retrive local ip address(mostly for wifi only);
 extern int getLocalAddr(ANDROID_APP app);
+
+extern float getXScale(ANDROID_APP app);
+
+extern float getYScale(ANDROID_APP app);
 
 //Retrive font path.
 extern irr::io::path getFontPath(ANDROID_APP app);

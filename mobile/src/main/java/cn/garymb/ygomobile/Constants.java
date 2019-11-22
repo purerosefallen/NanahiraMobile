@@ -34,7 +34,7 @@ public interface Constants {
     String PREF_SOUND_EFFECT = "pref_key_game_sound_effect";
     boolean PREF_DEF_SOUND_EFFECT = true;
     String PREF_START_SERVICEDUELASSISTANT = "pref_key_start_serviceduelassistant";
-    boolean PREF_DEF_START_SERVICEDUELASSISTANT = true;
+    boolean PREF_DEF_START_SERVICEDUELASSISTANT = false;
     String PREF_LOCK_SCREEN = "pref_key_game_screen_orientation";
     boolean PREF_DEF_LOCK_SCREEN = false;
     String PREF_IMMERSIVE_MODE = "pref_key_immersive_mode";
@@ -118,6 +118,9 @@ public interface Constants {
 
     String PREF_DECK_MANAGER_V2 = "pref_settings_deck_manager_v2";
     boolean DEF_PREF_DECK_MANAGER_V2 = false;
+
+    String PREF_KEEP_SCALE = "pref_settings_keep_scale";
+    boolean DEF_PREF_KEEP_SCALE = false;
 
     int REQUEST_CUT_IMG = 0x1000 + 0x10;
     int REQUEST_CHOOSE_FILE = 0x1000 + 0x20;

@@ -1056,8 +1056,10 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			hovered_location = 0;
 			irr::core::position2di pos(x, y);
 			if (x < (200 * mainGame->xScale) && y < (270 * mainGame->yScale)) {
+                mainGame->gMutex.lock();
 				mainGame->textFont->setTransparency(true);
 				mainGame->ClearChatMsg();
+                mainGame->gMutex.unlock();
 				break;
 			 }//touch the pic of detail to refresh textfonts
 			if(x < 300 * mainGame->xScale)
@@ -1657,7 +1659,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 		case irr::EMIE_LMOUSE_PRESSED_DOWN: {
 			if(!mainGame->dInfo.isStarted)
 				break;
-			if(mainGame->gameConf.control_mode == 1 && event.MouseInput.X > 300) {
+			if(mainGame->gameConf.control_mode == 1 && event.MouseInput.X > 300 * mainGame->xScale) {
 				mainGame->always_chain = event.MouseInput.isLeftPressed();
 				mainGame->ignore_chain = false;
 				mainGame->chain_when_avail = false;
@@ -1668,7 +1670,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 		case irr::EMIE_RMOUSE_PRESSED_DOWN: {
 			if(!mainGame->dInfo.isStarted)
 				break;
-			if(mainGame->gameConf.control_mode == 1 && event.MouseInput.X > 300) {
+			if(mainGame->gameConf.control_mode == 1 && event.MouseInput.X > 300 * mainGame->xScale) {
 				mainGame->ignore_chain = event.MouseInput.isRightPressed();
 				mainGame->always_chain = false;
 				mainGame->chain_when_avail = false;
@@ -2012,11 +2014,11 @@ void ClientField::GetHoverField(int x, int y) {
 			if(x >= ofRect.UpperLeftCorner.X + (cardSize + cardSpace) * 5 * mainGame->xScale)
 				hovered_sequence = 0;
 			else
-				hovered_sequence = hc - 1 - (x - ofRect.UpperLeftCorner.X) * (hc - 1) / ((cardSize + cardSpace) * 5 * mainGame->xScale);
+				hovered_sequence = hc - 1 - (x - ofRect.UpperLeftCorner.X) * (hc - 1) / (int)((cardSize + cardSpace) * 5 * mainGame->xScale);
 		}
 	} else {
-		double screenx = x / (1024.0 * mainGame->xScale) * 1.35  - 0.90;
-		double screeny = y / (640.0 * mainGame->yScale) * 0.84 - 0.42;
+		double screenx = x / (GAME_WIDTH * mainGame->xScale) * 1.35  - 0.90;
+		double screeny = y / (GAME_HEIGHT * mainGame->yScale) * 0.84 - 0.42;
 		double angle = 0.798056 - atan(screeny);	//0.798056 = arctan(8.0/7.8)
 		double vlen = sqrt(1.0 + screeny * screeny);
 		double boardx = 4.2 + 7.8 * screenx / vlen / cos(angle);
@@ -2313,7 +2315,7 @@ void ClientField::ShowCardInfoInList(ClientCard* pcard, irr::gui::IGUIElement* e
 			x = w + 10 * mainGame->xScale;
 		if(x + w > 670 * mainGame->xScale)
 			x = 670 * mainGame->xScale - w;
-		mainGame->stCardListTip->setRelativePosition(recti(x - dTip.Width / 2, y - 10, x + dTip.Width / 2, y - 10 + dTip.Height));
+		mainGame->stCardListTip->setRelativePosition(recti(x - dTip.Width / 2, y - 10 * mainGame->yScale, x + dTip.Width / 2, y - 10 * mainGame->yScale + dTip.Height));
 		mainGame->stCardListTip->setVisible(true);
 	}
 }

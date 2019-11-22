@@ -75,3 +75,5 @@ output.json
 .settings
 .vscode
 .classpath
+/libcore/.cxx
+/libygo/.cxx
