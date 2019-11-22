@@ -334,9 +334,7 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
                     //               startActivity(intent);
                 });
                 btnwechat.setOnClickListener((v) -> {
-                    Uri uri = Uri.parse("https://afdian.net/@koishi");
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
+                    WebActivity.open(this, getString(R.string.donation), Constants.AFDIAN_URL);
                     dialog.dismiss();
                 });
                 btnpaypal.setOnClickListener((v) -> {
