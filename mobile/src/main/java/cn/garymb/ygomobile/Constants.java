@@ -6,7 +6,7 @@ import cn.garymb.ygomobile.lite.BuildConfig;
 
 public interface Constants {
     String ORIGIN_APP_ID = "cn.garymb.ygomobile";
-    String ORIGIN_VER_NAME = "3.4.8";
+    String ORIGIN_VER_NAME = "3.5.3";
 
     boolean DEBUG = BuildConfig.DEBUG;
     String PREF_START = "game_pref_";
@@ -147,6 +147,8 @@ public interface Constants {
     int DECK_EXTRA_COUNT = (DECK_SIDE_MAX / DECK_WIDTH_COUNT * DECK_WIDTH_COUNT < DECK_SIDE_MAX) ? DECK_WIDTH_COUNT * 2 : DECK_WIDTH_COUNT;
     int DECK_SIDE_COUNT = DECK_EXTRA_COUNT;
     String ALIPAY_URL = "https://qr.alipay.com/tsx0946394abztqx9ez9jfb";
+    String PAYPAL_URL = "https://www.paypal.me/sekkananahira";
+    String AFDIAN_URL = "https://afdian.net/@koishi";
     String URL_HELP = "http://note.youdao.com/noteshare?id=8ae2dc824b7dc04a95a4665a938e2251";
     String URL_MASTERRULE_CN = "https://ocg-rule.readthedocs.io/zh_CN/master/";
     String WIKI_SEARCH_URL = "https://www.ourocg.cn/S.aspx?key=";
