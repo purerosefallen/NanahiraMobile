@@ -11,7 +11,6 @@
 #include "single_mode.h"
 
 #ifdef _IRR_ANDROID_PLATFORM_
-#include <android/AndroidSoundEffectPlayer.h>
 #include <android/CAndroidGUIEditBox.h>
 #include <android/CAndroidGUIComboBox.h>
 #include <android/CAndroidGUISkin.h>
@@ -81,8 +80,6 @@ bool Game::Initialize() {
 	setPositionFix(appPosition);
 	device->setProcessReceiver(this);
 
-	soundEffectPlayer = new AndroidSoundEffectPlayer(app);
-	soundEffectPlayer->setSEEnabled(options->isSoundEffectEnabled());
 	app->onInputEvent = android::handleInput;
 	ILogger* logger = device->getLogger();
 //	logger->setLogLevel(ELL_WARNING);
@@ -427,7 +424,28 @@ bool Game::Initialize() {
 	posY += 60;
 	chkWaitChain = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, -1, dataManager.GetSysString(1277));
 	chkWaitChain->setChecked(gameConf.chkWaitChain != 0);
-	elmTabHelperLast = chkWaitChain;
+	posY += 60;
+	chkEnableSound = env->addCheckBox(gameConf.enable_sound, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, CHECKBOX_ENABLE_SOUND, dataManager.GetSysString(1282));
+	chkEnableSound->setChecked(gameConf.enable_sound);
+	scrSoundVolume = env->addScrollBar(true, rect<s32>(posX + 110 * xScale, posY, posX + 250 * xScale, posY + 30 * yScale), tabHelper, SCROLL_VOLUME);
+	scrSoundVolume->setMax(100);
+	scrSoundVolume->setMin(0);
+	scrSoundVolume->setPos(gameConf.sound_volume);
+	scrSoundVolume->setLargeStep(1);
+	scrSoundVolume->setSmallStep(1);
+	posY += 60;
+	chkEnableMusic = env->addCheckBox(gameConf.enable_music, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1283));
+	chkEnableMusic->setChecked(gameConf.enable_music);
+	scrMusicVolume = env->addScrollBar(true, rect<s32>(posX + 110 * xScale, posY, posX + 250 * xScale, posY + 30 * yScale), tabHelper, SCROLL_VOLUME);
+	scrMusicVolume->setMax(100);
+	scrMusicVolume->setMin(0);
+	scrMusicVolume->setPos(gameConf.music_volume);
+	scrMusicVolume->setLargeStep(1);
+	scrMusicVolume->setSmallStep(1);
+	posY += 60;
+	chkMusicMode = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), tabHelper, -1, dataManager.GetSysString(1284));
+	chkMusicMode->setChecked(gameConf.music_mode != 0);
+	elmTabHelperLast = chkMusicMode;
 	//show scroll
 	s32 tabHelperLastY = elmTabHelperLast->getRelativePosition().LowerRightCorner.Y;
 	s32 tabHelperHeight = 300 * yScale;
@@ -595,10 +613,13 @@ bool Game::Initialize() {
 	wANNumber = env->addWindow(rect<s32>(550 * xScale, 200 * yScale, 780 * xScale, 355 * yScale), false, L"");
 	wANNumber->getCloseButton()->setVisible(false);
 	wANNumber->setVisible(false);
-#ifdef _IRR_ANDROID_PLATFORM_
 	cbANNumber = CAndroidGUIComboBox::addAndroidComboBox(env, rect<s32>(40 * xScale, 30 * yScale, 190 * xScale, 65 * yScale), wANNumber, -1);
-#endif
 	cbANNumber->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	for(int i = 0; i < 12; ++i) {
+		myswprintf(strbuf, L"%d", i + 1);
+		btnANNumber[i] = env->addButton(rect<s32>((20 + 50 * (i % 4)) * xScale, (40 + 50 * (i / 4)) * yScale, (60 + 50 * (i % 4)) * xScale, (80 + 50 * (i / 4)) * yScale), wANNumber, BUTTON_ANNUMBER_1 + i, strbuf);
+		btnANNumber[i]->setIsPushButton(true);
+	}
 	btnANNumberOK = env->addButton(rect<s32>(70 * xScale, 95 * yScale, 160 * xScale, 145 * yScale), wANNumber, BUTTON_ANNUMBER_OK, dataManager.GetSysString(1211));
 	//announce card
 	wANCard = env->addWindow(rect<s32>(400 * xScale, 100 * yScale, 800 * xScale, 400 * yScale), false, L"");
@@ -941,6 +962,19 @@ bool Game::Initialize() {
 	//cancel or finish
 	btnCancelOrFinish = env->addButton(rect<s32>(205 * xScale, 220 * yScale, 305 * xScale, 275 * yScale), 0, BUTTON_CANCEL_OR_FINISH, dataManager.GetSysString(1295));
 	btnCancelOrFinish->setVisible(false);
+	soundManager = Utils::make_unique<SoundManager>();
+	if(!soundManager->Init((double)gameConf.sound_volume / 100, (double)gameConf.music_volume / 100, gameConf.enable_sound, gameConf.enable_music, nullptr)) {
+		chkEnableSound->setChecked(false);
+		chkEnableSound->setEnabled(false);
+		chkEnableSound->setVisible(false);
+		chkEnableMusic->setChecked(false);
+		chkEnableMusic->setEnabled(false);
+		chkEnableMusic->setVisible(false);
+		scrSoundVolume->setVisible(false);
+		scrMusicVolume->setVisible(false);
+		chkMusicMode->setEnabled(false);
+		chkMusicMode->setVisible(false);
+	}
 #endif
 	//leave/surrender/exit
 	btnLeaveGame = env->addButton(rect<s32>(205 * xScale, 1 * yScale, 305 * xScale, 80 * yScale), 0, BUTTON_LEAVE_GAME, L"");
@@ -1101,6 +1135,16 @@ void Game::MainLoop() {
 #endif
 		gMutex.lock();
 		if(dInfo.isStarted) {
+			if(dInfo.isFinished && showcardcode == 1)
+				soundManager->PlayBGM(SoundManager::BGM::WIN);
+			else if(dInfo.isFinished && (showcardcode == 2 || showcardcode == 3))
+				soundManager->PlayBGM(SoundManager::BGM::LOSE);
+			else if(dInfo.lp[0] > 0 && dInfo.lp[0] <= dInfo.lp[1] / 2)
+				soundManager->PlayBGM(SoundManager::BGM::DISADVANTAGE);
+			else if(dInfo.lp[0] > 0 && dInfo.lp[0] >= dInfo.lp[1] * 2)
+				soundManager->PlayBGM(SoundManager::BGM::ADVANTAGE);
+			else
+				soundManager->PlayBGM(SoundManager::BGM::DUEL);
 			DrawBackImage(imageManager.tBackGround);
 			DrawBackGround();
 			DrawCards();
@@ -1109,12 +1153,14 @@ void Game::MainLoop() {
 			driver->setMaterial(irr::video::IdentityMaterial);
 			driver->clearZBuffer();
 		} else if(is_building) {
+			soundManager->PlayBGM(SoundManager::BGM::DECK);
 			DrawBackImage(imageManager.tBackGround_deck);
 #ifdef _IRR_ANDROID_PLATFORM_
 			driver->enableMaterial2D(true);
 			DrawDeckBd();
 			driver->enableMaterial2D(false);
 		} else {
+			soundManager->PlayBGM(SoundManager::BGM::MENU);
 			DrawBackImage(imageManager.tBackGround_menu);
 		}
 		driver->enableMaterial2D(true);
@@ -1196,7 +1242,7 @@ void Game::MainLoop() {
 	usleep(500000);
 #endif
 	SaveConfig();
-	delete soundEffectPlayer;
+	//delete soundEffectPlayer;
 	usleep(500000);
 //	device->drop();
 }
@@ -1448,6 +1494,11 @@ void Game::LoadConfig() {
 	gameConf.auto_save_replay = android::getIntSetting(appMain, "auto_save_replay", 0);
 	gameConf.quick_animation = android::getIntSetting(appMain, "quick_animation", 0);
 	gameConf.prefer_expansion_script = android::getIntSetting(appMain, "prefer_expansion_script", 0);
+	gameConf.enable_sound = android::getIntSetting(appMain, "enable_sound", 1);
+	gameConf.sound_volume = android::getIntSetting(appMain, "sound_volume", 50);
+	gameConf.enable_music = android::getIntSetting(appMain, "enable_music", 1);
+	gameConf.music_volume = android::getIntSetting(appMain, "music_volume", 50);
+	gameConf.music_mode = android::getIntSetting(appMain, "music_mode", 1);
 	//defult Setting without checked
     gameConf.hide_setname = 0;
 	gameConf.hide_hint_button = 0;
@@ -1487,6 +1538,17 @@ void Game::SaveConfig() {
         android::saveIntSetting(appMain, "quick_animation", gameConf.quick_animation);
 	gameConf.prefer_expansion_script = chkPreferExpansionScript->isChecked() ? 1 : 0;
 	    android::saveIntSetting(appMain, "prefer_expansion_script", gameConf.prefer_expansion_script);
+	gameConf.enable_sound = chkEnableSound->isChecked() ? 1 : 0;
+	    android::saveIntSetting(appMain, "enable_sound", gameConf.enable_sound);
+	gameConf.enable_music = chkEnableMusic->isChecked() ? 1 : 0;
+	    android::saveIntSetting(appMain, "enable_music", gameConf.enable_music);
+	gameConf.music_mode = chkMusicMode->isChecked() ? 1 : 0;
+	    android::saveIntSetting(appMain, "music_mode", gameConf.music_mode);
+
+	gameConf.sound_volume = (double)scrSoundVolume->getPos();
+	    android::saveIntSetting(appMain, "sound_volume", gameConf.sound_volume);
+	gameConf.music_volume = (double)scrMusicVolume->getPos();
+	    android::saveIntSetting(appMain, "music_volume", gameConf.music_volume);
 
 //gameConf.control_mode = control_mode->isChecked()?1:0;
 //	  android::saveIntSetting(appMain, "control_mode", gameConf.control_mode);
@@ -1595,10 +1657,12 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 	chatType[0] = player;
 	switch(player) {
 	case 0: //from host
+		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
 		chatMsg[0].append(dInfo.hostname);
 		chatMsg[0].append(L": ");
 		break;
 	case 1: //from client
+		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
 		chatMsg[0].append(dInfo.clientname);
 		chatMsg[0].append(L": ");
 		break;
@@ -1607,6 +1671,7 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 		chatMsg[0].append(L": ");
 		break;
 	case 3: //client tag
+		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
 		chatMsg[0].append(dInfo.clientname_tag);
 		chatMsg[0].append(L": ");
 		break;
@@ -1615,6 +1680,7 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 		chatMsg[0].append(L": ");
 		break;
 	case 8: //system custom message, no prefix.
+		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
 		chatMsg[0].append(L"[System]: ");
 		break;
 	case 9: //error message

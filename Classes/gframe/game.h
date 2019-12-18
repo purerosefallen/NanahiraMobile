@@ -5,10 +5,10 @@
 #include "client_field.h"
 #include "deck_con.h"
 #include "menu_handler.h"
+#include "sound_manager.h"
 #include <unordered_map>
 #include <vector>
 #include <list>
-#include "IYGOSoundEffectPlayer.h"
 
 namespace ygo {
 
@@ -50,6 +50,12 @@ struct Config {
 	int quick_animation;
 	int auto_save_replay;
 	int prefer_expansion_script;
+	//sound
+	bool enable_sound;
+	bool enable_music;
+	double sound_volume;
+	double music_volume;
+	double music_mode;
 };
 
 struct DuelInfo {
@@ -171,7 +177,12 @@ public:
 		irr::gui::IGUIElement* focus = env->getFocus();
 		return focus && focus->hasType(type);
 	}
+
+	template<typename T>
+	static std::vector<T> TokenizeString(T input, const T& token);
+
 // don't merge
+	std::unique_ptr<SoundManager> soundManager;
 	std::mutex gMutex;
 	Signal frameSignal;
 	Signal actionSignal;
@@ -225,6 +236,7 @@ public:
 	irr::video::IVideoDriver* driver;
 	irr::scene::ISceneManager* smgr;
 	irr::scene::ICameraSceneNode* camera;
+	std::vector<Utils::IrrArchiveHelper> archives;
 	//GUI
 	irr::gui::IGUIEnvironment* env;
 	irr::gui::CGUITTFont* guiFont;
@@ -269,6 +281,12 @@ public:
 	irr::gui::IGUICheckBox* chkAutoSearch;
 	irr::gui::IGUICheckBox* chkMultiKeywords;
 	irr::gui::IGUICheckBox* chkPreferExpansionScript;
+	//sound
+	irr::gui::IGUICheckBox* chkEnableSound;
+	irr::gui::IGUICheckBox* chkEnableMusic;
+	irr::gui::IGUIScrollBar* scrSoundVolume;
+	irr::gui::IGUIScrollBar* scrMusicVolume;
+	irr::gui::IGUICheckBox* chkMusicMode;
 	//main menu
 	irr::gui::IGUIWindow* wMainMenu;
 	irr::gui::IGUIButton* btnLanMode;
@@ -398,6 +416,7 @@ public:
 	//announce number
 	irr::gui::IGUIWindow* wANNumber;
 	irr::gui::IGUIComboBox* cbANNumber;
+	irr::gui::IGUIButton* btnANNumber[12];
 	irr::gui::IGUIButton* btnANNumberOK;
 	//announce card
 	irr::gui::IGUIWindow* wANCard;
@@ -535,7 +554,6 @@ public:
 	float xScale;
     float yScale;
 
-	IYGOSoundEffectPlayer* soundEffectPlayer;
 #ifdef _IRR_ANDROID_PLATFORM_
 	ANDROID_APP appMain;
 	int glversion;
@@ -571,6 +589,20 @@ private:
     };
 
     extern Game *mainGame;
+
+	template<typename T>
+	inline std::vector<T> Game::TokenizeString(T input, const T & token) {
+		std::vector<T> res;
+		std::size_t pos;
+		while((pos = input.find(token)) != T::npos) {
+			if(pos != 0)
+				res.push_back(input.substr(0, pos));
+			input = input.substr(pos + 1);
+		}
+		if(input.size())
+			res.push_back(input);
+		return res;
+	}
 
 }
 
@@ -692,9 +724,18 @@ private:
 #define BUTTON_CHAIN_WHENAVAIL		266
 #define BUTTON_CANCEL_OR_FINISH		267
 #define BUTTON_PHASE				268
-#define BUTTON_CLEAR_LOG			270
-#define LISTBOX_LOG					271
-#define SCROLL_CARDTEXT				280
+#define BUTTON_ANNUMBER_1			270
+#define BUTTON_ANNUMBER_2			271
+#define BUTTON_ANNUMBER_3			272
+#define BUTTON_ANNUMBER_4			273
+#define BUTTON_ANNUMBER_5			274
+#define BUTTON_ANNUMBER_6			275
+#define BUTTON_ANNUMBER_7			276
+#define BUTTON_ANNUMBER_8			277
+#define BUTTON_ANNUMBER_9			278
+#define BUTTON_ANNUMBER_10			279
+#define BUTTON_ANNUMBER_11			280
+#define BUTTON_ANNUMBER_12			281
 #define BUTTON_DISPLAY_0			290
 #define BUTTON_DISPLAY_1			291
 #define BUTTON_DISPLAY_2			292
@@ -745,12 +786,19 @@ private:
 #define BUTTON_DM_CANCEL			342
 #define BUTTON_CLOSE_DECKMANAGER	343
 #define COMBOBOX_LFLIST				349
-
+#define BUTTON_CLEAR_LOG			350
+#define LISTBOX_LOG					351
+#define SCROLL_CARDTEXT				352
 #define CHECKBOX_AUTO_SEARCH		360
 #define CHECKBOX_DRAW_FIELD_SPELL	361
 #define CHECKBOX_MULTI_KEYWORDS		372
 #define CHECKBOX_PREFER_EXPANSION	373
 #define CHECKBOX_DISABLE_CHAT		364
+
+#define SCROLL_VOLUME				365
+#define CHECKBOX_ENABLE_SOUND		366
+#define CHECKBOX_ENABLE_MUSIC		367
+
 #define CHECKBOX_QUICK_ANIMATION	369
 #define SCROLL_TAB_HELPER			370
 #define SCROLL_TAB_SYSTEM			371

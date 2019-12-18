@@ -197,7 +197,6 @@ public class AppsSettings {
         options.mCardQuality = getCardQuality();
         options.mIsFontAntiAliasEnabled = isFontAntiAlias();
         options.mIsPendulumScaleEnabled = isPendulumScale();
-        options.mIsSoundEffectEnabled = isSoundEffect();
         options.mOpenglVersion = getOpenglVersion();
         if (Constants.DEBUG) {
             Log.i("Irrlicht", "option=" + options);
@@ -260,20 +259,6 @@ public class AppsSettings {
                 }
             }
         }
-    }
-
-    /***
-     * 音效
-     */
-    public boolean isSoundEffect() {
-        return mSharedPreferences.getBoolean(Constants.PREF_SOUND_EFFECT, Constants.PREF_DEF_SOUND_EFFECT);
-    }
-
-    /***
-     * 音效
-     */
-    public void setSoundEffect(boolean soundEffect) {
-        mSharedPreferences.putBoolean(Constants.PREF_SOUND_EFFECT, soundEffect);
     }
 
     /***
@@ -413,6 +398,10 @@ public class AppsSettings {
      */
     public void setUseExtraCards(boolean useExtraCards) {
         mSharedPreferences.putBoolean(Constants.PREF_USE_EXTRA_CARD_CARDS, useExtraCards);
+    }
+
+    public String getSoundPath() {
+        return new File(getResourcePath(), Constants.CORE_SOUND_PATH).getAbsolutePath();
     }
 
     public String getCoreSkinPath() {

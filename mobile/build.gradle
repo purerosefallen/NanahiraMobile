@@ -8,12 +8,12 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 354001201
-        versionName "Fortune"
+        versionCode 360001216
+        versionName "Yume"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
-            abiFilters "armeabi-v7a"
+            abiFilters "armeabi-v7a","x86"
         }
     }
     compileOptions {
@@ -22,15 +22,15 @@ android {
     }
     productFlavors {
         cn {
-            manifestPlaceholders = [PGYER_APPID: "5be72b17bccbc9898012d35f713c57ff"]
+            manifestPlaceholders = [APP_ID: "0b6f110306"]
         }
         en {
             applicationIdSuffix ".EN"
-            manifestPlaceholders = [PGYER_APPID: "c94918f2b9ca85a0b77567ca53218121"]
+            manifestPlaceholders = [APP_ID: "9c66525dfa"]
         }
         ko {
             applicationIdSuffix ".KO"
-            manifestPlaceholders = [PGYER_APPID: "885b0ff6e389b741aff1d62011f9a8ac"]
+            manifestPlaceholders = [APP_ID: "0488398d8a"]
         }
         signingConfigs {
             releaseConfig {
@@ -113,7 +113,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //
     implementation(name: 'paysdk-release-1.2.4', ext: 'aar')
-    implementation "com.pgyersdk:sdk:3.0.11"
     //dialog库
     implementation(name: 'dialogutils2-release', ext: 'aar')
     //recyclerview的adapter库
@@ -124,4 +123,8 @@ dependencies {
     implementation 'com.yuyh.imgsel:library:2.0.6'
     //跨进程SharedPreferencesPlus工具
     implementation 'com.github.zhangliangming:PreferencesProvider:v1.3'
+    //Tencent bugly
+    implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
+    implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+
 }

@@ -409,7 +409,7 @@ int32 field::process() {
 		return pduel->bufferlen;
 	}
 	case PROCESSOR_SSET_G: {
-		if (sset_g(it->step, it->arg1, it->arg2, it->ptarget, it->arg3, it->peffect)) {
+		if (sset_g(it->step, it->arg1, it->arg2, it->ptarget, it->arg3, it->peffect, it->arg4)) {
 			core.units.pop_front();
 		} else
 			it->step++;
@@ -504,10 +504,11 @@ int32 field::process() {
 		if(it->step == 0) {
 			card* attacker = core.attacker;
 			if(!attacker
-			        || (attacker->fieldid_r != core.pre_field[0])
-			        || (attacker->current.location != LOCATION_MZONE)
-			        || !attacker->is_capable_attack()
-			        || !attacker->is_affect_by_effect(core.reason_effect)) {
+				|| core.effect_damage_step != 0
+				|| (attacker->fieldid_r != core.pre_field[0])
+				|| (attacker->current.location != LOCATION_MZONE)
+				|| !attacker->is_capable_attack()
+				|| !attacker->is_affect_by_effect(core.reason_effect)) {
 				returns.ivalue[0] = 0;
 				core.units.pop_front();
 			} else {
@@ -2465,6 +2466,10 @@ int32 field::process_battle_command(uint16 step) {
 			core.attacker->set_status(STATUS_ATTACK_CANCELED, FALSE);
 			core.attacker->attack_controler = core.attacker->current.controler;
 			core.pre_field[0] = core.attacker->fieldid_r;
+			if(core.chain_attack && core.chain_attacker_id != core.attacker->fieldid) {
+				core.chain_attack = FALSE;
+				core.chain_attacker_id = 0;
+			}
 			effect_set eset;
 			filter_player_effect(infos.turn_player, EFFECT_ATTACK_COST, &eset, FALSE);
 			core.attacker->filter_effect(EFFECT_ATTACK_COST, &eset);
@@ -2597,10 +2602,6 @@ int32 field::process_battle_command(uint16 step) {
 	case 7: {
 		if(!core.units.begin()->arg1) {
 			core.phase_action = TRUE;
-			if(core.chain_attack && core.chain_attacker_id != core.attacker->fieldid) {
-				core.chain_attack = FALSE;
-				core.chain_attacker_id = 0;
-			}
 			core.attack_state_count[infos.turn_player]++;
 			check_card_counter(core.attacker, 5, infos.turn_player);
 			core.attacker->attack_announce_count++;

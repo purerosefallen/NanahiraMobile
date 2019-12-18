@@ -31,8 +31,6 @@ public interface Constants {
     int PREF_DEF_OPENGL_VERSION = 1;
     String PREF_PENDULUM_SCALE = "pref_key_game_lab_pendulum_scale";
     boolean PREF_DEF_PENDULUM_SCALE = true;
-    String PREF_SOUND_EFFECT = "pref_key_game_sound_effect";
-    boolean PREF_DEF_SOUND_EFFECT = true;
     String PREF_START_SERVICEDUELASSISTANT = "pref_key_start_serviceduelassistant";
     boolean PREF_DEF_START_SERVICEDUELASSISTANT = false;
     String PREF_LOCK_SCREEN = "pref_key_game_screen_orientation";
@@ -69,6 +67,7 @@ public interface Constants {
     String CORE_CUSTOM_LIMIT_PATH = "expansions/lflist.conf";
     String CORE_SYSTEM_PATH = "system.conf";
     String CORE_BOT_CONF_PATH = "bot.conf";
+    String CORE_SOUND_PATH = "sound";
     String CORE_SKIN_PATH = "textures";
     String CORE_SKIN_PENDULUM_PATH = CORE_SKIN_PATH + "/extra";
     String CORE_DECK_PATH = "deck";
@@ -165,7 +164,7 @@ public interface Constants {
     /***
      * 长按删除
      */
-    long LONG_PRESS_DRAG = 900;
+    long LONG_PRESS_DRAG = 600;
     /***
      * adb shell am start -n cn.garymb.ygomobile/cn.garymb.ygomobile.ui.home.MainActivity -a ygomobile.intent.action.DECK --es android.intent.extra.TEXT 青眼白龙.ydk
      * <p>
