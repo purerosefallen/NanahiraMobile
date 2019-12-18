@@ -366,7 +366,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 				event_base_loopbreak(client_base);
 				temp_ver = pkt->code;
 				try_needed = true;
->>>>>>> 1d20db3303c222b77180399611b512c3aabf6610
+			}
 			break;
 		}
 		}
@@ -499,7 +499,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 	case STOC_JOIN_GAME: {
 		//modded
 		temp_ver = 0;
-=======
+		STOC_JoinGame* pkt = (STOC_JoinGame*)pdata;
 		std::wstring str;
 		wchar_t msgbuf[256];
 		myswprintf(msgbuf, L"%ls%ls\n", dataManager.GetSysString(1226), deckManager.GetLFListName(pkt->info.lflist));
@@ -1170,6 +1170,41 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->showcarddif = 0;
 			mainGame->showcard = 1;
 			mainGame->WaitFrameSignal(30);
+			break;
+		}
+		case 11: { //HINT_MUSIC
+			char BGMName[1024];
+			if (data) {
+				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.mp3", dataManager.GetDesc(data));			
+				BufferIO::EncodeUTF8(textBuffer, BGMName);
+				mainGame->soundManager->PlayCustomBGM(BGMName);
+			} else {
+				mainGame->soundManager->StopBGM();
+			}
+			break;
+		}
+		//playing custom sound effect
+		case 12: { //HINT_SOUND
+			char SoundName[1024];
+			if (data) {
+				myswprintf(textBuffer, L"./sound/custom/%ls.wav", dataManager.GetDesc(data));
+				BufferIO::EncodeUTF8(textBuffer, SoundName);
+				mainGame->soundManager->PlayCustomSound(SoundName);
+			} else {
+				mainGame->soundManager->StopSound();
+			}
+			break;
+		}
+		//playing custom bgm in ogg format
+		case 13: { //HINT_MUSIC_OGG
+			char BGMName[1024];
+			if (data) {
+				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.ogg", dataManager.GetDesc(data));			
+				BufferIO::EncodeUTF8(textBuffer, BGMName);
+				mainGame->soundManager->PlayCustomBGM(BGMName);
+			} else {
+				mainGame->soundManager->StopBGM();
+			}
 			break;
 		}
 		}
@@ -3014,7 +3049,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 	case MSG_CHAIN_DISABLED: {
 		int ct = BufferIO::ReadInt8(pbuf);
 		if(!mainGame->dInfo.isReplay || !mainGame->dInfo.isReplaySkiping) {
-			mainGame->soundEffectPlayer->doNegateEffect();
+			mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::NEGATE);
 			mainGame->showcardcode = mainGame->dField.chains[ct - 1].code;
 			mainGame->showcarddif = 0;
 			mainGame->showcard = 3;

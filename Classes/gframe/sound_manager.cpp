@@ -34,6 +34,7 @@ void SoundManager::RefreshBGMList() {
 	Utils::Makedirectory(TEXT("./sound/BGM/disadvantage"));
 	Utils::Makedirectory(TEXT("./sound/BGM/win"));
 	Utils::Makedirectory(TEXT("./sound/BGM/lose"));
+	Utils::Makedirectory(TEXT("./sound/BGM/custom"));
 	Utils::Makedirectory(TEXT("./sound/chants"));
 	RefreshBGMDir(TEXT(""), BGM::DUEL);
 	RefreshBGMDir(TEXT("duel"), BGM::DUEL);
@@ -43,6 +44,7 @@ void SoundManager::RefreshBGMList() {
 	RefreshBGMDir(TEXT("disadvantage"), BGM::DISADVANTAGE);
 	RefreshBGMDir(TEXT("win"), BGM::WIN);
 	RefreshBGMDir(TEXT("lose"), BGM::LOSE);
+	RefreshBGMDir(TEXT("custom"), BGM::CUSTOM);
 }
 void SoundManager::RefreshBGMDir(path_string path, BGM scene) {
 	for(auto& file : Utils::FindfolderFiles(TEXT("./sound/BGM/") + path, { TEXT("mp3"), TEXT("ogg"), TEXT("wav") })) {
@@ -98,6 +100,7 @@ void SoundManager::PlaySoundEffect(SFX sound) {
         {CARD_PICK, "./sound/cardpick.wav"},
         {CARD_DROP, "./sound/carddrop.wav"},
         {PLAYER_ENTER, "./sound/playerenter.wav"},
+        {NEGATE, "./sound/negate.wav"},
         {CHAT, "./sound/chatmessage.wav"}
     };
     if (!soundsEnabled) return;

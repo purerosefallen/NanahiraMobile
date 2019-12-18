@@ -38,6 +38,7 @@ public:
 		CARD_PICK,
 		CARD_DROP,
 		PLAYER_ENTER,
+		NEGATE,
 		CHAT
 	};
     enum BGM {
@@ -48,6 +49,7 @@ public:
         ADVANTAGE,
         DISADVANTAGE,
         WIN,
+		CUSTOM,
         LOSE
     };
 	bool Init(double sounds_volume, double music_volume, bool sounds_enabled, bool music_enabled, void* payload = nullptr);
