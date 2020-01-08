@@ -234,27 +234,6 @@ irr::video::ITexture* ImageManager::GetTexture(int code) {
 }
 irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 	return tUnknown;
-/*
-	if(code == 0)
-		return tUnknown;
-	auto tit = tThumb.find(code);
-	if(tit == tThumb.end()) {
-		char file[256];
-		sprintf(file, "%s/%d.jpg", irr::android::getCardImagePath(mainGame->appMain).c_str(), code);
-		irr::video::ITexture* img = driver->getTexture(file);
-		if(img == NULL) {
-			tThumb[code] = NULL;
-			return tUnknown;
-		} else {
-			tThumb[code] = img;
-			return img;
-		}
-	}
-	if(tit->second)
-		return tit->second;
-	else
-		return tUnknown;
-*/
 }
 irr::video::ITexture* ImageManager::GetTextureField(int code) {
 	if(code == 0)

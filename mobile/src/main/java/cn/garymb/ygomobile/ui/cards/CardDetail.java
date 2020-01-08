@@ -7,15 +7,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.feihua.dialogutils.util.DialogUtils;
+
 import cn.garymb.ygomobile.lite.R;
 import cn.garymb.ygomobile.loader.ImageLoader;
 import cn.garymb.ygomobile.ui.activities.BaseActivity;
-import cn.garymb.ygomobile.ui.activities.PhotoViewActivity;
 import cn.garymb.ygomobile.ui.adapters.BaseAdapterPlus;
 import cn.garymb.ygomobile.utils.CardUtils;
 import ocgcore.StringManager;
 import ocgcore.data.Card;
-import ocgcore.data.CardData;
 import ocgcore.enums.CardType;
 
 /***
@@ -51,16 +51,8 @@ public class CardDetail extends BaseAdapterPlus.BaseViewHolder {
     private Card mCardInfo;
     private CardListProvider mProvider;
     private OnCardClickListener mListener;
-
-    public interface OnCardClickListener {
-        void onOpenUrl(Card cardInfo);
-
-        void onAddMainCard(Card cardInfo);
-
-        void onAddSideCard(Card cardInfo);
-
-        void onClose();
-    }
+    private DialogUtils dialog;
+    private ImageView photoView;
 
     public CardDetail(BaseActivity context, ImageLoader imageLoader, StringManager stringManager) {
         super(LayoutInflater.from(context).inflate(R.layout.dialog_cardinfo, null));
@@ -155,12 +147,38 @@ public class CardDetail extends BaseAdapterPlus.BaseViewHolder {
         mListener = listener;
     }
 
+    public void bind(Card cardInfo, final int position, final CardListProvider provider) {
+        curPosition = position;
+        mProvider = provider;
+        if (cardInfo != null) {
+            setCardInfo(cardInfo);
+        }
+    }
+
+    public int getCurPosition() {
+        return curPosition;
+    }
+
+    public CardListProvider getProvider() {
+        return mProvider;
+    }
+
+    public Card getCardInfo() {
+        return mCardInfo;
+    }
+
     private void setCardInfo(Card cardInfo) {
         if (cardInfo == null) return;
         mCardInfo = cardInfo;
         imageLoader.bindImage(cardImage, cardInfo.Code, null, true);
+        dialog = DialogUtils.getdx(context);
         cardImage.setOnClickListener((v) -> {
-            PhotoViewActivity.showImage(context, cardInfo.Code, cardInfo.Name);
+            View view = dialog.initDialog(context, R.layout.dialog_photo);
+            ImageView photoView = view.findViewById(R.id.photoView);
+            photoView.setOnClickListener(View -> {
+                dialog.dis();
+            });
+            imageLoader.bindImage(photoView, cardInfo.Code, null, true);
         });
         name.setText(cardInfo.Name);
         desc.setText(cardInfo.Desc);
@@ -226,26 +244,6 @@ public class CardDetail extends BaseAdapterPlus.BaseViewHolder {
         }
     }
 
-    public void bind(Card cardInfo, final int position, final CardListProvider provider) {
-        curPosition = position;
-        mProvider = provider;
-        if (cardInfo != null) {
-            setCardInfo(cardInfo);
-        }
-    }
-
-    public int getCurPosition() {
-        return curPosition;
-    }
-
-    public CardListProvider getProvider() {
-        return mProvider;
-    }
-
-    public Card getCardInfo() {
-        return mCardInfo;
-    }
-
     public void onPreCard() {
         int position = getCurPosition();
         CardListProvider provider = getProvider();
@@ -294,6 +292,16 @@ public class CardDetail extends BaseAdapterPlus.BaseViewHolder {
 
     private <T extends View> T bind(int id) {
         return (T) findViewById(id);
+    }
+
+    public interface OnCardClickListener {
+        void onOpenUrl(Card cardInfo);
+
+        void onAddMainCard(Card cardInfo);
+
+        void onAddSideCard(Card cardInfo);
+
+        void onClose();
     }
 
     public static class DefaultOnCardClickListener implements OnCardClickListener {

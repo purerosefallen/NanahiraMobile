@@ -586,20 +586,10 @@ int32 field::get_useable_count_fromex(card* pcard, uint8 playerid, uint8 uplayer
 		pcard->current.location = LOCATION_EXTRA;
 	}
 	int32 useable_count = 0;
-	if(core.duel_rule >= 4 && !is_player_affected_by_effect(playerid, EFFECT_EXTRA_TOMAIN_KOISHI) && !pcard->is_affected_by_effect(EFFECT_EXTRA_TOMAIN_KOISHI))
+	if(core.duel_rule >= 4)
 		useable_count = get_useable_count_fromex_rule4(pcard, playerid, uplayer, zone, list);
 	else
-	{
 		useable_count = get_useable_count_other(pcard, playerid, LOCATION_MZONE, uplayer, LOCATION_REASON_TOFIELD, zone, list);
-		if(core.duel_rule >= 4) {
-			uint32 temp_list = 0;
-			get_useable_count_fromex_rule4(pcard, playerid, uplayer, zone, &temp_list);
-			if(~temp_list & ((1u << 5) | (1u << 6)))
-				useable_count++;
-			if(list)
-				*list &= temp_list;
-		}
-	}
 	if(use_temp_card)
 		pcard->current.location = 0;
 	return useable_count;
@@ -652,28 +642,7 @@ int32 field::get_tofield_count(card* pcard, uint8 playerid, uint8 location, uint
 		return 0;
 	uint32 flag = player[playerid].disabled_location | player[playerid].used_location;
 	if(location == LOCATION_MZONE && (reason & LOCATION_REASON_TOFIELD)) {
-		effect_set eset;
-		if(uplayer < 2)
-			filter_player_effect(uplayer, EFFECT_MUST_USE_MZONE, &eset);
-		if(pcard)
-			pcard->filter_effect(EFFECT_MUST_USE_MZONE, &eset);
-		for(int32 i = 0; i < eset.size(); ++i) {
-			if(eset[i]->is_flag(EFFECT_FLAG_COUNT_LIMIT) && eset[i]->count_limit == 0)
-				continue;
-			uint32 value = 0x1f;
-			if(eset[i]->is_flag(EFFECT_FLAG_PLAYER_TARGET))
-				value = eset[i]->get_value();
-			else {
-				pduel->lua->add_param(playerid, PARAM_TYPE_INT);
-				pduel->lua->add_param(uplayer, PARAM_TYPE_INT);
-				pduel->lua->add_param(reason, PARAM_TYPE_INT);
-				value = eset[i]->get_value(pcard, 3);
-			}
-			if(eset[i]->get_handler_player() == playerid)
-				flag |= ~value & 0x1f;
-			else
-				flag |= ~(value >> 16) & 0x1f;
-		}
+		filter_must_use_mzone(playerid, uplayer, reason, pcard, &flag);
 	}
 	if (location == LOCATION_MZONE)
 		flag = (flag | ~zone) & 0x1f;
@@ -695,29 +664,7 @@ int32 field::get_useable_count_fromex_rule4(card* pcard, uint8 playerid, uint8 u
 }
 int32 field::get_spsummonable_count_fromex_rule4(card* pcard, uint8 playerid, uint8 uplayer, uint32 zone, uint32* list) {
 	uint32 flag = player[playerid].disabled_location | player[playerid].used_location;
-	effect_set eset;
-	if(uplayer < 2)
-		filter_player_effect(uplayer, EFFECT_MUST_USE_MZONE, &eset);
-	if(pcard)
-		pcard->filter_effect(EFFECT_MUST_USE_MZONE, &eset);
-	for(int32 i = 0; i < eset.size(); ++i) {
-		if(eset[i]->is_flag(EFFECT_FLAG_COUNT_LIMIT) && eset[i]->count_limit == 0)
-			continue;
-		uint32 value = 0x1f;
-		if(eset[i]->is_flag(EFFECT_FLAG_PLAYER_TARGET))
-			value = eset[i]->get_value();
-		else {
-			pduel->lua->add_param(playerid, PARAM_TYPE_INT);
-			pduel->lua->add_param(uplayer, PARAM_TYPE_INT);
-			pduel->lua->add_param(LOCATION_REASON_TOFIELD, PARAM_TYPE_INT);
-			value = eset[i]->get_value(pcard, 3);
-		}
-		if(eset[i]->get_handler_player() == playerid)
-			flag |= ~value & 0x7f;
-		else
-			flag |= ~(value >> 16) & 0x7f;
-	}
-	uint32 linked_zone = get_linked_zone(playerid) | (1u << 5) | (1u << 6);
+	filter_must_use_mzone(playerid, uplayer, LOCATION_REASON_TOFIELD, pcard, &flag);
 	if(player[playerid].list_mzone[5] && is_location_useable(playerid, LOCATION_MZONE, 6)
 		&& check_extra_link(playerid, pcard, 6)) {
 		flag |= 1u << 5;
@@ -732,7 +679,8 @@ int32 field::get_spsummonable_count_fromex_rule4(card* pcard, uint8 playerid, ui
 		if(!is_location_useable(playerid, LOCATION_MZONE, 6))
 			flag |= 1u << 6;
 	}
-	flag = flag | ~zone | ~linked_zone;
+	uint32 rule_zone = get_rule_zone_fromex(playerid, pcard);
+	flag = flag | ~zone | ~rule_zone;
 	if(list)
 		*list = flag & 0x7f;
 	int32 count = 5 - field_used_count[flag & 0x1f];
@@ -803,6 +751,42 @@ uint32 field::get_linked_zone(int32 playerid) {
 			zones |= 1u << (i + 1);
 	}
 	return zones;
+}
+uint32 field::get_rule_zone_fromex(int32 playerid, card* pcard) {
+	if(core.duel_rule >= 4) {
+		if(core.duel_rule >= 5 && pcard && pcard->is_position(POS_FACEDOWN) && (pcard->data.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ)))
+			return 0x7f;
+		if(is_player_affected_by_effect(playerid, EFFECT_EXTRA_TOMAIN_KOISHI) || pcard && pcard->is_affected_by_effect(EFFECT_EXTRA_TOMAIN_KOISHI))
+			return 0x7f;
+		else
+			return get_linked_zone(playerid) | (1u << 5) | (1u << 6);
+	} else {
+		return 0x1f;
+	}
+}
+void field::filter_must_use_mzone(uint8 playerid, uint8 uplayer, uint32 reason, card* pcard, uint32* flag) {
+	effect_set eset;
+	if(uplayer < 2)
+		filter_player_effect(uplayer, EFFECT_MUST_USE_MZONE, &eset);
+	if(pcard)
+		pcard->filter_effect(EFFECT_MUST_USE_MZONE, &eset);
+	for(int32 i = 0; i < eset.size(); ++i) {
+		if(eset[i]->is_flag(EFFECT_FLAG_COUNT_LIMIT) && eset[i]->count_limit == 0)
+			continue;
+		uint32 value = 0x1f;
+		if(eset[i]->is_flag(EFFECT_FLAG_PLAYER_TARGET))
+			value = eset[i]->get_value();
+		else {
+			pduel->lua->add_param(playerid, PARAM_TYPE_INT);
+			pduel->lua->add_param(uplayer, PARAM_TYPE_INT);
+			pduel->lua->add_param(reason, PARAM_TYPE_INT);
+			value = eset[i]->get_value(pcard, 3);
+		}
+		if(eset[i]->get_handler_player() == playerid)
+			*flag |= ~value & 0x7f;
+		else
+			*flag |= ~(value >> 16) & 0x7f;
+	}
 }
 void field::get_linked_cards(uint8 self, uint8 s, uint8 o, card_set* cset) {
 	cset->clear();
@@ -1238,11 +1222,6 @@ void field::remove_oath_effect(effect* reason_effect) {
 void field::reset_phase(uint32 phase) {
 	for(auto eit = effects.pheff.begin(); eit != effects.pheff.end();) {
 		auto rm = eit++;
-		// work around: skip turn still raise reset_phase(PHASE_END)
-		// without this taking control only for one turn will be returned when skipping turn
-		// RESET_TURN_END should be introduced
-		//if((*rm)->code == EFFECT_SET_CONTROL)
-		//	continue;
 		if((*rm)->reset(phase, RESET_PHASE)) {
 			if((*rm)->is_flag(EFFECT_FLAG_FIELD_ONLY))
 				remove_effect((*rm));
@@ -2436,13 +2415,13 @@ int32 field::check_tuner_material(card* pcard, card* tuner, int32 findex1, int32
 	}
 	int32 playerid = pcard->current.controler;
 	int32 ct = get_spsummonable_count(pcard, playerid);
-	card_set linked_cards;
+	card_set handover_zone_cards;
 	if(ct <= 0) {
-		uint32 linked_zone = core.duel_rule >= 4 ? get_linked_zone(playerid) | (1u << 5) | (1u << 6) : 0x1f;
-		if(is_player_affected_by_effect(playerid, EFFECT_EXTRA_TOMAIN_KOISHI) || pcard->is_affected_by_effect(EFFECT_EXTRA_TOMAIN_KOISHI))
-			linked_zone = 0x7f;
-		get_cards_in_zone(&linked_cards, linked_zone, playerid, LOCATION_MZONE);
-		if(linked_cards.find(tuner) != linked_cards.end())
+		uint32 must_use_zone_flag = 0;
+		filter_must_use_mzone(playerid, playerid, LOCATION_REASON_TOFIELD, pcard, &must_use_zone_flag);
+		uint32 handover_zone = get_rule_zone_fromex(playerid, pcard) & ~must_use_zone_flag;
+		get_cards_in_zone(&handover_zone_cards, handover_zone, playerid, LOCATION_MZONE);
+		if(handover_zone_cards.find(tuner) != handover_zone_cards.end())
 			ct++;
 	}
 	int32 location = LOCATION_MZONE;
@@ -2499,7 +2478,7 @@ int32 field::check_tuner_material(card* pcard, card* tuner, int32 findex1, int32
 		smat->sum_param = smat->get_synchro_level(pcard);
 		mcount++;
 		if(ct <= 0) {
-			if(linked_cards.find(smat) != linked_cards.end())
+			if(handover_zone_cards.find(smat) != handover_zone_cards.end())
 				ct++;
 		}
 		if(min == 0) {
@@ -2567,7 +2546,7 @@ int32 field::check_tuner_material(card* pcard, card* tuner, int32 findex1, int32
 	auto start = nsyn.begin() + mcount;
 	for(auto cit = start; cit != nsyn.end(); ++cit) {
 		card* pm = *cit;
-		if(linked_cards.find(pm) == linked_cards.end())
+		if(handover_zone_cards.find(pm) == handover_zone_cards.end())
 			continue;
 		if(start != cit)
 			std::iter_swap(start, cit);
@@ -2733,16 +2712,16 @@ int32 field::check_xyz_material(card* scard, int32 findex, int32 lv, int32 min, 
 	get_xyz_material(scard, findex, lv, max, mg);
 	int32 playerid = scard->current.controler;
 	int32 ct = get_spsummonable_count(scard, playerid);
-	card_set linked_cards;
+	card_set handover_zone_cards;
 	if(ct <= 0) {
 		int32 ft = ct;
-		uint32 linked_zone = core.duel_rule >= 4 ? get_linked_zone(playerid) | (1u << 5) | (1u << 6) : 0x1f;
-		if(is_player_affected_by_effect(playerid, EFFECT_EXTRA_TOMAIN_KOISHI) || scard->is_affected_by_effect(EFFECT_EXTRA_TOMAIN_KOISHI))
-			linked_zone = 0x7f;
-		get_cards_in_zone(&linked_cards, linked_zone, playerid, LOCATION_MZONE);
+		uint32 must_use_zone_flag = 0;
+		filter_must_use_mzone(playerid, playerid, LOCATION_REASON_TOFIELD, scard, &must_use_zone_flag);
+		uint32 handover_zone = get_rule_zone_fromex(playerid, scard) & ~must_use_zone_flag;
+		get_cards_in_zone(&handover_zone_cards, handover_zone, playerid, LOCATION_MZONE);
 		for(auto cit = core.xmaterial_lst.begin(); cit != core.xmaterial_lst.end(); ++cit) {
 			card* pcard = cit->second;
-			if(linked_cards.find(pcard) != linked_cards.end())
+			if(handover_zone_cards.find(pcard) != handover_zone_cards.end())
 				ft++;
 		}
 		if(ft <= 0)
@@ -2756,7 +2735,7 @@ int32 field::check_xyz_material(card* scard, int32 findex, int32 lv, int32 min, 
 	int32 mct = mcset.size();
 	if(mct > 0) {
 		if(ct == 0 && std::none_of(mcset.begin(), mcset.end(),
-			[=](card* pcard) { return linked_cards.find(pcard) != linked_cards.end(); }))
+			[=](card* pcard) { return handover_zone_cards.find(pcard) != handover_zone_cards.end(); }))
 			mct++;
 		if(mct > max)
 			return FALSE;
@@ -2811,7 +2790,7 @@ int32 field::check_xyz_material(card* scard, int32 findex, int32 lv, int32 min, 
 		++cit;
 	}
 	ct += std::count_if(mcset.begin(), mcset.end(),
-		[=](card* pcard) { return linked_cards.find(pcard) != linked_cards.end(); });
+		[=](card* pcard) { return handover_zone_cards.find(pcard) != handover_zone_cards.end(); });
 	std::multimap<int32, card*, std::greater<int32>> mat;
 	for(int32 icheck = 1; icheck <= digit; icheck <<= 1) {
 		mat.clear();
@@ -2828,7 +2807,7 @@ int32 field::check_xyz_material(card* scard, int32 findex, int32 lv, int32 min, 
 			int32 ft = ct;
 			for(auto cit = mat.begin(); cit != mat.end(); ++cit) {
 				card* pcard = cit->second;
-				if(linked_cards.find(pcard) != linked_cards.end())
+				if(handover_zone_cards.find(pcard) != handover_zone_cards.end())
 					ft++;
 			}
 			if(ft <= 0)

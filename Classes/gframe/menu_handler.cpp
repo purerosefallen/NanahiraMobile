@@ -56,7 +56,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 		switch(event.GUIEvent.EventType) {
 		case irr::gui::EGET_BUTTON_CLICKED: {
 			if(id < 110)
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::SOUND_MENU);
 			else
 				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
 			switch(id) {
@@ -569,6 +569,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 		}
 		case irr::gui::EGET_COMBO_BOX_CHANGED: {
 			switch(id) {
+			case COMBOBOX_BOT_RULE: {
+				mainGame->RefreshBot();
+				break;
+			}
 			case COMBOBOX_HP_CATEGORY: {
 				int catesel = mainGame->cbCategorySelect->getSelected();
 				if(catesel == 3) {
@@ -605,10 +609,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->cbCategorySelect->setEnabled(true);
 					mainGame->cbDeckSelect->setEnabled(true);
 				}
-				break;
-			}
-			case CHECKBOX_BOT_OLD_RULE: {
-				mainGame->RefreshBot();
 				break;
 			}
 			}
