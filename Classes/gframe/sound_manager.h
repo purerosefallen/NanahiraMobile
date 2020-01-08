@@ -40,7 +40,6 @@ public:
 		CARD_PICK,
 		CARD_DROP,
 		PLAYER_ENTER,
-		NEGATE,
 		CHAT
 	};
     enum BGM {

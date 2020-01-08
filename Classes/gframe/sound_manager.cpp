@@ -98,7 +98,6 @@ void SoundManager::PlaySoundEffect(SFX sound) {
         {CARD_PICK, "./sound/cardpick.wav"},
         {CARD_DROP, "./sound/carddrop.wav"},
         {PLAYER_ENTER, "./sound/playerenter.wav"},
-        {NEGATE, "./sound/negate.wav"},
         {CHAT, "./sound/chatmessage.wav"}
     };
     if (!soundsEnabled) return;
