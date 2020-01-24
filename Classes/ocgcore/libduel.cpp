@@ -43,7 +43,26 @@ int32 scriptlib::duel_select_field(lua_State * L) {
 		flag = (flag | (0xffffffff-0xff1fff1f));
 	}
 	pduel->game_field->add_process(PROCESSOR_SELECT_DISFIELD, 0, 0, 0, playerid, flag, count);
-	return lua_yield(L, 0);
+	return lua_yieldk(L, 0, (lua_KContext)pduel, [](lua_State *L, int32 status, lua_KContext ctx) {
+		duel* pduel = (duel*)ctx;
+		int32 playerid = lua_tointeger(L, 1);
+		uint32 count = lua_tointeger(L, 2);
+		int32 dfflag = 0;
+		uint8 pa = 0;
+		for(uint32 i = 0; i < count; ++i) {
+			uint8 p = pduel->game_field->returns.bvalue[pa];
+			uint8 l = pduel->game_field->returns.bvalue[pa + 1];
+			uint8 s = pduel->game_field->returns.bvalue[pa + 2];
+			dfflag |= 0x1u << (s + (p == playerid ? 0 : 16) + (l == LOCATION_MZONE ? 0 : 8));
+			pa += 3;
+		}
+		if(dfflag & (0x1 << 5))
+			dfflag |= 0x1 << (16 + 6);
+		if(dfflag & (0x1 << 6))
+			dfflag |= 0x1 << (16 + 5);
+		lua_pushinteger(L, dfflag);
+		return 1;
+	});
 }
 int32 scriptlib::duel_get_master_rule(lua_State * L) {
 	duel* pduel = interpreter::get_duel_info(L);
@@ -1030,16 +1049,7 @@ int32 scriptlib::duel_swap_sequence(lua_State *L) {
 		&& location == LOCATION_MZONE && pcard2->current.location == location
 		&& pcard1->is_affect_by_effect(pduel->game_field->core.reason_effect)
 		&& pcard2->is_affect_by_effect(pduel->game_field->core.reason_effect)) {
-		uint8 s1 = pcard1->current.sequence, s2 = pcard2->current.sequence;
-		pduel->game_field->remove_card(pcard1);
-		pduel->game_field->remove_card(pcard2);
-		pduel->game_field->add_card(player, pcard1, location, s2);
-		pduel->game_field->add_card(player, pcard2, location, s1);
-		pduel->write_buffer8(MSG_SWAP);
-		pduel->write_buffer32(pcard1->data.code);
-		pduel->write_buffer32(pcard2->get_info_location());
-		pduel->write_buffer32(pcard2->data.code);
-		pduel->write_buffer32(pcard1->get_info_location());
+		pduel->game_field->swap_card(pcard1, pcard2);
 		field::card_set swapped;
 		swapped.insert(pcard1);
 		swapped.insert(pcard2);
@@ -4533,59 +4543,6 @@ int32 scriptlib::duel_is_able_to_enter_bp(lua_State *L) {
 	lua_pushboolean(L, pduel->game_field->is_able_to_enter_bp());
 	return 1;
 }
-int32 scriptlib::duel_venom_swamp_check(lua_State *L) {
-	check_param_count(L, 2);
-	check_param(L, PARAM_TYPE_CARD, 2);
-	card* pcard = *(card**) lua_touserdata(L, 2);
-	if(pcard->get_counter(0x9) == 0 || pcard->is_affected_by_effect(EFFECT_SWAP_AD) || pcard->is_affected_by_effect(EFFECT_REVERSE_UPDATE)) {
-		lua_pushboolean(L, 0);
-		return 1;
-	}
-	uint32 base = pcard->get_base_attack();
-	pcard->temp.base_attack = base;
-	pcard->temp.attack = base;
-	int32 up = 0, upc = 0;
-	effect_set eset;
-	effect* peffect = 0;
-	pcard->filter_effect(EFFECT_UPDATE_ATTACK, &eset, FALSE);
-	pcard->filter_effect(EFFECT_SET_ATTACK, &eset, FALSE);
-	pcard->filter_effect(EFFECT_SET_ATTACK_FINAL, &eset);
-	for (int32 i = 0; i < eset.size(); ++i) {
-		switch (eset[i]->code) {
-		case EFFECT_UPDATE_ATTACK: {
-			if (eset[i]->type & EFFECT_TYPE_SINGLE && !eset[i]->is_flag(EFFECT_FLAG_SINGLE_RANGE))
-				up += eset[i]->get_value(pcard);
-			else
-				upc += eset[i]->get_value(pcard);
-			if(pcard->temp.attack > 0)
-				peffect = eset[i];
-			break;
-		}
-		case EFFECT_SET_ATTACK:
-			base = eset[i]->get_value(pcard);
-			if (eset[i]->type & EFFECT_TYPE_SINGLE && !eset[i]->is_flag(EFFECT_FLAG_SINGLE_RANGE))
-				up = 0;
-			break;
-		case EFFECT_SET_ATTACK_FINAL:
-			if (eset[i]->type & EFFECT_TYPE_SINGLE && !eset[i]->is_flag(EFFECT_FLAG_SINGLE_RANGE)) {
-				base = eset[i]->get_value(pcard);
-				up = 0;
-				upc = 0;
-				peffect = 0;
-			}
-			break;
-		}
-		pcard->temp.attack = base + up + upc;
-	}
-	int32 atk = pcard->temp.attack;
-	pcard->temp.base_attack = 0xffffffff;
-	pcard->temp.attack = 0xffffffff;
-	if((atk <= 0) && peffect && (peffect->handler->get_code() == 54306223))
-		lua_pushboolean(L, 1);
-	else
-		lua_pushboolean(L, 0);
-	return 1;
-}
 int32 scriptlib::duel_swap_deck_and_grave(lua_State *L) {
 	check_action_permission(L);
 	check_param_count(L, 1);
@@ -4630,4 +4587,234 @@ int32 scriptlib::duel_majestic_copy(lua_State *L) {
 		pcard->add_effect(ceffect);
 	}
 	return 0;
+}
+
+static const struct luaL_Reg duellib[] = {
+	{ "SelectField", scriptlib::duel_select_field },
+	{ "GetMasterRule", scriptlib::duel_get_master_rule },
+	{ "ReadCard", scriptlib::duel_read_card },
+	{ "Exile", scriptlib::duel_exile },
+	{ "DisableActionCheck", scriptlib::duel_disable_action_check },
+	{ "SetMetatable", scriptlib::duel_setmetatable },
+	{ "MoveTurnCount", scriptlib::duel_move_turn_count },
+	{ "GetCardsInZone", scriptlib::duel_get_cards_in_zone },
+	{ "XyzSummonByRose", scriptlib::duel_xyz_summon_by_rose },
+	{ "LoadScript", scriptlib::duel_load_script },
+	{ "AnnounceCardFilter", scriptlib::duel_announce_card }, // For compat
+
+	{ "EnableGlobalFlag", scriptlib::duel_enable_global_flag },
+	{ "GetLP", scriptlib::duel_get_lp },
+	{ "SetLP", scriptlib::duel_set_lp },
+	{ "GetTurnPlayer", scriptlib::duel_get_turn_player },
+	{ "GetTurnCount", scriptlib::duel_get_turn_count },
+	{ "GetDrawCount", scriptlib::duel_get_draw_count },
+	{ "RegisterEffect", scriptlib::duel_register_effect },
+	{ "RegisterFlagEffect", scriptlib::duel_register_flag_effect },
+	{ "GetFlagEffect", scriptlib::duel_get_flag_effect },
+	{ "ResetFlagEffect", scriptlib::duel_reset_flag_effect },
+	{ "SetFlagEffectLabel", scriptlib::duel_set_flag_effect_label },
+	{ "GetFlagEffectLabel", scriptlib::duel_get_flag_effect_label },
+	{ "Destroy", scriptlib::duel_destroy },
+	{ "Remove", scriptlib::duel_remove },
+	{ "SendtoGrave", scriptlib::duel_sendto_grave },
+	{ "SendtoHand", scriptlib::duel_sendto_hand },
+	{ "SendtoDeck", scriptlib::duel_sendto_deck },
+	{ "SendtoExtraP", scriptlib::duel_sendto_extra },
+	{ "GetOperatedGroup", scriptlib::duel_get_operated_group },
+	{ "Summon", scriptlib::duel_summon },
+	{ "SpecialSummonRule", scriptlib::duel_special_summon_rule },
+	{ "SynchroSummon", scriptlib::duel_synchro_summon },
+	{ "XyzSummon", scriptlib::duel_xyz_summon },
+	{ "LinkSummon", scriptlib::duel_link_summon },
+	{ "MSet", scriptlib::duel_setm },
+	{ "SSet", scriptlib::duel_sets },
+	{ "CreateToken", scriptlib::duel_create_token },
+	{ "SpecialSummon", scriptlib::duel_special_summon },
+	{ "SpecialSummonStep", scriptlib::duel_special_summon_step },
+	{ "SpecialSummonComplete", scriptlib::duel_special_summon_complete },
+	{ "IsCanAddCounter", scriptlib::duel_is_can_add_counter },
+	{ "RemoveCounter", scriptlib::duel_remove_counter },
+	{ "IsCanRemoveCounter", scriptlib::duel_is_can_remove_counter },
+	{ "GetCounter", scriptlib::duel_get_counter },
+	{ "ChangePosition", scriptlib::duel_change_form },
+	{ "Release", scriptlib::duel_release },
+	{ "MoveToField", scriptlib::duel_move_to_field },
+	{ "ReturnToField", scriptlib::duel_return_to_field },
+	{ "MoveSequence", scriptlib::duel_move_sequence },
+	{ "SwapSequence", scriptlib::duel_swap_sequence },
+	{ "Activate", scriptlib::duel_activate_effect },
+	{ "SetChainLimit", scriptlib::duel_set_chain_limit },
+	{ "SetChainLimitTillChainEnd", scriptlib::duel_set_chain_limit_p },
+	{ "GetChainMaterial", scriptlib::duel_get_chain_material },
+	{ "ConfirmDecktop", scriptlib::duel_confirm_decktop },
+	{ "ConfirmExtratop", scriptlib::duel_confirm_extratop },
+	{ "ConfirmCards", scriptlib::duel_confirm_cards },
+	{ "SortDecktop", scriptlib::duel_sort_decktop },
+	{ "CheckEvent", scriptlib::duel_check_event },
+	{ "RaiseEvent", scriptlib::duel_raise_event },
+	{ "RaiseSingleEvent", scriptlib::duel_raise_single_event },
+	{ "CheckTiming", scriptlib::duel_check_timing },
+	{ "GetEnvironment", scriptlib::duel_get_environment },
+	{ "IsEnvironment", scriptlib::duel_is_environment },
+	{ "Win", scriptlib::duel_win },
+	{ "Draw", scriptlib::duel_draw },
+	{ "Damage", scriptlib::duel_damage },
+	{ "Recover", scriptlib::duel_recover },
+	{ "RDComplete", scriptlib::duel_rd_complete },
+	{ "Equip", scriptlib::duel_equip },
+	{ "EquipComplete", scriptlib::duel_equip_complete },
+	{ "GetControl", scriptlib::duel_get_control },
+	{ "SwapControl", scriptlib::duel_swap_control },
+	{ "CheckLPCost", scriptlib::duel_check_lp_cost },
+	{ "PayLPCost", scriptlib::duel_pay_lp_cost },
+	{ "DiscardDeck", scriptlib::duel_discard_deck },
+	{ "DiscardHand", scriptlib::duel_discard_hand },
+	{ "DisableShuffleCheck", scriptlib::duel_disable_shuffle_check },
+	{ "ShuffleDeck", scriptlib::duel_shuffle_deck },
+	{ "ShuffleExtra", scriptlib::duel_shuffle_extra },
+	{ "ShuffleHand", scriptlib::duel_shuffle_hand },
+	{ "ShuffleSetCard", scriptlib::duel_shuffle_setcard },
+	{ "ChangeAttacker", scriptlib::duel_change_attacker },
+	{ "ChangeAttackTarget", scriptlib::duel_change_attack_target },
+	{ "CalculateDamage", scriptlib::duel_calculate_damage },
+	{ "GetBattleDamage", scriptlib::duel_get_battle_damage },
+	{ "ChangeBattleDamage", scriptlib::duel_change_battle_damage },
+	{ "ChangeTargetCard", scriptlib::duel_change_target },
+	{ "ChangeTargetPlayer", scriptlib::duel_change_target_player },
+	{ "ChangeTargetParam", scriptlib::duel_change_target_param },
+	{ "BreakEffect", scriptlib::duel_break_effect },
+	{ "ChangeChainOperation", scriptlib::duel_change_effect },
+	{ "NegateActivation", scriptlib::duel_negate_activate },
+	{ "NegateEffect", scriptlib::duel_negate_effect },
+	{ "NegateRelatedChain", scriptlib::duel_negate_related_chain },
+	{ "NegateSummon", scriptlib::duel_disable_summon },
+	{ "IncreaseSummonedCount", scriptlib::duel_increase_summon_count },
+	{ "CheckSummonedCount", scriptlib::duel_check_summon_count },
+	{ "GetLocationCount", scriptlib::duel_get_location_count },
+	{ "GetMZoneCount", scriptlib::duel_get_mzone_count },
+	{ "GetLocationCountFromEx", scriptlib::duel_get_location_count_fromex },
+	{ "GetUsableMZoneCount", scriptlib::duel_get_usable_mzone_count },
+	{ "GetLinkedGroup", scriptlib::duel_get_linked_group },
+	{ "GetLinkedGroupCount", scriptlib::duel_get_linked_group_count },
+	{ "GetLinkedZone", scriptlib::duel_get_linked_zone },
+	{ "GetFieldCard", scriptlib::duel_get_field_card },
+	{ "CheckLocation", scriptlib::duel_check_location },
+	{ "GetCurrentChain", scriptlib::duel_get_current_chain },
+	{ "GetChainInfo", scriptlib::duel_get_chain_info },
+	{ "GetChainEvent", scriptlib::duel_get_chain_event },
+	{ "GetFirstTarget", scriptlib::duel_get_first_target },
+	{ "GetCurrentPhase", scriptlib::duel_get_current_phase },
+	{ "SkipPhase", scriptlib::duel_skip_phase },
+	{ "IsDamageCalculated", scriptlib::duel_is_damage_calculated },
+	{ "GetAttacker", scriptlib::duel_get_attacker },
+	{ "GetAttackTarget", scriptlib::duel_get_attack_target },
+	{ "NegateAttack", scriptlib::duel_disable_attack },
+	{ "ChainAttack", scriptlib::duel_chain_attack },
+	{ "Readjust", scriptlib::duel_readjust },
+	{ "AdjustInstantly", scriptlib::duel_adjust_instantly },
+	{ "GetFieldGroup", scriptlib::duel_get_field_group },
+	{ "GetFieldGroupCount", scriptlib::duel_get_field_group_count },
+	{ "GetDecktopGroup", scriptlib::duel_get_decktop_group },
+	{ "GetExtraTopGroup", scriptlib::duel_get_extratop_group },
+	{ "GetMatchingGroup", scriptlib::duel_get_matching_group },
+	{ "GetMatchingGroupCount", scriptlib::duel_get_matching_count },
+	{ "GetFirstMatchingCard", scriptlib::duel_get_first_matching_card },
+	{ "IsExistingMatchingCard", scriptlib::duel_is_existing_matching_card },
+	{ "SelectMatchingCard", scriptlib::duel_select_matching_cards },
+	{ "GetReleaseGroup", scriptlib::duel_get_release_group },
+	{ "GetReleaseGroupCount", scriptlib::duel_get_release_group_count },
+	{ "CheckReleaseGroup", scriptlib::duel_check_release_group },
+	{ "SelectReleaseGroup", scriptlib::duel_select_release_group },
+	{ "CheckReleaseGroupEx", scriptlib::duel_check_release_group_ex },
+	{ "SelectReleaseGroupEx", scriptlib::duel_select_release_group_ex },
+	{ "GetTributeGroup", scriptlib::duel_get_tribute_group },
+	{ "GetTributeCount", scriptlib::duel_get_tribute_count },
+	{ "CheckTribute", scriptlib::duel_check_tribute },
+	{ "SelectTribute", scriptlib::duel_select_tribute },
+	{ "GetTargetCount", scriptlib::duel_get_target_count },
+	{ "IsExistingTarget", scriptlib::duel_is_existing_target },
+	{ "SelectTarget", scriptlib::duel_select_target },
+	{ "SelectFusionMaterial", scriptlib::duel_select_fusion_material },
+	{ "SetFusionMaterial", scriptlib::duel_set_fusion_material },
+	{ "SetSynchroMaterial", scriptlib::duel_set_synchro_material },
+	{ "SelectSynchroMaterial", scriptlib::duel_select_synchro_material },
+	{ "CheckSynchroMaterial", scriptlib::duel_check_synchro_material },
+	{ "SelectTunerMaterial", scriptlib::duel_select_tuner_material },
+	{ "CheckTunerMaterial", scriptlib::duel_check_tuner_material },
+	{ "GetRitualMaterial", scriptlib::duel_get_ritual_material },
+	{ "ReleaseRitualMaterial", scriptlib::duel_release_ritual_material },
+	{ "GetFusionMaterial", scriptlib::duel_get_fusion_material },
+	{ "SetSelectedCard", scriptlib::duel_set_must_select_cards },
+	{ "GrabSelectedCard", scriptlib::duel_grab_must_select_cards },
+	{ "SetTargetCard", scriptlib::duel_set_target_card },
+	{ "ClearTargetCard", scriptlib::duel_clear_target_card },
+	{ "SetTargetPlayer", scriptlib::duel_set_target_player },
+	{ "SetTargetParam", scriptlib::duel_set_target_param },
+	{ "SetOperationInfo", scriptlib::duel_set_operation_info },
+	{ "GetOperationInfo", scriptlib::duel_get_operation_info },
+	{ "GetOperationCount", scriptlib::duel_get_operation_count },
+	{ "ClearOperationInfo", scriptlib::duel_clear_operation_info },
+	{ "CheckXyzMaterial", scriptlib::duel_check_xyz_material },
+	{ "SelectXyzMaterial", scriptlib::duel_select_xyz_material },
+	{ "Overlay", scriptlib::duel_overlay },
+	{ "GetOverlayGroup", scriptlib::duel_get_overlay_group },
+	{ "GetOverlayCount", scriptlib::duel_get_overlay_count },
+	{ "CheckRemoveOverlayCard", scriptlib::duel_check_remove_overlay_card },
+	{ "RemoveOverlayCard", scriptlib::duel_remove_overlay_card },
+	{ "Hint", scriptlib::duel_hint },
+	{ "HintSelection", scriptlib::duel_hint_selection },
+	{ "SelectEffectYesNo", scriptlib::duel_select_effect_yesno },
+	{ "SelectYesNo", scriptlib::duel_select_yesno },
+	{ "SelectOption", scriptlib::duel_select_option },
+	{ "SelectSequence", scriptlib::duel_select_sequence },
+	{ "SelectPosition", scriptlib::duel_select_position },
+	{ "SelectDisableField", scriptlib::duel_select_disable_field },
+	{ "AnnounceRace", scriptlib::duel_announce_race },
+	{ "AnnounceAttribute", scriptlib::duel_announce_attribute },
+	{ "AnnounceLevel", scriptlib::duel_announce_level },
+	{ "AnnounceCard", scriptlib::duel_announce_card },
+	{ "AnnounceType", scriptlib::duel_announce_type },
+	{ "AnnounceNumber", scriptlib::duel_announce_number },
+	{ "AnnounceCoin", scriptlib::duel_announce_coin },
+	{ "TossCoin", scriptlib::duel_toss_coin },
+	{ "TossDice", scriptlib::duel_toss_dice },
+	{ "RockPaperScissors", scriptlib::duel_rock_paper_scissors },
+	{ "GetCoinResult", scriptlib::duel_get_coin_result },
+	{ "GetDiceResult", scriptlib::duel_get_dice_result },
+	{ "SetCoinResult", scriptlib::duel_set_coin_result },
+	{ "SetDiceResult", scriptlib::duel_set_dice_result },
+	{ "IsPlayerAffectedByEffect", scriptlib::duel_is_player_affected_by_effect },
+	{ "IsPlayerCanDraw", scriptlib::duel_is_player_can_draw },
+	{ "IsPlayerCanDiscardDeck", scriptlib::duel_is_player_can_discard_deck },
+	{ "IsPlayerCanDiscardDeckAsCost", scriptlib::duel_is_player_can_discard_deck_as_cost },
+	{ "IsPlayerCanSummon", scriptlib::duel_is_player_can_summon },
+	{ "IsPlayerCanMSet", scriptlib::duel_is_player_can_mset },
+	{ "IsPlayerCanSSet", scriptlib::duel_is_player_can_sset },
+	{ "IsPlayerCanSpecialSummon", scriptlib::duel_is_player_can_spsummon },
+	{ "IsPlayerCanFlipSummon", scriptlib::duel_is_player_can_flipsummon },
+	{ "IsPlayerCanSpecialSummonMonster", scriptlib::duel_is_player_can_spsummon_monster },
+	{ "IsPlayerCanSpecialSummonCount", scriptlib::duel_is_player_can_spsummon_count },
+	{ "IsPlayerCanRelease", scriptlib::duel_is_player_can_release },
+	{ "IsPlayerCanRemove", scriptlib::duel_is_player_can_remove },
+	{ "IsPlayerCanSendtoHand", scriptlib::duel_is_player_can_send_to_hand },
+	{ "IsPlayerCanSendtoGrave", scriptlib::duel_is_player_can_send_to_grave },
+	{ "IsPlayerCanSendtoDeck", scriptlib::duel_is_player_can_send_to_deck },
+	{ "IsPlayerCanAdditionalSummon", scriptlib::duel_is_player_can_additional_summon },
+	{ "IsChainNegatable", scriptlib::duel_is_chain_negatable },
+	{ "IsChainDisablable", scriptlib::duel_is_chain_disablable },
+	{ "CheckChainTarget", scriptlib::duel_check_chain_target },
+	{ "CheckChainUniqueness", scriptlib::duel_check_chain_uniqueness },
+	{ "GetActivityCount", scriptlib::duel_get_activity_count },
+	{ "CheckPhaseActivity", scriptlib::duel_check_phase_activity },
+	{ "AddCustomActivityCounter", scriptlib::duel_add_custom_activity_counter },
+	{ "GetCustomActivityCount", scriptlib::duel_get_custom_activity_count },
+	{ "GetBattledCount", scriptlib::duel_get_battled_count },
+	{ "IsAbleToEnterBP", scriptlib::duel_is_able_to_enter_bp },
+	{ "SwapDeckAndGrave", scriptlib::duel_swap_deck_and_grave },
+	{ "MajesticCopy", scriptlib::duel_majestic_copy },
+	{ NULL, NULL }
+};
+void scriptlib::open_duellib(lua_State *L) {
+	luaL_newlib(L, duellib);
+	lua_setglobal(L, "Duel");
 }

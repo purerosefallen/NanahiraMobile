@@ -77,9 +77,9 @@ import cn.garymb.ygomobile.utils.ComponentUtils;
 import cn.garymb.ygomobile.utils.FileLogUtil;
 import cn.garymb.ygomobile.utils.PayUtils;
 import cn.garymb.ygomobile.utils.ScreenUtil;
+import cn.garymb.ygomobile.utils.YGOUtil;
 
 import static cn.garymb.ygomobile.Constants.ASSET_SERVER_LIST;
-import static cn.garymb.ygomobile.ui.mycard.mcchat.util.Util.startDuelService;
 
 public abstract class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     //卡查关键字
@@ -98,7 +98,6 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
     //卡查内容
     public static String cardSearchMessage = "";
     public static String DeckText = "";
-    public static String oldmsg = "";
     protected SwipeMenuRecyclerView mServerList;
     long exitLasttime = 0;
     ShimmerTextView tv;
@@ -152,8 +151,8 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
         //TrPay.getInstance(HomeActivity.this).initPaySdk("e1014da420ea4405898c01273d6731b6", "YGOMobile");
         //check update
         //Beta.checkUpgrade(false, false);
-        //ServiceDuelAssistant
-        startDuelService(this);
+        //DuelAssistantService
+        YGOUtil.startDuelService(this);
         //萌卡
         StartMycard();
         checkNotch();
@@ -555,10 +554,11 @@ public abstract class HomeActivity extends BaseActivity implements NavigationVie
             clipMessage = null;
         }
         //如果复制的内容为空则不执行下面的代码
-        if (TextUtils.isEmpty(clipMessage) || clipMessage.equals(oldmsg)) {
+        if (TextUtils.isEmpty(clipMessage)) {
             return;
         }
-        oldmsg = clipMessage;
+        clipData = ClipData.newPlainText("", "");
+        cm.setPrimaryClip(clipData);
         //如果复制的内容是多行作为卡组去判断
         if (clipMessage.contains("\n")) {
             for (String s : DeckTextKey) {

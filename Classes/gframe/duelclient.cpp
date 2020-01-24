@@ -7,7 +7,6 @@
 #include "game.h"
 #include "replay.h"
 #include "replay_mode.h"
-#include <algorithm>
 #ifdef _IRR_ANDROID_PLATFORM_
 #include <android/android_tools.h>
 #endif
@@ -1085,7 +1084,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 	}
 	case MSG_HINT: {
 		int type = BufferIO::ReadInt8(pbuf);
-		/*int player = */BufferIO::ReadInt8(pbuf);
+		int player = BufferIO::ReadInt8(pbuf);
 		int data = BufferIO::ReadInt32(pbuf);
 		if(mainGame->dInfo.isReplay && mainGame->dInfo.isReplaySkiping)
 			return true;
@@ -1172,7 +1171,49 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->WaitFrameSignal(30);
 			break;
 		}
-		case 11: { //HINT_MUSIC
+		case HINT_ZONE: {
+			if(mainGame->LocalPlayer(player) == 1)
+				data = (data >> 16) | (data << 16);
+			for(unsigned filter = 0x1; filter != 0; filter <<= 1) {
+				std::wstring str;
+				if(unsigned s = filter & data) {
+					if(s & 0x60) {
+						str += dataManager.GetSysString(1081);
+						data &= ~0x600000;
+					} else if(s & 0xffff)
+						str += dataManager.GetSysString(102);
+					else if(s & 0xffff0000) {
+						str += dataManager.GetSysString(103);
+						s >>= 16;
+					}
+					if(s & 0x1f)
+						str += dataManager.GetSysString(1002);
+					else if(s & 0xff00) {
+						s >>= 8;
+						if(s & 0x1f)
+							str += dataManager.GetSysString(1003);
+						else if(s & 0x20)
+							str += dataManager.GetSysString(1008);
+						else if(s & 0xc0)
+							str += dataManager.GetSysString(1009);
+					}
+					int seq = 1;
+					for(int i = 0x1; i < 0x100; i <<= 1) {
+						if(s & i)
+							break;
+						++seq;
+					}
+					str += L"(" + std::to_wstring(seq) + L")";
+					myswprintf(textBuffer, dataManager.GetSysString(1510), str.c_str());
+					mainGame->AddLog(textBuffer);
+				}
+			}
+			mainGame->dField.selectable_field = data;
+			mainGame->WaitFrameSignal(40);
+			mainGame->dField.selectable_field = 0;
+			break;
+		}
+		case 21: { //HINT_MUSIC
 			char BGMName[1024];
 			if (data) {
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.mp3", dataManager.GetDesc(data));			
@@ -1184,7 +1225,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			break;
 		}
 		//playing custom sound effect
-		case 12: { //HINT_SOUND
+		case 22: { //HINT_SOUND
 			char SoundName[1024];
 			if (data) {
 				myswprintf(textBuffer, L"./sound/custom/%ls.wav", dataManager.GetDesc(data));
@@ -1196,7 +1237,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			break;
 		}
 		//playing custom bgm in ogg format
-		case 13: { //HINT_MUSIC_OGG
+		case 23: { //HINT_MUSIC_OGG
 			char BGMName[1024];
 			if (data) {
 				myswprintf(textBuffer, L"./sound/BGM/custom/%ls.ogg", dataManager.GetDesc(data));			
@@ -1205,7 +1246,6 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			} else {
 				mainGame->soundManager->StopBGM();
 			}
-			break;
 		}
 		}
 		break;
@@ -1223,7 +1263,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		else if(mainGame->LocalPlayer(player) == 0) {
 			mainGame->showcardcode = 1;
 			if(match_kill)
-				myswprintf(vic_buf, dataManager.GetVictoryString(0x20), dataManager.GetName(match_kill));
+				myswprintf(vic_buf, dataManager.GetVictoryString(0xffff), dataManager.GetName(match_kill));
 			else if(type < 0x10)
 				myswprintf(vic_buf, L"[%ls] %ls", mainGame->dInfo.clientname, dataManager.GetVictoryString(type));
 			else
@@ -1232,7 +1272,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		} else {
 			mainGame->showcardcode = 2;
 			if(match_kill)
-				myswprintf(vic_buf, dataManager.GetVictoryString(0x20), dataManager.GetName(match_kill));
+				myswprintf(vic_buf, dataManager.GetVictoryString(0xffff), dataManager.GetName(match_kill));
 			else if(type < 0x10)
 				myswprintf(vic_buf, L"[%ls] %ls", mainGame->dInfo.hostname, dataManager.GetVictoryString(type));
 			else
@@ -2041,8 +2081,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		}
 		return mainGame->dField.ShowSelectSum(mainGame->dField.select_panalmode);
 	}
-	case MSG_SORT_CARD:
-	case MSG_SORT_CHAIN: {
+	case MSG_SORT_CARD: {
 		/*int player = */BufferIO::ReadInt8(pbuf);
 		int count = BufferIO::ReadInt8(pbuf);
 		mainGame->dField.selectable_cards.clear();
@@ -2062,16 +2101,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			mainGame->dField.selectable_cards.push_back(pcard);
 			mainGame->dField.sort_list.push_back(0);
 		}
-		if (mainGame->chkAutoChain->isChecked() && mainGame->dInfo.curMsg == MSG_SORT_CHAIN) {
-			mainGame->dField.sort_list.clear();
-			SetResponseI(-1);
-			DuelClient::SendResponse();
-			return true;
-		}
-		if(mainGame->dInfo.curMsg == MSG_SORT_CHAIN)
-			mainGame->wCardSelect->setText(dataManager.GetSysString(206));
-		else
-			mainGame->wCardSelect->setText(dataManager.GetSysString(205));
+		mainGame->wCardSelect->setText(dataManager.GetSysString(205));
 		mainGame->dField.select_min = 0;
 		mainGame->dField.select_max = count;
 		mainGame->dField.ShowSelectCard();

@@ -8,8 +8,8 @@ android {
         applicationId "cn.garymb.ygomobile.koishi"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 360100107
-        versionName "Lunar"
+        versionCode 360200124
+        versionName "Owen"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -126,5 +126,7 @@ dependencies {
     //Tencent bugly
     implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
     implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+    //http请求库
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
 
 }

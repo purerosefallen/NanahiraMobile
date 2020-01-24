@@ -248,7 +248,7 @@ struct card_sort {
 #define MSG_SELECT_PLACE		18
 #define MSG_SELECT_POSITION		19
 #define MSG_SELECT_TRIBUTE		20
-#define MSG_SORT_CHAIN			21
+//#define MSG_SORT_CHAIN			21
 #define MSG_SELECT_COUNTER		22
 #define MSG_SELECT_SUM			23
 #define MSG_SELECT_DISFIELD		24
@@ -336,10 +336,11 @@ struct card_sort {
 #define HINT_CODE				8
 #define HINT_NUMBER				9
 #define HINT_CARD				10
+#define HINT_ZONE               11
 //custom hints in KoishiPro for custom sound
-#define HINT_MUSIC				11
-#define HINT_SOUND				12
-#define HINT_MUSIC_OGG			13
+#define HINT_MUSIC				21
+#define HINT_SOUND				22
+#define HINT_MUSIC_OGG			23
 //
 #define CHINT_TURN				1
 #define CHINT_CARD				2

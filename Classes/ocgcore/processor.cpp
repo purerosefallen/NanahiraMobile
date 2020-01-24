@@ -180,7 +180,7 @@ int32 field::process() {
 		}
 	}
 	case PROCESSOR_SORT_CARD: {
-		if (sort_card(it->step, it->arg1, it->arg2)) {
+		if (sort_card(it->step, it->arg1)) {
 			core.units.pop_front();
 			return pduel->bufferlen;
 		} else {
@@ -1262,6 +1262,7 @@ int32 field::process_phase_event(int16 step, int32 phase) {
 		core.quick_f_chain.clear();
 		core.instant_event.clear();
 		core.point_event.clear();
+		core.delayed_activate_event.clear();
 		core.full_event.clear();
 		return TRUE;
 	}
@@ -1273,6 +1274,7 @@ int32 field::process_point_event(int16 step, int32 skip_trigger, int32 skip_free
 	case 0: {
 		core.select_chains.clear();
 		core.point_event.splice(core.point_event.end(), core.instant_event);
+		core.full_event.splice(core.full_event.end(), core.delayed_activate_event);
 		if(skip_trigger) {
 			core.units.begin()->step = 7;
 			return FALSE;
@@ -1606,41 +1608,41 @@ int32 field::process_quick_effect(int16 step, int32 skip_freechain, uint8 priori
 		chain newchain;
 		if(core.ignition_priority_chains.size())
 			core.select_chains.swap(core.ignition_priority_chains);
-		for(auto evit = core.point_event.begin(); evit != core.instant_event.end(); ++evit) {
-			if(evit == core.point_event.end())
-				evit = core.instant_event.begin();
-			auto pr = effects.activate_effect.equal_range(evit->event_code);
-			for(auto eit = pr.first; eit != pr.second;) {
-				effect* peffect = eit->second;
-				++eit;
-				peffect->set_activate_location();
-				if(!peffect->is_flag(EFFECT_FLAG_DELAY) && peffect->is_chainable(priority) && peffect->is_activateable(priority, *evit)) {
-					card* phandler = peffect->get_handler();
-					newchain.flag = 0;
-					newchain.chain_id = infos.field_id++;
-					newchain.evt = *evit;
-					newchain.triggering_effect = peffect;
-					newchain.set_triggering_state(phandler);
-					newchain.triggering_player = priority;
-					core.select_chains.push_back(newchain);
+		for(const auto* ev_list : { &core.point_event, &core.instant_event }) {
+			for(const auto& ev : *ev_list) {
+				auto pr = effects.activate_effect.equal_range(ev.event_code);
+				for(auto eit = pr.first; eit != pr.second;) {
+					effect* peffect = eit->second;
+					++eit;
+					peffect->set_activate_location();
+					if(!peffect->is_flag(EFFECT_FLAG_DELAY) && peffect->is_chainable(priority) && peffect->is_activateable(priority, ev)) {
+						card* phandler = peffect->get_handler();
+						newchain.flag = 0;
+						newchain.chain_id = infos.field_id++;
+						newchain.evt = ev;
+						newchain.triggering_effect = peffect;
+						newchain.set_triggering_state(phandler);
+						newchain.triggering_player = priority;
+						core.select_chains.push_back(newchain);
+					}
 				}
-			}
-			pr = effects.quick_o_effect.equal_range(evit->event_code);
-			for(auto eit = pr.first; eit != pr.second;) {
-				effect* peffect = eit->second;
-				++eit;
-				peffect->set_activate_location();
-				if(peffect->is_chainable(priority) && peffect->is_activateable(priority, *evit)) {
-					card* phandler = peffect->get_handler();
-					newchain.flag = 0;
-					newchain.chain_id = infos.field_id++;
-					newchain.evt = *evit;
-					newchain.triggering_effect = peffect;
-					newchain.set_triggering_state(phandler);
-					newchain.triggering_player = priority;
-					core.select_chains.push_back(newchain);
-					core.delayed_quick_tmp.erase(std::make_pair(peffect, *evit));
-					core.delayed_quick_break.erase(std::make_pair(peffect, *evit));
+				pr = effects.quick_o_effect.equal_range(ev.event_code);
+				for(auto eit = pr.first; eit != pr.second;) {
+					effect* peffect = eit->second;
+					++eit;
+					peffect->set_activate_location();
+					if(peffect->is_chainable(priority) && peffect->is_activateable(priority, ev)) {
+						card* phandler = peffect->get_handler();
+						newchain.flag = 0;
+						newchain.chain_id = infos.field_id++;
+						newchain.evt = ev;
+						newchain.triggering_effect = peffect;
+						newchain.set_triggering_state(phandler);
+						newchain.triggering_player = priority;
+						core.select_chains.push_back(newchain);
+						core.delayed_quick_tmp.erase(std::make_pair(peffect, ev));
+						core.delayed_quick_break.erase(std::make_pair(peffect, ev));
+					}
 				}
 			}
 		}
@@ -1879,7 +1881,7 @@ int32 field::process_instant_event() {
 			}
 		}
 		// delayed activate effect
-		core.full_event.push_back(ev);
+		core.delayed_activate_event.push_back(ev);
 		// delayed quick effect
 		pr = effects.quick_o_effect.equal_range(ev.event_code);
 		for(auto eit = pr.first; eit != pr.second;) {
@@ -2618,6 +2620,7 @@ int32 field::process_battle_command(uint16 step) {
 		return FALSE;
 	}
 	case 8: {
+		core.attack_cancelable = TRUE;
 		pduel->write_buffer8(MSG_ATTACK);
 		pduel->write_buffer32(core.attacker->get_info_location());
 		if(core.attack_target) {
@@ -2701,6 +2704,7 @@ int32 field::process_battle_command(uint16 step) {
 			add_process(PROCESSOR_SELECT_YESNO, 0, 0, 0, infos.turn_player, 30);
 		else {
 			returns.ivalue[0] = TRUE;
+			core.attack_cancelable = FALSE;
 		}
 		return FALSE;
 	}
@@ -2709,7 +2713,6 @@ int32 field::process_battle_command(uint16 step) {
 		if(returns.ivalue[0]) {
 			core.units.begin()->arg1 = TRUE;
 			core.units.begin()->arg3 = FALSE;
-			core.attack_cancelable = TRUE;
 			core.units.begin()->step = 3;
 		}
 		return FALSE;
@@ -3085,6 +3088,8 @@ int32 field::process_battle_command(uint16 step) {
 		pduel->write_buffer8(HINT_EVENT);
 		pduel->write_buffer8(1);
 		pduel->write_buffer32(43);
+		core.hint_timing[0] |= TIMING_BATTLED;
+		core.hint_timing[1] |= TIMING_BATTLED;
 		add_process(PROCESSOR_POINT_EVENT, 0, 0, 0, 0, TRUE);
 		return FALSE;
 	}
@@ -3406,6 +3411,44 @@ void field::calculate_battle_damage(effect** pdamchange, card** preason_card, ui
 							}
 						}
 					}
+					effect_set eset;
+					core.attacker->filter_effect(EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+					core.attack_target->filter_effect(EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+					filter_player_effect(pa, EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+					filter_player_effect(1 - pa, EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+					eset.sort();
+					for(uint8 p = 0; p < 2; ++p) {
+						bool double_dam = false;
+						bool half_dam = false;
+						int32 dam_value = -1;
+						for(uint32 i = 0; i < eset.size(); ++i) {
+							int32 val = -1;
+							if(!eset[i]->is_flag(EFFECT_FLAG_PLAYER_TARGET)) {
+								pduel->lua->add_param(p, PARAM_TYPE_INT);
+								val = eset[i]->get_value(1);
+							} else if(eset[i]->is_target_player(p))
+								val = eset[i]->get_value();
+							if(val == 0) {
+								dam_value = 0;
+								break;
+							} else if(val > 0)
+								dam_value = val;
+							else if(val == DOUBLE_DAMAGE)
+								double_dam = true;
+							else if(val == HALF_DAMAGE)
+								half_dam = true;
+						}
+						if(double_dam && half_dam) {
+							double_dam = false;
+							half_dam = false;
+						}
+						if(double_dam)
+							core.battle_damage[p] *= 2;
+						if(half_dam)
+							core.battle_damage[p] /= 2;
+						if(dam_value >= 0 && core.battle_damage[p] > 0)
+							core.battle_damage[p] = dam_value;
+					}
 					if(core.attacker->is_affected_by_effect(EFFECT_NO_BATTLE_DAMAGE)
 						|| core.attack_target->is_affected_by_effect(EFFECT_AVOID_BATTLE_DAMAGE, core.attacker)
 						|| is_player_affected_by_effect(pd, EFFECT_AVOID_BATTLE_DAMAGE))
@@ -3486,6 +3529,45 @@ void field::calculate_battle_damage(effect** pdamchange, card** preason_card, ui
 					core.battle_damage[1 - damp] = 0;
 				}
 			}
+		}
+		effect_set eset;
+		reason_card->filter_effect(EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+		if(dam_card)
+			dam_card->filter_effect(EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+		filter_player_effect(damp, EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+		filter_player_effect(1 - damp, EFFECT_CHANGE_BATTLE_DAMAGE, &eset, FALSE);
+		eset.sort();
+		for(uint8 p = 0; p < 2; ++p) {
+			bool double_dam = false;
+			bool half_dam = false;
+			int32 dam_value = -1;
+			for(uint32 i = 0; i < eset.size(); ++i) {
+				int32 val = -1;
+				if(!eset[i]->is_flag(EFFECT_FLAG_PLAYER_TARGET)) {
+					pduel->lua->add_param(p, PARAM_TYPE_INT);
+					val = eset[i]->get_value(1);
+				} else if(eset[i]->is_target_player(p))
+					val = eset[i]->get_value();
+				if(val == 0) {
+					dam_value = 0;
+					break;
+				} else if(val > 0)
+					dam_value = val;
+				else if(val == DOUBLE_DAMAGE)
+					double_dam = true;
+				else if(val == HALF_DAMAGE)
+					half_dam = true;
+			}
+			if(double_dam && half_dam) {
+				double_dam = false;
+				half_dam = false;
+			}
+			if(double_dam)
+				core.battle_damage[p] *= 2;
+			if(half_dam)
+				core.battle_damage[p] /= 2;
+			if(dam_value >= 0 && core.battle_damage[p] > 0)
+				core.battle_damage[p] = dam_value;
 		}
 		if(reason_card->is_affected_by_effect(EFFECT_NO_BATTLE_DAMAGE)
 			|| dam_card && dam_card->is_affected_by_effect(EFFECT_AVOID_BATTLE_DAMAGE, reason_card)

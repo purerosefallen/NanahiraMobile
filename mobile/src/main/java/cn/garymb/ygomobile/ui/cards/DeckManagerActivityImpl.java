@@ -66,18 +66,17 @@ import cn.garymb.ygomobile.ui.cards.deck.DeckItemTouchHelper;
 import cn.garymb.ygomobile.ui.cards.deck.DeckItemType;
 import cn.garymb.ygomobile.ui.cards.deck.DeckLayoutManager;
 import cn.garymb.ygomobile.ui.mycard.mcchat.util.ImageUtil;
-import cn.garymb.ygomobile.ui.mycard.mcchat.util.Util;
 import cn.garymb.ygomobile.ui.plus.AOnGestureListener;
 import cn.garymb.ygomobile.ui.plus.DefaultOnBoomListener;
 import cn.garymb.ygomobile.ui.plus.DialogPlus;
-import cn.garymb.ygomobile.ui.plus.ServiceDuelAssistant;
+import com.ourygo.assistant.service.DuelAssistantService;
 import cn.garymb.ygomobile.ui.plus.VUiKit;
 import cn.garymb.ygomobile.utils.BitmapUtil;
-import cn.garymb.ygomobile.utils.DeckUtil;
 import cn.garymb.ygomobile.utils.FileUtils;
 import cn.garymb.ygomobile.utils.IOUtils;
 import cn.garymb.ygomobile.utils.ShareUtil;
 import cn.garymb.ygomobile.utils.YGODialogUtil;
+import cn.garymb.ygomobile.utils.YGOUtil;
 import ocgcore.DataManager;
 import ocgcore.data.Card;
 import ocgcore.data.LimitList;
@@ -799,11 +798,11 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
             @Override
             public void onClick(View v) {
                 du.dis();
-                stopService(new Intent(DeckManagerActivityImpl.this, ServiceDuelAssistant.class));
-                Util.fzMessage(DeckManagerActivityImpl.this, et_code.getText().toString().trim());
+                stopService(new Intent(DeckManagerActivityImpl.this, DuelAssistantService.class));
+                YGOUtil.copyMessage(DeckManagerActivityImpl.this, et_code.getText().toString().trim());
                 showToast(getString(R.string.deck_text_copyed));
                 //复制完毕开启决斗助手
-                Util.startDuelService(DeckManagerActivityImpl.this);
+                YGOUtil.startDuelService(DeckManagerActivityImpl.this);
 
             }
         });
@@ -884,18 +883,18 @@ class DeckManagerActivityImpl extends BaseCardsAcitivity implements RecyclerView
         List<File> files = getYdkFiles();
         List<SimpleSpinnerItem> items = new ArrayList<>();
         String name = curYdk != null ? curYdk.getName() : null;
-        Collections.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File ydk1, File ydk2) {
-                if (ydk1.isDirectory() && ydk2.isFile())
-                    return -1;
-                if (ydk1.isFile() && ydk2.isDirectory())
-                    return 1;
-                return ydk1.getName().compareTo(ydk2.getName());
-            }
-        });
         int index = -1;
         if (files != null) {
+            Collections.sort(files, new Comparator<File>() {
+                @Override
+                public int compare(File ydk1, File ydk2) {
+                    if (ydk1.isDirectory() && ydk2.isFile())
+                        return -1;
+                    if (ydk1.isFile() && ydk2.isDirectory())
+                        return 1;
+                    return ydk1.getName().compareTo(ydk2.getName());
+                }
+            });
             int i = 0;
             for (File file : files) {
                 if (name != null && TextUtils.equals(name, file.getName())) {
