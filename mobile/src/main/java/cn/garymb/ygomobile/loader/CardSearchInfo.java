@@ -41,18 +41,21 @@ class CardSearchInfo {
             }
         } else if (!TextUtils.isEmpty(prefixWord) && !TextUtils.isEmpty(suffixWord)) {
             boolean has = false;
+            int i1 = -1, i2 = -1, i3, i4;
             if (card.Name != null) {
-                int i1 = card.Name.indexOf(prefixWord);
-                int i2 = card.Name.indexOf(suffixWord);
-                if (i1 >= 0 && i2 >= 0 && i1 < i2) {
+                i1 = card.Name.indexOf(prefixWord);
+                i2 = card.Name.indexOf(suffixWord);
+                if (i1 >= 0 && i2 >= 0) {
                     has = true;
                 }
             }
             if (!has) {
                 if (card.Desc != null) {
-                    int i1 = card.Desc.indexOf(prefixWord);
-                    int i2 = card.Desc.indexOf(suffixWord);
-                    if (i1 >= 0 && i2 >= 0 && i1 < i2) {
+                    i3 = card.Desc.indexOf(prefixWord);
+                    i4 = card.Desc.indexOf(suffixWord);
+                    if ((i3 >= 0 && i4 >= 0)
+                            || (i3 >= 0 && i2 >= 0)
+                            || (i1 >= 0 && i4 >= 0)) {
                         has = true;
                     }
                 }
@@ -153,10 +156,7 @@ class CardSearchInfo {
                             continue;
                         }
                     }
-                    if ((card.Type & type) != type) {
-                        return false;
-                    }
-                    //如果是效果怪兽
+                    //效果怪兽
                     if (type == CardType.Effect.value()) {
                         if ((card.Type & CardType.Effect.value()) == CardType.Effect.value()) {
                             //如果是融合/仪式/同调/超量/连接
@@ -167,7 +167,15 @@ class CardSearchInfo {
                                     || (card.Type & CardType.Link.value()) == CardType.Link.value()
                                     )
                                 return false;
+                        }else {
+                            return false;
                         }
+                    }else  if (type == CardType.Non_Effect.value()) {
+                        //非效果怪兽
+                        if ((card.Type & CardType.Effect.value()) == CardType.Effect.value())
+                            return false;
+                    }else  if ((card.Type & type) != type) {
+                        return false;
                     }
 
                 }
