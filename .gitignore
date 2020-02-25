@@ -48,6 +48,7 @@ libYGOMobile.so
 /mobile/assets/data/pics.zip
 /mobile/assets/data/*.cdb
 /mobile/assets/data/deck
+/mobile/assets/data/conf/lflist.conf
 /pics*
 /script
 /mobile/assets_ko/data/*.cdb
