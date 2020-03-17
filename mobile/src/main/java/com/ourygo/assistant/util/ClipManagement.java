@@ -13,7 +13,7 @@ import cn.garymb.ygomobile.utils.FileLogUtil;
 
 public class ClipManagement implements ClipboardManager.OnPrimaryClipChangedListener {
 
-    public static final int ID_CLIP_LISTENER=-1;
+    public static final int ID_CLIP_LISTENER = -1;
     private static final ClipManagement ourInstance = new ClipManagement();
     private ClipboardManager clipboardManager;
     private OnClipChangedListener onClipChangedListener;
@@ -54,17 +54,15 @@ public class ClipManagement implements ClipboardManager.OnPrimaryClipChangedList
             }
             return null;
         }
-        try {
-            FileLogUtil.writeAndTime("剪贴板内容获取："+clipData.getItemAt(0).getText().toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return clipData.getItemAt(0).getText().toString();
+        CharSequence charSequence = clipData.getItemAt(0).getText();
+        if (charSequence != null)
+            return charSequence.toString();
+        return null;
     }
 
-    public void clear(){
+    public void clear() {
         removeClipboardListener();
-        onClipChangedListener=null;
+        onClipChangedListener = null;
     }
 
     @Override
@@ -74,22 +72,17 @@ public class ClipManagement implements ClipboardManager.OnPrimaryClipChangedList
         if (TextUtils.isEmpty(clipMessage)) {
             return;
         }
-        try {
-            FileLogUtil.writeAndTime("剪贴板监听触发："+clipMessage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (onClipChangedListener!=null)
-            onClipChangedListener.onClipChanged(clipMessage,false,ID_CLIP_LISTENER);
+        if (onClipChangedListener != null)
+            onClipChangedListener.onClipChanged(clipMessage, false, ID_CLIP_LISTENER);
     }
 
-    public void onPrimaryClipChanged(boolean isCheck,int id) {
+    public void onPrimaryClipChanged(boolean isCheck, int id) {
         final String clipMessage = getClipMessage();
         //如果复制的内容为空则不执行下面的代码
         if (TextUtils.isEmpty(clipMessage)) {
             return;
         }
-        if (onClipChangedListener!=null)
-            onClipChangedListener.onClipChanged(clipMessage,isCheck,id);
+        if (onClipChangedListener != null)
+            onClipChangedListener.onClipChanged(clipMessage, isCheck, id);
     }
 }
