@@ -6,7 +6,7 @@ import cn.garymb.ygomobile.lite.BuildConfig;
 
 public interface Constants {
     String ORIGIN_APP_ID = "cn.garymb.ygomobile";
-    String ORIGIN_VER_NAME = "3.6.3";
+    String ORIGIN_VER_NAME = "3.6.4";
 
     boolean DEBUG = BuildConfig.DEBUG;
     String PREF_START = "game_pref_";
